@@ -31,6 +31,7 @@ class Section(models.Model):
     faculty = models.JSONField()
     meetings_faculty = models.JSONField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    is_primary_section = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f"Section: {self.course_reference_number}"

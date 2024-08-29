@@ -1,5 +1,8 @@
 import json
+from collections import defaultdict
+
 from django.core.management.base import BaseCommand, CommandError, CommandParser
+
 from courses.models import Course, Section
 from courses.api import get_sections
 
@@ -17,6 +20,7 @@ class Command(BaseCommand):
         if not options["usecache"] and not options["jsessionid"]:
             raise CommandError("You must provide a JSESSIONID cookie value when not the --usecache option")
 
+        # Load the course sections from a file or fetch them from the API
         if options["usecache"]:
             try:
                 with open(f"courses/data/raw/sections/{options['term']}.json", "r") as f:
@@ -33,6 +37,9 @@ class Command(BaseCommand):
         if not options["usecache"]:
             with open(f"courses/data/raw/sections/{options['term']}.json", "w") as f:
                 json.dump(sections, f, indent=2)
+
+        # Get the CRNs of the primary sections for each course
+        primary_section_crns = get_primary_section_crns(sections)
 
         for section in sections:
 
@@ -66,6 +73,7 @@ class Command(BaseCommand):
                     "faculty": section["faculty"],
                     "meetings_faculty": section["meetingsFaculty"],
                     "course": course,
+                    "is_primary_section": section['courseReferenceNumber'] in primary_section_crns,
                 }
             )
 
@@ -90,3 +98,41 @@ def get_all_sections(term: str, jsessionid: str):
             break
 
     return data
+
+
+def get_primary_section_crns(sections: list) -> set:
+    """
+    Return the CRNs of the primary sections for each course.
+
+    The primary sections for a course are the section types (e.g. lectures, labs, tutorials),
+    that have the fewest sections. Any sections without links are also considered primary sections. 
+    These are used to retrieve linked sections from the API.
+    """
+
+    primary_sections = set()
+
+    # Any unlinked section is considered a primary section
+    for section in sections:
+        if not section['isSectionLinked']:
+            primary_sections.add(section['courseReferenceNumber'])
+    sections = [section for section in sections if section['isSectionLinked']]
+
+    # Group the remaining sections by course code
+    courses = defaultdict(list)
+    for section in sections:
+        courses[section['subjectCourse']].append(section)
+
+    for course_sections in courses.values():
+
+        # Count the number of sections of each link type
+        link_counts = defaultdict(int)
+        for section in course_sections:
+            link_counts[section['linkIdentifier']] += 1
+
+        # The link type with the fewest sections is the primary link type
+        primary_link = min(link_counts, key=link_counts.get)
+        for section in course_sections:
+            if (section['linkIdentifier'] == primary_link):
+                primary_sections.add(section['courseReferenceNumber'])
+
+    return primary_sections
