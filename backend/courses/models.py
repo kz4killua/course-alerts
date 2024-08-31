@@ -1,4 +1,7 @@
 from django.db import models
+from django.core.cache import cache
+
+from .api import get_linked_sections
 
 
 class Course(models.Model):
@@ -35,3 +38,24 @@ class Section(models.Model):
 
     def __str__(self) -> str:
         return f"Section: {self.course_reference_number}"
+    
+    def get_linked_crns(self) -> list[list[str]]:
+        """
+        Return the CRNs of the linked sections for this class.
+
+        These will be retrieved from the cache if available, otherwise they will be fetched from the API.
+        """
+
+        if not self.is_section_linked:
+            return []
+
+        key = f"linked_crns_{self.course_reference_number}"
+        if key not in cache:
+            result = get_linked_sections(self.term, self.course_reference_number)
+            linked_crns = [
+                [section['courseReferenceNumber'] for section in sections]
+                for sections in result['linkedData']
+            ]
+            cache.set(key, linked_crns, timeout=None)
+
+        return cache.get(key)
