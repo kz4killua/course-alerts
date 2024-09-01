@@ -56,10 +56,11 @@ class Command(BaseCommand):
 
             # Create or update each section
             section, _ = Section.objects.update_or_create(
-                course_reference_number=section["courseReferenceNumber"],
+                id=section["id"],
                 defaults={
                     "term": section["term"],
                     "term_desc": section["termDesc"],
+                    "course_reference_number": section["courseReferenceNumber"],
                     "part_of_term": section["partOfTerm"],
                     "sequence_number": section["sequenceNumber"],
                     "campus_description": section["campusDescription"],

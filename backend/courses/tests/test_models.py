@@ -27,7 +27,10 @@ class TestSection(TestCase):
 
     def test_get_linked_crns(self):
         
-        section = Section.objects.get(course_reference_number="42684")
+        section = Section.objects.get(
+            term="202309",
+            course_reference_number="42684"
+        )
         linked_crns = section.get_linked_crns()
         expected = [
             ["42944"], ["45101"], ["42946"], ["42945"], ["42688"], 
@@ -38,7 +41,10 @@ class TestSection(TestCase):
         expected.sort()
         self.assertSequenceEqual(linked_crns, expected)
 
-        section = Section.objects.get(course_reference_number="44746")
+        section = Section.objects.get(
+            term="202309",
+            course_reference_number="44746"
+        )
         self.assertSequenceEqual(
             section.get_linked_crns(), []
         )

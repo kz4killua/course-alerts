@@ -18,9 +18,10 @@ class Course(models.Model):
 
 class Section(models.Model):
     """A section (class) within a course e.g. individual lectures, labs, tutorials"""
+    id = models.IntegerField(primary_key=True)
     term = models.CharField(max_length=6)
     term_desc = models.CharField(max_length=128)
-    course_reference_number = models.CharField(primary_key=True, max_length=5)
+    course_reference_number = models.CharField(max_length=128)
     part_of_term = models.CharField(max_length=128)
     sequence_number = models.CharField(max_length=128)
     campus_description = models.CharField(max_length=128)
@@ -34,10 +35,10 @@ class Section(models.Model):
     faculty = models.JSONField()
     meetings_faculty = models.JSONField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    is_primary_section = models.BooleanField(default=False)
+    is_primary_section = models.BooleanField()
 
     def __str__(self) -> str:
-        return f"Section: {self.course_reference_number}"
+        return f"Section: {self.term} - {self.course_reference_number}"
     
     def get_linked_crns(self) -> list[list[str]]:
         """
@@ -49,7 +50,7 @@ class Section(models.Model):
         if not self.is_section_linked:
             return []
 
-        key = f"linked_crns_{self.course_reference_number}"
+        key = f"linked_crns_{self.id}"
         if key not in cache:
             result = get_linked_sections(self.term, self.course_reference_number)
             linked_crns = [
