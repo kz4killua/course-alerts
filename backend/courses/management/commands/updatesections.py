@@ -125,15 +125,15 @@ def get_primary_section_crns(sections: list) -> set:
 
     for course_sections in courses.values():
 
-        # Count the number of sections of each link type
-        link_counts = defaultdict(int)
+        # Count the number of sections of each schedule type
+        section_type_counts = defaultdict(int)
         for section in course_sections:
-            link_counts[section['linkIdentifier']] += 1
+            section_type_counts[section['scheduleTypeDescription']] += 1
 
-        # The link type with the fewest sections is the primary link type
-        primary_link = min(link_counts, key=link_counts.get)
+        # The schedule type with the fewest sections is the primary schedule type
+        primary_section_type = min(section_type_counts, key=section_type_counts.get)
         for section in course_sections:
-            if (section['linkIdentifier'] == primary_link):
+            if (section['scheduleTypeDescription'] == primary_section_type):
                 primary_sections.add(section['courseReferenceNumber'])
 
     return primary_sections
