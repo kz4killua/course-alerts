@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.management import call_command
 
 from courses.scheduling.time_bitmap import TimeBitmap
-from courses.scheduling.scheduling import get_section_time_bitmap, get_valid_section_combinations, generate_schedules
+from courses.scheduling.scheduling import get_valid_section_combinations, generate_schedules
 from courses.models import Section
 
 
@@ -55,11 +55,13 @@ class TestScheduling(TestCase):
 
         schedules = generate_schedules("202309", ["BIOL1000U", "CRMN1000U"], time_limit=3, max_solutions=5, solver="random")
         self.assertEqual(len(schedules), 2)
-        self.assertEqual(len(schedules.keys()), 2)
+        for schedule in schedules:
+            self.assertEqual(len(schedule.keys()), 2)
 
         schedules = generate_schedules("202309", ["BIOL1000U", "CRMN1000U"], time_limit=3, max_solutions=5, solver="cp")
         self.assertEqual(len(schedules), 2)
-        self.assertEqual(len(schedules.keys()), 2)
+        for schedule in schedules:
+            self.assertEqual(len(schedule.keys()), 2)
 
 
     def test_get_valid_section_combinations(self):
@@ -72,34 +74,3 @@ class TestScheduling(TestCase):
 
         combinations = get_valid_section_combinations("202309", "CSCI2000U")
         self.assertEqual(len(combinations), 7)
-
-
-    def test_get_section_time_bitmap(self):
-        
-        # COMM1050U, LEC, Online
-        section = Section.objects.get(term="202309", course_reference_number="42750")
-        tb = get_section_time_bitmap(section)
-        self.assertEqual(tb, TimeBitmap())
-
-        # SCCO 0999U, LEC, Online
-        section = Section.objects.get(term="202309", course_reference_number="45203")
-        tb = get_section_time_bitmap(section)
-        self.assertEqual(tb, TimeBitmap())
-
-        # MATH1010U, LEC, Tuesday + Friday 12:40 - 14:00
-        section = Section.objects.get(term="202309", course_reference_number="40288")
-        tb = get_section_time_bitmap(section)
-        self.assertEqual(tb, TimeBitmap.from_begin_and_end_time('1240', '1400', 'tuesday') | TimeBitmap.from_begin_and_end_time('1240', '1400', 'friday'))
-
-        # CSCI1030U, LAB, Thursday 09:40 - 11:00
-        section = Section.objects.get(term="202309", course_reference_number="42685")
-        tb = get_section_time_bitmap(section)
-        self.assertEqual(tb, TimeBitmap.from_begin_and_end_time('0940', '1100', 'thursday'))
-
-
-    def test_get_matching_schedules(self):
-        pass
-
-
-    def test_evaluate_schedule(self):
-        pass

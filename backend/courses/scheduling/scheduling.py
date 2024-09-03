@@ -26,7 +26,7 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
         for combination in section_combinations:
 
             time_bitmaps = [
-                get_section_time_bitmap(section) 
+                section.get_time_bitmap()
                 for section in Section.objects.filter(
                     term=term,
                     course_reference_number__in=combination
@@ -116,23 +116,3 @@ def get_valid_section_combinations(term: str, course_code: str) -> list[list[str
                 )
 
     return section_combinations
-
-
-def get_section_time_bitmap(section: Section) -> TimeBitmap:
-    """Get the TimeBitmap representing all time slots occupied by a section."""
-
-    time_bitmap = TimeBitmap()
-
-    for meeting in section.meetings_faculty:
-
-        # All asynchronous sessions have no time conflicts
-        if not meeting["meetingTime"]["beginTime"] or not meeting["meetingTime"]["endTime"]:
-            continue
-
-        for day in TimeBitmap.DAYS:
-            if meeting["meetingTime"][day]:
-                time_bitmap |= TimeBitmap.from_begin_and_end_time(
-                    meeting["meetingTime"]["beginTime"], meeting["meetingTime"]["endTime"], day
-                )
-
-    return time_bitmap

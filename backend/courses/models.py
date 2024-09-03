@@ -2,6 +2,7 @@ from django.db import models
 from django.core.cache import cache
 
 from .api import get_linked_sections
+from courses.scheduling.time_bitmap import TimeBitmap
 
 
 class Course(models.Model):
@@ -37,15 +38,13 @@ class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     is_primary_section = models.BooleanField()
 
+
     def __str__(self) -> str:
         return f"Section: {self.term} - {self.course_reference_number}"
-    
-    def get_linked_crns(self) -> list[list[str]]:
-        """
-        Return the CRNs of the linked sections for this class.
 
-        These will be retrieved from the cache if available, otherwise they will be fetched from the API.
-        """
+
+    def get_linked_crns(self) -> list[list[str]]:
+        """Return the CRNs of the linked sections for this class (from the cache if available)."""
 
         if not self.is_section_linked:
             return []
@@ -60,3 +59,23 @@ class Section(models.Model):
             cache.set(key, linked_crns, timeout=None)
 
         return cache.get(key)
+
+
+    def get_time_bitmap(self) -> TimeBitmap:
+        """Get the TimeBitmap representing all time slots occupied by a section."""
+
+        time_bitmap = TimeBitmap()
+
+        for meeting in self.meetings_faculty:
+
+            # All asynchronous sessions have no time conflicts
+            if not meeting["meetingTime"]["beginTime"] or not meeting["meetingTime"]["endTime"]:
+                continue
+
+            for day in TimeBitmap.DAYS:
+                if meeting["meetingTime"][day]:
+                    time_bitmap |= TimeBitmap.from_begin_and_end_time(
+                        meeting["meetingTime"]["beginTime"], meeting["meetingTime"]["endTime"], day
+                    )
+
+        return time_bitmap
