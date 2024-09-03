@@ -116,7 +116,7 @@ class TimeBitmap:
     
 
     def __repr__(self) -> str:
-        return f"MeetingTime({hex(self.bitmap)})"
+        return f"TimeBitmap({hex(self.bitmap)})"
     
 
     @classmethod
