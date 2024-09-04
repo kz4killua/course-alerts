@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.cache import cache
 
-from .api import get_linked_sections
+from .api import get_linked_sections, get_enrollment_info
 from courses.scheduling.time_bitmap import TimeBitmap
 
 
@@ -57,6 +57,17 @@ class Section(models.Model):
                 for sections in result['linkedData']
             ]
             cache.set(key, linked_crns, timeout=None)
+
+        return cache.get(key)
+    
+
+    def get_enrollment_info(self) -> dict:
+        """Return the enrollment information for this section (from the cache if available)."""
+        
+        key = f"enrollment_info_{self.id}"
+        if key not in cache:
+            result = get_enrollment_info(self.term, self.course_reference_number)
+            cache.set(key, result, timeout=60 * 60 * 24)
 
         return cache.get(key)
 

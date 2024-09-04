@@ -6,9 +6,10 @@ from collections import defaultdict
 from courses.models import Section
 from .time_bitmap import TimeBitmap
 from .solvers import random_solver, cp_solver
+from .filtering import apply_filters
 
 
-def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, solver: str = "random") -> list[dict]:
+def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, filters: dict = None, solver: str = "random") -> list[dict]:
     """Create a schedule for a set of courses."""
 
     # Get valid combinations of LEC, TUT, LAB, etc. for each course
@@ -17,7 +18,14 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
         options[course_code] = get_valid_section_combinations(term, course_code)
         if len(options[course_code]) == 0:
             raise ValueError(f"No valid section combinations found for {course_code}.")
-
+        
+    # Apply filters to the section combinations
+    if filters:
+        options = apply_filters(options, term, filters)
+        for course_code in course_codes:
+            if len(options[course_code]) == 0:
+                raise ValueError(f"No valid section combinations found for {course_code} after filtering.")
+    
     # Create a single TimeBitmap for each valid combination of CRNs
     time_bitmap_options = defaultdict(set)
     time_bitmap_to_crns = defaultdict(list)
