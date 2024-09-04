@@ -7,9 +7,10 @@ from courses.models import Section
 from .time_bitmap import TimeBitmap
 from .solvers import random_solver, cp_solver
 from .filtering import apply_filters
+from .scoring import score_schedule
 
 
-def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, filters: dict = None, solver: str = "random") -> list[dict]:
+def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, filters: dict = None, preferences: dict = None, solver: str = "random") -> list[dict]:
     """Create a schedule for a set of courses."""
 
     # Get valid combinations of LEC, TUT, LAB, etc. for each course
@@ -67,7 +68,9 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
     valid_schedules = get_matching_schedules(time_assignments, time_bitmap_to_crns)
 
     # Return (at most) the 3 best schedules
-    return heapq.nlargest(3, valid_schedules, key=evaluate_schedule)
+    if preferences is None:
+        preferences = dict()
+    return heapq.nlargest(3, valid_schedules, key=lambda x: score_schedule(x, term, preferences))
 
 
 def get_matching_schedules(schedules: list[dict], time_bitmap_to_crns: dict) -> list[dict]:
@@ -89,11 +92,6 @@ def get_matching_schedules(schedules: list[dict], time_bitmap_to_crns: dict) -> 
             )
 
     return results
-
-
-def evaluate_schedule(schedule: dict) -> int:
-    """Calculate a "goodness" score for a schedule based on given preferences."""
-    return 0
 
 
 def get_valid_section_combinations(term: str, course_code: str) -> list[list[str]]:
