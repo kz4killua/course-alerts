@@ -5,6 +5,7 @@ from courses.scheduling.time_bitmap import TimeBitmap
 from courses.scheduling.scheduling import get_valid_section_combinations, generate_schedules
 from courses.models import Section
 from courses.scheduling.filtering import is_section_downtown, is_section_before, is_section_after, is_section_closed
+from courses.scheduling.scoring import count_days_with_scheduled_classes, count_breaks_between_classes, count_online_classes, get_schedule_time_bitmap
 
 
 class TestTimeBitmap(TestCase):
@@ -44,7 +45,7 @@ class TestScheduling(TestCase):
 
     def setUp(self) -> None:
         call_command("updatesections", "202309", "--usecache")
-    
+
 
     def test_generate_schedules(self):
 
@@ -118,3 +119,83 @@ class TestFiltering(TestCase):
     
         section = Section.objects.get(term="202309", course_reference_number="40371")
         self.assertTrue(is_section_closed(section))
+
+
+class TestScoring(TestCase):
+
+    def setUp(self) -> None:
+        call_command("updatesections", "202309", "--usecache")
+
+    
+    def test_count_days_with_scheduled_classes(self):
+
+        schedule = {
+            'COMM1050U': ['42750', '42768']
+        }
+        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 1)
+
+        schedule = {
+            'CSCI1030U': ['42684', '42944']
+        }
+        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 3)
+
+        schedule = {
+            'CSCI1030U': ['42684', '42946']
+        }
+        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 2)
+
+        schedule = {
+            'CSCI1030U': ['42684', '42946'],
+            'MATH1010U': ['40288', '45708']
+        }
+        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 5)
+
+
+    def test_count_breaks_between_classes(self):
+
+        schedule = {
+            'BIOL1000U': ['44746']
+        }
+        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+
+        schedule = {
+            'MATH1010U': ['40288', '40301']
+        }
+        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+
+        schedule = {
+            'MATH1010U': ['40288', '45708']
+        }
+        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+
+        schedule = {
+            'MATH1010U': ['40288', '40294']
+        }
+        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+
+        schedule = {
+            'MATH1010U': ['40288', '42959']
+        }
+        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 3)
+
+
+    def test_count_online_classes(self):
+        
+        schedule = {
+            'COMM1050U': ['42750', '42768'],
+            'PSYC1000U': ['43546']
+        }
+        self.assertEqual(count_online_classes(schedule, "202309"), 3)
+
+
+        schedule = {
+            'MATH1010U': ['40288', '40294'],
+            'PSYC1000U': ['43546']
+        }
+        self.assertEqual(count_online_classes(schedule, "202309"), 1)
+
+        schedule = {
+            'MATH1010U': ['40288', '40294'],
+            'BIOL1000U': ['44746']
+        }
+        self.assertEqual(count_online_classes(schedule, "202309"), 0)
