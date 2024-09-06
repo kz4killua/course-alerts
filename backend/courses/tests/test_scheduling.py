@@ -2,10 +2,10 @@ from django.test import TestCase
 from django.core.management import call_command
 
 from courses.scheduling.time_bitmap import TimeBitmap
-from courses.scheduling.scheduling import get_valid_section_combinations, generate_schedules
+from courses.scheduling.scheduling import get_valid_section_combinations, generate_schedules, get_sections
 from courses.models import Section
 from courses.scheduling.filtering import is_section_downtown, is_section_before, is_section_after, is_section_closed
-from courses.scheduling.scoring import count_days_with_scheduled_classes, count_breaks_between_classes, count_online_classes, get_schedule_time_bitmap
+from courses.scheduling.scoring import count_days_with_scheduled_classes, count_breaks_between_classes, count_online_classes
 
 
 class TestTimeBitmap(TestCase):
@@ -68,13 +68,15 @@ class TestScheduling(TestCase):
 
     def test_get_valid_section_combinations(self):
 
-        combinations = get_valid_section_combinations("202309", "BIOL1000U")
+        sections = get_sections("202309", ["BIOL1000U", "CRMN1000U", "CRMN1000U", "CSCI2000U"])
+
+        combinations = get_valid_section_combinations("BIOL1000U", sections)
         self.assertEqual(len(combinations), 1)
 
-        combinations = get_valid_section_combinations("202309", "CRMN1000U")
+        combinations = get_valid_section_combinations("CRMN1000U", sections)
         self.assertEqual(len(combinations), 2)
 
-        combinations = get_valid_section_combinations("202309", "CSCI2000U")
+        combinations = get_valid_section_combinations("CSCI2000U", sections)
         self.assertEqual(len(combinations), 7)
 
 
@@ -129,73 +131,79 @@ class TestScoring(TestCase):
     
     def test_count_days_with_scheduled_classes(self):
 
+        sections = get_sections("202309", ["COMM1050U", "CSCI1030U", "MATH1010U"])
+
         schedule = {
             'COMM1050U': ['42750', '42768']
         }
-        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 1)
+        self.assertEqual(count_days_with_scheduled_classes(schedule, sections), 1)
 
         schedule = {
             'CSCI1030U': ['42684', '42944']
         }
-        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 3)
+        self.assertEqual(count_days_with_scheduled_classes(schedule, sections), 3)
 
         schedule = {
             'CSCI1030U': ['42684', '42946']
         }
-        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 2)
+        self.assertEqual(count_days_with_scheduled_classes(schedule, sections), 2)
 
         schedule = {
             'CSCI1030U': ['42684', '42946'],
             'MATH1010U': ['40288', '45708']
         }
-        self.assertEqual(count_days_with_scheduled_classes(schedule, "202309"), 5)
+        self.assertEqual(count_days_with_scheduled_classes(schedule, sections), 5)
 
 
     def test_count_breaks_between_classes(self):
 
+        sections = get_sections("202309", ["BIOL1000U", "MATH1010U"])
+
         schedule = {
             'BIOL1000U': ['44746']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 0)
 
         schedule = {
             'MATH1010U': ['40288', '40301']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 0)
 
         schedule = {
             'MATH1010U': ['40288', '45708']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 0)
 
         schedule = {
             'MATH1010U': ['40288', '40294']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 0)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 0)
 
         schedule = {
             'MATH1010U': ['40288', '42959']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, "202309"), 3)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 3)
 
 
     def test_count_online_classes(self):
+
+        sections = get_sections("202309", ["COMM1050U", "PSYC1000U", "MATH1010U", "BIOL1000U"])
         
         schedule = {
             'COMM1050U': ['42750', '42768'],
             'PSYC1000U': ['43546']
         }
-        self.assertEqual(count_online_classes(schedule, "202309"), 3)
+        self.assertEqual(count_online_classes(schedule, sections), 3)
 
 
         schedule = {
             'MATH1010U': ['40288', '40294'],
             'PSYC1000U': ['43546']
         }
-        self.assertEqual(count_online_classes(schedule, "202309"), 1)
+        self.assertEqual(count_online_classes(schedule, sections), 1)
 
         schedule = {
             'MATH1010U': ['40288', '40294'],
             'BIOL1000U': ['44746']
         }
-        self.assertEqual(count_online_classes(schedule, "202309"), 0)
+        self.assertEqual(count_online_classes(schedule, sections), 0)

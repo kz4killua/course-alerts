@@ -2,25 +2,25 @@ from courses.models import Section
 from .time_bitmap import TimeBitmap
 
 
-def score_schedule(schedule: dict[str, list[str]], term: str, preferences: dict) -> float:
+def score_schedule(schedule: dict[str, list[str]], preferences: dict, sections: dict[str, Section]) -> float:
     """Score a schedule based on the given preferences."""
 
     score = 0
 
     if preferences.get("more_free_days", False):
-        score -= count_days_with_scheduled_classes(schedule, term)
+        score -= count_days_with_scheduled_classes(schedule, sections)
     if preferences.get("less_breaks_between_classes", False):
-        score -= count_breaks_between_classes(schedule, term)
+        score -= count_breaks_between_classes(schedule, sections)
     if preferences.get("more_online_classes", False):
-        score += count_online_classes(schedule, term)
+        score += count_online_classes(schedule, sections)
 
     return score
 
 
-def count_days_with_scheduled_classes(schedule: dict[str, list[str]], term: str) -> list[dict]:
+def count_days_with_scheduled_classes(schedule: dict[str, list[str]], sections: dict[str, Section]) -> list[dict]:
     """Count the number of days a student has scheduled classes."""
 
-    time_bitmap = get_schedule_time_bitmap(schedule, term)
+    time_bitmap = get_schedule_time_bitmap(schedule, sections)
     days_on_campus = 0
 
     for day in TimeBitmap.DAYS:
@@ -33,10 +33,10 @@ def count_days_with_scheduled_classes(schedule: dict[str, list[str]], term: str)
     return days_on_campus
 
 
-def count_breaks_between_classes(schedule: dict[str, list[str]], term: str) -> list[dict]:
+def count_breaks_between_classes(schedule: dict[str, list[str]], sections: dict[str, Section]) -> list[dict]:
     """Count the number of breaks between classes for a given schedule."""
 
-    time_bitmap = get_schedule_time_bitmap(schedule, term)
+    time_bitmap = get_schedule_time_bitmap(schedule, sections)
     breaks_between_classes = 0
 
     for day in TimeBitmap.DAYS:
@@ -50,27 +50,27 @@ def count_breaks_between_classes(schedule: dict[str, list[str]], term: str) -> l
     return breaks_between_classes
 
 
-def count_online_classes(schedule: dict[str, list[str]], term: str) -> list[dict]:
+def count_online_classes(schedule: dict[str, list[str]], sections: dict[str, Section]) -> list[dict]:
     """Count the number of online classes in a schedule."""
 
-    crns = set()
-    for values in schedule.values():
-        crns.update(values)
+    online_classes = 0
+    
+    for crns in schedule.values():
+        for crn in crns:
+            section = sections[crn]
+            if section.campus_description == "OT-Online":
+                online_classes += 1
 
-    return Section.objects.filter(
-        term=term, 
-        course_reference_number__in=crns,
-        campus_description="OT-Online"
-    ).count()
+    return online_classes
             
 
-def get_schedule_time_bitmap(schedule: dict[str, list[str]], term: str) -> TimeBitmap:
+def get_schedule_time_bitmap(schedule: dict[str, list[str]], sections: dict[str, Section]) -> TimeBitmap:
     """Get the time bitmap of a schedule."""
     time_bitmap = TimeBitmap()
 
     for crns in schedule.values():
         for crn in crns:
-            section = Section.objects.get(term=term, course_reference_number=crn)
+            section = sections[crn]
             time_bitmap |= section.get_time_bitmap()
 
     return time_bitmap

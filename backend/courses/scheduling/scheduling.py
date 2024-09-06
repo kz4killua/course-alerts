@@ -10,37 +10,36 @@ from .filtering import apply_filters
 from .scoring import score_schedule
 
 
-def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, filters: dict = None, preferences: dict = None, solver: str = "random") -> list[dict]:
+def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, filters: dict | None = None, preferences: dict | None = None, solver: str = "cp") -> list[dict]:
     """Create a schedule for a set of courses."""
+
+    sections = get_sections(term, course_codes)
 
     # Get valid combinations of LEC, TUT, LAB, etc. for each course
     options = dict()
     for course_code in course_codes:
-        options[course_code] = get_valid_section_combinations(term, course_code)
+        options[course_code] = get_valid_section_combinations(course_code, sections)
+        
+    if filters:
+        options = apply_filters(options, filters, sections)
+
+    for course_code in course_codes:
         if len(options[course_code]) == 0:
             raise ValueError(f"No valid section combinations found for {course_code}.")
-        
-    # Apply filters to the section combinations
-    if filters:
-        options = apply_filters(options, term, filters)
-        for course_code in course_codes:
-            if len(options[course_code]) == 0:
-                raise ValueError(f"No valid section combinations found for {course_code} after filtering.")
     
     # Create a single TimeBitmap for each valid combination of CRNs
-    time_bitmap_options = defaultdict(set)
+    course_code_to_time_bitmaps = defaultdict(set)
     time_bitmap_to_crns = defaultdict(list)
 
     for course_code, section_combinations in options.items():
         for combination in section_combinations:
 
-            time_bitmaps = [
-                section.get_time_bitmap()
-                for section in Section.objects.filter(
-                    term=term,
-                    course_reference_number__in=combination
+            time_bitmaps = []
+            for crn in combination:
+                section = sections[crn]
+                time_bitmaps.append(
+                    section.get_time_bitmap()
                 )
-            ]
 
             # Skip combinations with time conflicts
             if TimeBitmap.overlaps(*time_bitmaps):
@@ -50,17 +49,17 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
                 lambda x, y: x | y, time_bitmaps
             )
 
-            time_bitmap_options[course_code].add(time_bitmaps)
+            course_code_to_time_bitmaps[course_code].add(time_bitmaps)
             time_bitmap_to_crns[course_code, time_bitmaps].append(combination)
 
     # Generate valid schedules
     if solver == "random":
         time_assignments = random_solver.get_valid_time_assignments(
-            course_codes, time_bitmap_options, time_limit, max_solutions
+            course_codes, course_code_to_time_bitmaps, time_limit, max_solutions
         )
     elif solver == "cp":
         time_assignments = cp_solver.get_valid_time_assignments(
-            course_codes, time_bitmap_options, time_limit, max_solutions
+            course_codes, course_code_to_time_bitmaps, time_limit, max_solutions
         )
     else:
         raise ValueError(f"Invalid solver: {solver}")
@@ -70,7 +69,7 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
     # Return (at most) the 3 best schedules
     if preferences is None:
         preferences = dict()
-    return heapq.nlargest(3, valid_schedules, key=lambda x: score_schedule(x, term, preferences))
+    return heapq.nlargest(3, valid_schedules, key=lambda x: score_schedule(x, preferences, sections))
 
 
 def get_matching_schedules(schedules: list[dict], time_bitmap_to_crns: dict) -> list[dict]:
@@ -94,15 +93,14 @@ def get_matching_schedules(schedules: list[dict], time_bitmap_to_crns: dict) -> 
     return results
 
 
-def get_valid_section_combinations(term: str, course_code: str) -> list[list[str]]:
+def get_valid_section_combinations(course_code: str, sections: dict[str, Section]) -> list[list[str]]:
     """Return the CRNs of all valid section combinations (LEC, TUT, LAB, etc.) for a course."""
     
     # Get all primary sections for the course
-    primary_sections = Section.objects.filter(
-        term=term, 
-        course__subject_course=course_code,
-        is_primary_section=True
-    )
+    primary_sections = []
+    for section in sections.values():
+        if section.is_primary_section and section.course.subject_course == course_code:
+            primary_sections.append(section)
 
     # Pre-fetch linked CRNs for each primary section
     for section in primary_sections:
@@ -122,3 +120,11 @@ def get_valid_section_combinations(term: str, course_code: str) -> list[list[str
                 )
 
     return section_combinations
+
+
+def get_sections(term: str, course_codes: list[str]) -> dict[str, Section]:
+    """Create a mapping of CRNs to course sections for a given term."""
+    sections = dict()
+    for section in Section.objects.filter(term=term, course__subject_course__in=course_codes):
+        sections[section.course_reference_number] = section
+    return sections

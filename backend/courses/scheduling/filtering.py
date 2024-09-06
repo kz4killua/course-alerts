@@ -3,7 +3,7 @@ from courses.scheduling.time_bitmap import TimeBitmap
 from courses.models import Section
 
 
-def apply_filters(options: dict, term: str, filters: dict):
+def apply_filters(options: dict, filters: dict, sections: dict[str, Section]) -> dict:
     """Apply filters to the given course options."""
 
     filtered = defaultdict(list)
@@ -14,9 +14,7 @@ def apply_filters(options: dict, term: str, filters: dict):
             for crn in combination:
                 
                 if crn not in memo:
-                    section = Section.objects.get(
-                        term=term, course_reference_number=crn
-                    )
+                    section = sections[crn]
                     memo[crn] = is_section_filtered(section, filters)
                 
                 if memo[crn]:
