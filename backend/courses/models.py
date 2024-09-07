@@ -37,6 +37,7 @@ class Section(models.Model):
     meetings_faculty = models.JSONField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     is_primary_section = models.BooleanField()
+    _time_bitmap = models.CharField(max_length=512, editable=False)
 
 
     def __str__(self) -> str:
@@ -72,8 +73,8 @@ class Section(models.Model):
         return cache.get(key)
 
 
-    def get_time_bitmap(self) -> TimeBitmap:
-        """Get the TimeBitmap representing all time slots occupied by a section."""
+    def _calculate_time_bitmap(self) -> TimeBitmap:
+        """Calculate the TimeBitmap representing all time slots occupied by a section."""
 
         time_bitmap = TimeBitmap()
 
@@ -90,3 +91,13 @@ class Section(models.Model):
                     )
 
         return time_bitmap
+    
+
+    def get_time_bitmap(self) -> TimeBitmap:
+        """Get the TimeBitmap representing all time slots occupied by a section."""
+        return TimeBitmap(int(self._time_bitmap))
+    
+
+    def save(self, *args, **kwargs) -> None:
+        self._time_bitmap = str(self._calculate_time_bitmap().bitmap)
+        return super().save(*args, **kwargs)
