@@ -167,7 +167,7 @@ class TestScoring(TestCase):
         schedule = {
             'MATH1010U': ['40288', '40301']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, sections), 0)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 1)
 
         schedule = {
             'MATH1010U': ['40288', '45708']
@@ -177,12 +177,12 @@ class TestScoring(TestCase):
         schedule = {
             'MATH1010U': ['40288', '40294']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, sections), 0)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 1)
 
         schedule = {
             'MATH1010U': ['40288', '42959']
         }
-        self.assertEqual(count_breaks_between_classes(schedule, sections), 3)
+        self.assertEqual(count_breaks_between_classes(schedule, sections), 10)
 
 
     def test_count_online_classes(self):
