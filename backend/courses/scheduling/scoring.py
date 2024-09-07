@@ -2,6 +2,15 @@ from courses.models import Section
 from .time_bitmap import TimeBitmap
 
 
+# Precompute the time bitmaps for each day
+DAY_BITMAPS = {
+    day: TimeBitmap.from_begin_and_end_time(
+        TimeBitmap.TIME_SLOTS[0][0], TimeBitmap.TIME_SLOTS[-1][1], day
+    )
+    for day in TimeBitmap.DAYS
+}
+
+
 def score_schedule(schedule: dict[str, list[str]], preferences: dict, sections: dict[str, Section]) -> float:
     """Score a schedule based on the given preferences."""
 
@@ -24,9 +33,7 @@ def count_days_with_scheduled_classes(schedule: dict[str, list[str]], sections: 
     days_on_campus = 0
 
     for day in TimeBitmap.DAYS:
-        mask = TimeBitmap.from_begin_and_end_time(
-            TimeBitmap.SLOTS[0][0], TimeBitmap.SLOTS[-1][1], day
-        )
+        mask = DAY_BITMAPS[day]
         if time_bitmap & mask:
             days_on_campus += 1
 
@@ -34,15 +41,13 @@ def count_days_with_scheduled_classes(schedule: dict[str, list[str]], sections: 
 
 
 def count_breaks_between_classes(schedule: dict[str, list[str]], sections: dict[str, Section]) -> list[dict]:
-    """Count the number of breaks between classes for a given schedule."""
+    """Count the number of breaks (10-minute intervals) between classes for a given schedule."""
 
     time_bitmap = get_schedule_time_bitmap(schedule, sections)
     breaks_between_classes = 0
 
     for day in TimeBitmap.DAYS:
-        mask = TimeBitmap.from_begin_and_end_time(
-            TimeBitmap.SLOTS[0][0], TimeBitmap.SLOTS[-1][1], day
-        )
+        mask = DAY_BITMAPS[day]
         mask &= time_bitmap
         if mask:
             breaks_between_classes += bin(mask.bitmap)[2:].strip("0").count("0")

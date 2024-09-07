@@ -1,36 +1,27 @@
+from datetime import datetime, timedelta
+
+
+def _get_time_slots(start_time: str, end_time: str, increment: int) -> list[tuple[str, str]]:
+    """Return a list of time slots between the start and end times."""
+    
+    time_slots = []
+
+    start_time = datetime.strptime(start_time, "%H%M")
+    end_time = datetime.strptime(end_time, "%H%M")
+
+    a = start_time
+    while a < end_time:
+        b = a + timedelta(minutes=increment)
+        time_slots.append((a.strftime("%H%M"), b.strftime("%H%M")))
+        a = b
+
+    return time_slots
+
+
 class TimeBitmap:
     """A data structure optimized for checking time conflicts"""
 
-    SLOTS = [
-        ('0810', '0830'),
-        ('0840', '0900'),
-        ('0910', '0930'),
-        ('0940', '1000'),
-        ('1010', '1030'),
-        ('1040', '1100'),
-        ('1110', '1130'),
-        ('1140', '1200'),
-        ('1210', '1230'),
-        ('1240', '1300'),
-        ('1310', '1330'),
-        ('1340', '1400'),
-        ('1410', '1430'),
-        ('1440', '1500'),
-        ('1510', '1530'),
-        ('1540', '1600'),
-        ('1610', '1630'),
-        ('1640', '1700'),
-        ('1710', '1730'),
-        ('1740', '1800'),
-        ('1810', '1830'),
-        ('1840', '1900'),
-        ('1910', '1930'),
-        ('1940', '2000'),
-        ('2010', '2030'),
-        ('2040', '2100'),
-        ('2110', '2130'),
-        ('2140', '2200'),
-    ]
+    TIME_SLOTS = _get_time_slots("0800", "2200", 10)
 
     DAYS = [
         'monday',
@@ -50,7 +41,7 @@ class TimeBitmap:
         start_time_index = None
         end_time_index = None
 
-        for i, slot in enumerate(TimeBitmap.SLOTS):
+        for i, slot in enumerate(TimeBitmap.TIME_SLOTS):
             if slot[0] == start_time:
                 start_time_index = i
             if slot[1] == end_time:
@@ -79,8 +70,8 @@ class TimeBitmap:
         """Return the bitmap for the given time range and day."""
         
         # Find the FSB and LSB for the resulting bitmap
-        first_set_bit = start_time_index + (day_index * len(TimeBitmap.SLOTS))
-        last_set_bit = end_time_index + (day_index * len(TimeBitmap.SLOTS))
+        first_set_bit = start_time_index + (day_index * len(TimeBitmap.TIME_SLOTS))
+        last_set_bit = end_time_index + (day_index * len(TimeBitmap.TIME_SLOTS))
 
         # Create the bitmap, setting all bits from first_set_bit to last_set_bit
         bitmap = (1 << (last_set_bit - first_set_bit + 1)) - 1

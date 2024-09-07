@@ -65,7 +65,7 @@ def is_section_before(section: Section, time: str):
     
     mask = TimeBitmap()
     for day in TimeBitmap.DAYS:
-        mask |= TimeBitmap.from_begin_and_end_time(TimeBitmap.SLOTS[0][0], time, day)
+        mask |= TimeBitmap.from_begin_and_end_time(TimeBitmap.TIME_SLOTS[0][0], time, day)
 
     return mask & time_bitmap
 
@@ -76,6 +76,6 @@ def is_section_after(section: Section, time: str):
     
     mask = TimeBitmap()
     for day in TimeBitmap.DAYS:
-        mask |= TimeBitmap.from_begin_and_end_time(time, TimeBitmap.SLOTS[-1][1], day)
+        mask |= TimeBitmap.from_begin_and_end_time(time, TimeBitmap.TIME_SLOTS[-1][1], day)
 
     return mask & time_bitmap
