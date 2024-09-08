@@ -8,10 +8,11 @@ from .time_bitmap import TimeBitmap
 from .solvers import random_solver, cp_solver
 from .filtering import apply_filters
 from .scoring import score_schedule
+from .exceptions import SchedulingException
 
 
-def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_solutions: int, filters: dict | None = None, preferences: dict | None = None, solver: str = "cp") -> list[dict]:
-    """Create a schedule for a set of courses."""
+def generate_schedules(term: str, course_codes: list[str], num_schedules: int, time_limit: int | None, max_solutions: int | None, filters: dict | None = None, preferences: dict | None = None, solver: str = "cp") -> list[dict]:
+    """Find the best schedules for a given term and list of course codes."""
 
     sections = get_sections(term, course_codes)
 
@@ -25,7 +26,7 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
 
     for course_code in course_codes:
         if len(options[course_code]) == 0:
-            raise ValueError(f"No valid section combinations found for {course_code}.")
+            raise SchedulingException(f"No valid section combinations found for {course_code}.")
     
     # Create a single TimeBitmap for each valid combination of CRNs
     course_code_to_time_bitmaps = defaultdict(set)
@@ -66,10 +67,10 @@ def generate_schedules(term: str, course_codes: list[str], time_limit: int, max_
 
     valid_schedules = get_matching_schedules(time_assignments, time_bitmap_to_crns)
 
-    # Return (at most) the 3 best schedules
+    # Return the best schedules
     if preferences is None:
-        preferences = dict()
-    return heapq.nlargest(3, valid_schedules, key=lambda x: score_schedule(x, preferences, sections))
+        return valid_schedules[:num_schedules]
+    return heapq.nlargest(num_schedules, valid_schedules, key=lambda x: score_schedule(x, preferences, sections))
 
 
 def get_matching_schedules(schedules: list[dict], time_bitmap_to_crns: dict) -> list[dict]:
