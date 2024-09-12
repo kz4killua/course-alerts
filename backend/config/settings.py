@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'courses.apps.CoursesConfig',
+    'alerts.apps.AlertsConfig',
 ]
 
 MIDDLEWARE = [
