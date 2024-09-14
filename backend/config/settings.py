@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_celery_beat',
 
+    'accounts.apps.AccountsConfig',
     'courses.apps.CoursesConfig',
     'alerts.apps.AlertsConfig',
 ]
@@ -129,6 +130,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# User model
+AUTH_USER_MODEL = 'accounts.User'
 
 # Cache settings
 CACHES = {
