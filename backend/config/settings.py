@@ -162,3 +162,11 @@ REST_FRAMEWORK = {
         'user': '30/min',
     },
 }
+
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append(
+    'rest_framework.authentication.BasicAuthentication'
+)
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'email@example.com'
