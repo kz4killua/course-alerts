@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from .serializers import UserSerializer
+from .throttles import RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle
 from .models import EmailVerificationCode
 
 
@@ -28,6 +29,7 @@ class SignUp(generics.CreateAPIView):
 class RequestEmailVerification(APIView):
     """Request an email verification code."""
     permission_classes = [IsAuthenticated]
+    throttle_classes = [RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle]
 
     def post(self, request):
         
