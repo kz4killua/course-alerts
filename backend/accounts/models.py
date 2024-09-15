@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
@@ -29,6 +30,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     email = models.EmailField(max_length=255, unique=True)
+    email_verified = models.BooleanField(default=False)
     username = models.CharField(max_length=255, blank=True, null=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -36,3 +38,16 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.email
+    
+
+class EmailVerificationCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def __str__(self) -> str:
+        return self.code
+    
+    def is_expired(self) -> bool:
+        return timezone.now() > self.expires_at
