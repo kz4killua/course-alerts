@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.management import call_command
 
 from courses.models import Course, Section
-from courses.scheduling.time_bitmap import TimeBitmap
+from courses.time_bitmap import TimeBitmap
 
 
 class TestSection(TestCase):

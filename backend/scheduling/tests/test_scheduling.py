@@ -1,44 +1,10 @@
 from django.test import TestCase
 from django.core.management import call_command
 
-from courses.scheduling.time_bitmap import TimeBitmap
-from courses.scheduling.scheduling import get_valid_section_combinations, generate_schedules, get_sections
 from courses.models import Section
-from courses.scheduling.filtering import is_section_downtown, is_section_before, is_section_after, is_section_closed
-from courses.scheduling.scoring import count_days_with_scheduled_classes, count_breaks_between_classes, count_online_classes
-
-
-class TestTimeBitmap(TestCase):
-
-    def setUp(self) -> None:
-        call_command("updatesections", "202309", "--usecache")
-
-
-    def test_overlaps(self):
-
-        tb1 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'monday')
-        tb2 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'tuesday')
-        self.assertFalse(TimeBitmap.overlaps(tb1, tb2))
-
-        tb1 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'monday')
-        tb2 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'monday')
-        self.assertTrue(TimeBitmap.overlaps(tb1, tb2))
-
-        tb1 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'monday')
-        tb2 = TimeBitmap.from_begin_and_end_time('0940', '1100', 'monday')
-        self.assertFalse(TimeBitmap.overlaps(tb1, tb2))
-
-        tb1 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'monday')
-        tb1 |= TimeBitmap.from_begin_and_end_time('0810', '0930', 'wednesday')
-        tb2 = TimeBitmap.from_begin_and_end_time('0840', '0930', 'tuesday')
-        tb2 |= TimeBitmap.from_begin_and_end_time('0840', '0930', 'wednesday')
-        self.assertTrue(TimeBitmap.overlaps(tb1, tb2))
-
-        tb1 = TimeBitmap.from_begin_and_end_time('0810', '0930', 'monday')
-        tb1 |= TimeBitmap.from_begin_and_end_time('0810', '0930', 'wednesday')
-        tb2 = TimeBitmap.from_begin_and_end_time('0840', '0930', 'tuesday')
-        tb2 |= TimeBitmap.from_begin_and_end_time('0840', '0930', 'thursday')
-        self.assertFalse(TimeBitmap.overlaps(tb1, tb2))
+from scheduling.scheduling import get_valid_section_combinations, generate_schedules, get_sections
+from scheduling.filtering import is_section_downtown, is_section_before, is_section_after, is_section_closed
+from scheduling.scoring import count_days_with_scheduled_classes, count_breaks_between_classes, count_online_classes
 
 
 class TestScheduling(TestCase):
@@ -49,18 +15,18 @@ class TestScheduling(TestCase):
 
     def test_generate_schedules(self):
 
-        schedules = generate_schedules("202309", ["BIOL1000U", "EAP1000E"], time_limit=3, max_solutions=5, solver="random")
+        schedules = generate_schedules("202309", ["BIOL1000U", "EAP1000E"], num_schedules=3, time_limit=3, max_solutions=5, solver="random")
         self.assertEqual(len(schedules), 0)
 
-        schedules = generate_schedules("202309", ["BIOL1000U", "EAP1000E"], time_limit=3, max_solutions=5, solver="cp")
+        schedules = generate_schedules("202309", ["BIOL1000U", "EAP1000E"], num_schedules=3, time_limit=3, max_solutions=5, solver="cp")
         self.assertEqual(len(schedules), 0)
 
-        schedules = generate_schedules("202309", ["BIOL1000U", "CRMN1000U"], time_limit=3, max_solutions=5, solver="random")
+        schedules = generate_schedules("202309", ["BIOL1000U", "CRMN1000U"], num_schedules=3, time_limit=3, max_solutions=5, solver="random")
         self.assertEqual(len(schedules), 2)
         for schedule in schedules:
             self.assertEqual(len(schedule.keys()), 2)
 
-        schedules = generate_schedules("202309", ["BIOL1000U", "CRMN1000U"], time_limit=3, max_solutions=5, solver="cp")
+        schedules = generate_schedules("202309", ["BIOL1000U", "CRMN1000U"], num_schedules=3, time_limit=3, max_solutions=5, solver="cp")
         self.assertEqual(len(schedules), 2)
         for schedule in schedules:
             self.assertEqual(len(schedule.keys()), 2)

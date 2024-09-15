@@ -1,5 +1,5 @@
 from courses.models import Section
-from .time_bitmap import TimeBitmap
+from courses.time_bitmap import TimeBitmap
 
 
 # Precompute the time bitmaps for each day

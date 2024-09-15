@@ -2,7 +2,7 @@ from django.db import models
 from django.core.cache import cache
 
 from .api import get_linked_sections, get_enrollment_info
-from courses.scheduling.time_bitmap import TimeBitmap
+from .time_bitmap import TimeBitmap
 
 
 class Course(models.Model):

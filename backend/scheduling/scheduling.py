@@ -4,7 +4,7 @@ import functools
 from collections import defaultdict
 
 from courses.models import Section
-from .time_bitmap import TimeBitmap
+from courses.time_bitmap import TimeBitmap
 from .solvers import random_solver, cp_solver
 from .filtering import apply_filters
 from .scoring import score_schedule

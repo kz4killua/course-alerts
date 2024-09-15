@@ -1,5 +1,5 @@
 from collections import defaultdict
-from courses.scheduling.time_bitmap import TimeBitmap
+from courses.time_bitmap import TimeBitmap
 from courses.models import Section
 
 

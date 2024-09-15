@@ -2,7 +2,7 @@ import itertools
 
 from ortools.sat.python import cp_model
 
-from courses.scheduling.time_bitmap import TimeBitmap
+from courses.time_bitmap import TimeBitmap
 
 
 def get_valid_time_assignments(course_codes: list[str], combinations: dict[str, set[TimeBitmap]], time_limit: int = None, max_solutions: int = None):
