@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         email = email.lower()
 
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("This email is already in use.")
+            raise serializers.ValidationError("user with this email already exists.")
         
         return email
 
