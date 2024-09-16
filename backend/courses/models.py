@@ -62,11 +62,11 @@ class Section(models.Model):
         return cache.get(key)
     
 
-    def get_enrollment_info(self) -> dict:
+    def get_enrollment_info(self, force_refresh=False) -> dict:
         """Return the enrollment information for this section (from the cache if available)."""
         
         key = f"enrollment_info_{self.id}"
-        if key not in cache:
+        if (key not in cache) or force_refresh:
             result = get_enrollment_info(self.term, self.course_reference_number)
             cache.set(key, result, timeout=60 * 60 * 24)
 
