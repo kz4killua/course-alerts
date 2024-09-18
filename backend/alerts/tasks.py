@@ -10,9 +10,10 @@ def send_alerts_task():
     enrollment_info = {}
     subscriptions = Subscription.objects.all()
     for subscription in subscriptions:
-        enrollment_info[subscription.section.id] = (
-            subscription.section.get_enrollment_info(force_refresh=True)
-        )
+        if subscription.section.id not in enrollment_info:
+            enrollment_info[subscription.section.id] = (
+                subscription.section.get_enrollment_info(force_refresh=True)
+            )
 
     # TODO: Send alerts to users based on enrollment info
     pass
