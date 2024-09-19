@@ -154,7 +154,7 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_BEAT_SCHEDULE = {
     'send-alerts-task': {
         'task': 'alerts.tasks.send_alerts_task',
-        'schedule': crontab(hour=[7, 16], minute=0),
+        'schedule': crontab(hour='7,16', minute=0),
     },
 }
 
