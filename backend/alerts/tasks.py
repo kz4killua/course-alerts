@@ -12,6 +12,8 @@ from .models import Subscription
 
 User = get_user_model()
 
+logger = get_task_logger(__name__)
+
 
 @shared_task
 def send_alerts_task():
@@ -19,6 +21,7 @@ def send_alerts_task():
     subscriptions = Subscription.objects.all()
 
     # Get enrollment info for all relevant sections
+    logger.info("Getting enrollment info...")
     enrollment_info = {}
     for subscription in subscriptions:
         if subscription.section.id not in enrollment_info:
@@ -26,9 +29,11 @@ def send_alerts_task():
                 subscription.section.get_enrollment_info(force_refresh=True)
             )
 
+    logger.info("Checking for new alerts...")
     new_alerts = get_new_alerts(subscriptions, enrollment_info)
 
     # Send emails to users
+    logger.info(f"Sending {len(new_alerts)} alert(s)...")
     for user_id, user_alert in new_alerts.items():
         user = User.objects.get(id=user_id)
         message = render_to_string(
@@ -40,6 +45,8 @@ def send_alerts_task():
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
         )
+
+    logger.info("Done.")
 
 
 def get_new_alerts(subscriptions, enrollment_info):
