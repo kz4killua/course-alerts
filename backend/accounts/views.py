@@ -75,8 +75,8 @@ class VerifyEmail(APIView):
             )
         except EmailVerificationCode.DoesNotExist:
             return Response({
-                'detail': 'Invalid code.'
-            })
+                'detail': 'Invalid code.', 
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         if email_verification_code.is_expired():
             return Response({
