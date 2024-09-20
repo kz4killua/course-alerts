@@ -9,6 +9,9 @@ from rest_framework_simplejwt.views import (
 from . import views
 
 
+app_name = 'accounts'
+
+
 urlpatterns = [
     path('signup', views.SignUp.as_view(), name='signup'),
     path('token/request', TokenObtainPairView.as_view(), name='token-request'),
