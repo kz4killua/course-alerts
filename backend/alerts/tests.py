@@ -5,6 +5,10 @@ from rest_framework.test import APITestCase
 from django.core.management import call_command
 from rest_framework import status
 
+from courses.models import Section
+from alerts.models import Subscription
+from alerts.tasks import get_latest_alerts, get_latest_enrollment_info
+
 
 User = get_user_model()
 
@@ -82,3 +86,60 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         response = self.client.get(url, {'term': '202401'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+
+class TestAlerts(TestCase):
+
+    def setUp(self) -> None:
+        call_command("updatesections", "202309", "--usecache")
+        call_command("updatesections", "202401", "--usecache")
+
+
+    def test_send_alerts_task(self):
+
+        user = User.objects.create_user(
+            email="user@example.com", password="password"
+        )
+
+        # Create subscriptions
+        subscriptions = [
+            ('202309', '42684'),
+            ('202309', '44746'),
+            ('202401', '73772'),
+            ('202401', '70154'),
+            ('202309', '42752'),
+            ('202309', '41942'),
+            ('202401', '73773'),
+            ('202401', '72741'),
+        ]
+        for term, crn in subscriptions:
+            section = Section.objects.get(
+                term=term, course_reference_number=crn
+            )
+            Subscription.objects.create(user=user, section=section)
+
+
+        subscriptions = Subscription.objects.all()
+
+        latest_enrollment_info = get_latest_enrollment_info(subscriptions)
+        latest_alerts = get_latest_alerts(subscriptions, latest_enrollment_info)
+
+        expected = {
+            user: {
+                Subscription.OPEN: {
+                    Section.objects.get(term='202309', course_reference_number='44746'),
+                    Section.objects.get(term='202309', course_reference_number='42684'),
+                    Section.objects.get(term='202401', course_reference_number='73772'),
+                    Section.objects.get(term='202401', course_reference_number='70154'),
+                },
+                Subscription.WAITLIST_OPEN: set(),
+                Subscription.CLOSED: {
+                    Section.objects.get(term='202309', course_reference_number='42752'),
+                    Section.objects.get(term='202309', course_reference_number='41942'),
+                    Section.objects.get(term='202401', course_reference_number='73773'),
+                    Section.objects.get(term='202401', course_reference_number='72741'),
+                }
+            }
+        }
+
+        self.assertEqual(latest_alerts, expected)

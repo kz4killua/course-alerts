@@ -3,14 +3,13 @@ from collections import defaultdict
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.mail import send_mail
-from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.db.models import Manager
 
 from .models import Subscription
-
-
-User = get_user_model()
+from courses.models import Section
+from accounts.models import User
 
 logger = get_task_logger(__name__)
 
@@ -20,24 +19,24 @@ def send_alerts_task():
     
     subscriptions = Subscription.objects.all()
 
-    # Get enrollment info for all relevant sections
     logger.info("Getting enrollment info...")
-    enrollment_info = {}
-    for subscription in subscriptions:
-        if subscription.section.id not in enrollment_info:
-            enrollment_info[subscription.section.id] = (
-                subscription.section.get_enrollment_info(force_refresh=True)
-            )
+    latest_enrollment_info = get_latest_enrollment_info(subscriptions)
 
     logger.info("Checking for new alerts...")
-    new_alerts = get_new_alerts(subscriptions, enrollment_info)
+    alerts = get_latest_alerts(subscriptions, latest_enrollment_info)
 
-    # Send emails to users
-    logger.info(f"Sending {len(new_alerts)} alert(s)...")
-    for user_id, user_alert in new_alerts.items():
-        user = User.objects.get(id=user_id)
+    logger.info(f"Sending {len(alerts)} alert(s)...")
+    send_alerts(alerts)
+
+    logger.info("Done.")
+
+
+
+def send_alerts(alerts: dict[User, dict]) -> None:
+
+    for user, alert in alerts.items():
         message = render_to_string(
-            "alerts/update.txt", {"alert": user_alert}
+            "alerts/update.txt", {"alert": alert}
         )
         send_mail(
             subject="Course enrollment updates",
@@ -46,19 +45,17 @@ def send_alerts_task():
             recipient_list=[user.email],
         )
 
-    logger.info("Done.")
 
-
-def get_new_alerts(subscriptions, enrollment_info):
+def get_latest_alerts(subscriptions: Manager[Subscription], enrollment_info: dict[Section, dict]) -> dict[User, dict]:
 
     # Group subscriptions by user
     user_subscriptions = defaultdict(list)
     for subscription in subscriptions:
-        user_subscriptions[subscription.user.id].append(subscription)
+        user_subscriptions[subscription.user].append(subscription)
 
     # Check for new updates
     new_alerts = {}
-    for user_id in user_subscriptions:
+    for user in user_subscriptions:
 
         user_alert = {
             Subscription.OPEN: set(), 
@@ -67,10 +64,10 @@ def get_new_alerts(subscriptions, enrollment_info):
         }
         user_alert_is_new = False
 
-        for subscription in user_subscriptions[user_id]:
+        for subscription in user_subscriptions[user]:
 
-            status = get_enrollment_status(
-                enrollment_info[subscription.section.id]
+            status = get_section_alert_status(
+                enrollment_info[subscription.section]
             )
             user_alert[status].add(subscription.section)
 
@@ -82,15 +79,27 @@ def get_new_alerts(subscriptions, enrollment_info):
 
         # Only send alerts if there are new updates
         if user_alert_is_new:
-            new_alerts[user_id] = user_alert
+            new_alerts[user] = user_alert
 
     return new_alerts
 
 
-def get_enrollment_status(enrollment_info: dict) -> str:
-    if (enrollment_info["seatsAvailable"] is not None) and (enrollment_info["seatsAvailable"] > 0):
+def get_latest_enrollment_info(subscriptions: Manager[Subscription]) -> dict[Section, dict]:
+
+    enrollment_info = {}
+    for subscription in subscriptions:
+        if subscription.section not in enrollment_info:
+            enrollment_info[subscription.section] = (
+                subscription.section.get_enrollment_info(force_refresh=True)
+            )
+
+    return enrollment_info
+
+
+def get_section_alert_status(section_enrollment_info: dict) -> str:
+    if (section_enrollment_info["seatsAvailable"] is not None) and (section_enrollment_info["seatsAvailable"] > 0):
         return Subscription.OPEN
-    elif (enrollment_info["waitlistAvailable"] is not None) and (enrollment_info["waitlistAvailable"] > 0):
+    elif (section_enrollment_info["waitAvailable"] is not None) and (section_enrollment_info["waitAvailable"] > 0):
         return Subscription.WAITLIST_OPEN
     else:
         return Subscription.CLOSED
