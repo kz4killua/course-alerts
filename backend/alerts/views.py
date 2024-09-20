@@ -35,7 +35,7 @@ class SubscriptionListCreateDeleteView(APIView):
         """Create subscriptions for the user to the given sections."""
 
         term = request.data.get('term')
-        course_reference_numbers = request.data.get('course_reference_numbers')
+        course_reference_numbers = request.data.getlist('course_reference_numbers')
 
         if not term:
             return Response({'detail': 'No term provided.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -71,7 +71,7 @@ class SubscriptionListCreateDeleteView(APIView):
         """Delete subscriptions for the user to the given sections."""
 
         term = request.data.get('term')
-        course_reference_numbers = request.data.get('course_reference_numbers')
+        course_reference_numbers = request.data.getlist('course_reference_numbers')
 
         if not term:
             return Response({'detail': 'No term provided.'}, status=status.HTTP_400_BAD_REQUEST)
