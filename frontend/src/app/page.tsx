@@ -1,7 +1,7 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { BellIcon, GraduationCapIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";
 import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
@@ -35,9 +35,9 @@ function Hero() {
           Be the first to know when seats become available.
         </h3>
         <div>
-          <Button size={"lg"} className="text-base h-12">
+          <Link className={`${buttonVariants({ variant: "default", size: "lg" })} text-base h-12 px-8`} href={"/classes"}>
             <SearchIcon size={16} className="mr-2" /> Search for a class
-          </Button>
+          </Link>
         </div>
       </div>
       <div className="hidden md:block">
