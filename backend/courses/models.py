@@ -14,7 +14,7 @@ class Course(models.Model):
     course_number = models.CharField(max_length=128)
 
     class Meta:
-        ordering = ["subject_course"]
+        ordering = ["course_title", "subject_course"]
 
     def __str__(self) -> str:
         return f"Course: {self.subject_course}"
