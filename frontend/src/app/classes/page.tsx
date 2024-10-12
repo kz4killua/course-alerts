@@ -6,18 +6,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
 import { SearchIcon } from "lucide-react"
-import { useState, useEffect } from "react"
-import type { Term } from "@/types"
-import { listTerms } from "@/services/courses"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import type { Term, Course } from "@/types"
+import { listTerms, listCourses } from "@/services/courses"
+import { debounce } from "lodash"
 
 
 
-function CourseSearch() {
+function CourseSearch({
+  setQuery
+} : {
+  setQuery: (query: string) => void
+}) {
   return (
     <div className={clsx(
       "group flex items-center justify-center",
@@ -32,6 +39,7 @@ function CourseSearch() {
         )}
         type="text" 
         placeholder="Search for a class..." 
+        onChange={e => setQuery(e.target.value)}
       />
     </div>
   )
@@ -39,10 +47,18 @@ function CourseSearch() {
 
 
 function TermSelect({
-  terms
+  terms,
+  selectedTerm,
+  setSelectedTerm
 }: {
-  terms: Term[]
+  terms: Term[],
+  selectedTerm: Term | undefined,
+  setSelectedTerm: (term: Term | undefined) => void
 }) {
+
+  function handleValueChange(value: string) {
+    setSelectedTerm(terms.find(term => term.term === value));
+  }
 
   return (
     <div className="flex gap-8">
@@ -53,17 +69,18 @@ function TermSelect({
             <Skeleton className="h-4 w-24" />
           </div>
         ) : (
-          terms.map((term, index) => (
-            <div className="flex items-center space-x-2" key={term.term}>
-              <Checkbox id={term.term} defaultChecked={index === 0} />
-              <label
-                htmlFor={term.term}
-                className="leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {term.term_desc}
-              </label>
-            </div>
-          ))
+          <RadioGroup defaultValue={selectedTerm?.term} className="flex gap-4" onValueChange={handleValueChange}>
+            {
+              terms.map(term => (
+                <div className="flex items-center space-x-2" key={term.term}>
+                  <RadioGroupItem id={term.term} value={term.term} />
+                  <Label htmlFor={term.term}>
+                    {term.term_desc}
+                  </Label>
+                </div>
+              ))
+            }
+          </RadioGroup>
         )
       }
     </div>
@@ -71,84 +88,71 @@ function TermSelect({
 }
 
 
-function SearchResults() {
+function SearchResults({
+  query,
+  selectedTerm
+}: {
+  query: string,
+  selectedTerm: Term | undefined
+}) {
 
-  const courses = [
-    {
-      id: 1,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 2,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 3,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 4,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 5,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 6,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 7,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 8,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
-    },
-    {
-      id: 9,
-      title: "Calculus I",
-      term: "Fall 2024",
-      code: "MATH 1010U"
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(false)
+  const [lastQuery, setLastQuery] = useState<string>("")
+  const [lastSelectedTerm, setLastSelectedTerm] = useState<Term>()
+
+
+  function handleSearch(query: string, term: Term) {
+    setLastQuery(query)
+    setLastSelectedTerm(term)
+
+    if (query.length > 0) {
+      listCourses(term.term, query)
+      .then(response => {
+        setCourses(response.data)
+      })
+      .catch(error => {
+        console.error(error)
+      })
+    } else {
+      setCourses([])
     }
-  ]
+  }
+
+  const debouncedSearch = useMemo(() => 
+    debounce((query, term) => handleSearch(query, term), 750), 
+  [handleSearch])
+
+  useEffect(() => {
+    debouncedSearch(query, selectedTerm)
+    return debouncedSearch.cancel
+  }, [query, selectedTerm])
 
 
   return (
     <div>
-      <p className="text-sm">Found {courses.length} results for "math"</p>
+      <p className="text-sm">
+        {
+          lastQuery.length !== 0 && (
+            <span>Found {courses.length} results for &ldquo;{lastQuery}&rdquo; in {lastSelectedTerm?.term_desc}</span>
+          )
+        }
+      </p>
 
       <div className="mt-4 space-y-4">
         {
           courses.map(course =>
             <div 
-              key={course.id} 
+              key={course.subject_course} 
               className={clsx(
                 "rounded-md border px-8 py-4 cursor-pointer",
                 "flex flex-col gap-y-1",
               )}
             >
-              <p className="text-lg font-bold">{course.title}</p>
+              <p className="text-lg font-bold">{course.course_title}</p>
               <div className="flex items-center justify-between">
-                <p className="text-sm">{course.code}</p>
-                <p className="text-sm">{course.term}</p>
+                <p className="text-sm">{course.subject_course}</p>
+                <p className="text-sm">{lastSelectedTerm?.term_desc}</p>
               </div>
             </div>
           )
@@ -231,11 +235,17 @@ function SectionsDialog() {
 export default function Classes() {
 
   const [terms, setTerms] = useState<Term[]>([])
+  const [selectedTerm, setSelectedTerm] = useState<Term>()
+  const [query, setQuery] = useState<string>("")
 
   useEffect(() => {
     listTerms(true)
     .then(response => {
-      setTerms(response.data)
+      const terms = response.data
+      setTerms(terms)
+      if (terms.length > 0) {
+        setSelectedTerm(terms[0])
+      }
     })
     .catch(error => {
       console.error(error)
@@ -248,12 +258,19 @@ export default function Classes() {
       <main className="grow w-full max-w-3xl mx-auto pt-10">
 
         <div className="space-y-6">
-          <CourseSearch />
-          <TermSelect terms={terms} />
+          <CourseSearch setQuery={setQuery} />
+          <TermSelect 
+            terms={terms} 
+            selectedTerm={selectedTerm}
+            setSelectedTerm={setSelectedTerm}
+          />
         </div>
 
         <div className="mt-10">
-          <SearchResults />
+          <SearchResults 
+            query={query} 
+            selectedTerm={selectedTerm} 
+          />
         </div>
 
       </main>
