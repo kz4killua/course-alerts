@@ -1,12 +1,20 @@
+"use client"
+
 import clsx from "clsx"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
 import { SearchIcon } from "lucide-react"
+import { useState, useEffect } from "react"
+import type { Term } from "@/types"
+import { listTerms } from "@/services/courses"
+
 
 
 function CourseSearch() {
@@ -30,33 +38,33 @@ function CourseSearch() {
 }
 
 
-function TermSelect() {
-
-  const terms = [
-    {
-      id: "202409",
-      name: "Fall 2024"
-    },
-    {
-      id: "202501",
-      name: "Winter 2025"
-    }
-  ]
+function TermSelect({
+  terms
+}: {
+  terms: Term[]
+}) {
 
   return (
     <div className="flex gap-8">
       {
-        terms.map((term, index) => (
-          <div className="flex items-center space-x-2" key={term.id}>
-            <Checkbox id={term.id} defaultChecked={index === 0} />
-            <label
-              htmlFor={term.id}
-              className="leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {term.name}
-            </label>
+        terms.length === 0 ? (
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-24" />
           </div>
-        ))
+        ) : (
+          terms.map((term, index) => (
+            <div className="flex items-center space-x-2" key={term.term}>
+              <Checkbox id={term.term} defaultChecked={index === 0} />
+              <label
+                htmlFor={term.term}
+                className="leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {term.term_desc}
+              </label>
+            </div>
+          ))
+        )
       }
     </div>
   )
@@ -221,6 +229,19 @@ function SectionsDialog() {
 
 
 export default function Classes() {
+
+  const [terms, setTerms] = useState<Term[]>([])
+
+  useEffect(() => {
+    listTerms(true)
+    .then(response => {
+      setTerms(response.data)
+    })
+    .catch(error => {
+      console.error(error)
+    })
+  }, [])
+
   return (
     <Container className="flex flex-col min-h-screen">
       <Header />
@@ -228,7 +249,7 @@ export default function Classes() {
 
         <div className="space-y-6">
           <CourseSearch />
-          <TermSelect />
+          <TermSelect terms={terms} />
         </div>
 
         <div className="mt-10">
