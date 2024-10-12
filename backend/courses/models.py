@@ -21,6 +21,7 @@ class Term(models.Model):
     """A term e.g. 202109"""
     term = models.CharField(primary_key=True, max_length=6)
     term_desc = models.CharField(max_length=128)
+    registration_open = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f"Term: {self.term}"
