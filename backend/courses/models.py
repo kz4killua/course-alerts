@@ -23,6 +23,9 @@ class Term(models.Model):
     term_desc = models.CharField(max_length=128)
     registration_open = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ["term"]
+
     def __str__(self) -> str:
         return f"Term: {self.term}"
 
