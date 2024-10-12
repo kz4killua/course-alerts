@@ -1,6 +1,8 @@
 import clsx from "clsx"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
@@ -145,6 +147,75 @@ function SearchResults() {
         }
       </div>
     </div>
+  )
+}
+
+
+function SectionsDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Open Dialog</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-5xl p-10">
+        <DialogHeader>
+          <DialogTitle className="text-3xl">
+            MATH 1010U - Calculus I
+          </DialogTitle>
+        </DialogHeader>
+        <div>
+          <p className="text-sm">
+            We found 3 lectures, 32 labs, and 16 tutorials for this class. 
+          </p>
+
+          <div className="mt-8">
+            <p className="mb-4 font-bold">
+              Choose the classes to get alerts for.
+            </p>
+            <div className="flex gap-4">
+              <Button variant="secondary">
+                🎓 Sign up for all lectures.
+              </Button>
+              <Button variant="secondary">
+                📘 Sign up for all tutorials.
+              </Button>
+              <Button variant="secondary">
+                🧪 Sign up for all labs.
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <p className="mb-4 font-bold">
+              Or pick classes yourself...
+            </p>
+            <div>
+
+              <div className="flex items-center justify-center gap-3">
+                <Checkbox id="42343" />
+                <div className={clsx(
+                  "rounded-md border px-8 py-4 cursor-pointer",
+                  "grow flex flex-col gap-y-1",
+                )}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg font-bold">Lecture</p>
+                    <p className="text-sm">CRN: 40234</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm">MATH 1010U</p>
+                    <p className="text-sm">Mon & Thur · 9:40am - 11:00am</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit">Save changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
