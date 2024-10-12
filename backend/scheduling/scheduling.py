@@ -126,6 +126,6 @@ def get_valid_section_combinations(course_code: str, sections: dict[str, Section
 def get_sections(term: str, course_codes: list[str]) -> dict[str, Section]:
     """Create a mapping of CRNs to course sections for a given term."""
     sections = dict()
-    for section in Section.objects.filter(term=term, course__subject_course__in=course_codes):
+    for section in Section.objects.filter(term__term=term, course__subject_course__in=course_codes):
         sections[section.course_reference_number] = section
     return sections

@@ -23,7 +23,7 @@ class GenerateSchedules(APIView):
             raise APIException(detail="No course codes provided.")
         if len(course_codes) > 10:
             raise APIException(detail="Too many course codes provided.")
-        if not Section.objects.filter(term=term).exists():
+        if not Section.objects.filter(term__term=term).exists():
             raise APIException(detail="No sections found for the given term.")
 
         try:

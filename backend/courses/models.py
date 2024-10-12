@@ -15,13 +15,20 @@ class Course(models.Model):
 
     def __str__(self) -> str:
         return f"Course: {self.subject_course}"
+    
+
+class Term(models.Model):
+    """A term e.g. 202109"""
+    term = models.CharField(primary_key=True, max_length=6)
+    term_desc = models.CharField(max_length=128)
+
+    def __str__(self) -> str:
+        return f"Term: {self.term}"
 
 
 class Section(models.Model):
     """A section (class) within a course e.g. individual lectures, labs, tutorials"""
     id = models.IntegerField(primary_key=True)
-    term = models.CharField(max_length=6)
-    term_desc = models.CharField(max_length=128)
     course_reference_number = models.CharField(max_length=128)
     part_of_term = models.CharField(max_length=128)
     sequence_number = models.CharField(max_length=128)
@@ -36,12 +43,13 @@ class Section(models.Model):
     faculty = models.JSONField()
     meetings_faculty = models.JSONField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
     is_primary_section = models.BooleanField()
     _time_bitmap = models.CharField(max_length=512, editable=False)
 
 
     def __str__(self) -> str:
-        return f"Section: {self.term} - {self.course_reference_number}"
+        return f"Section: {self.term.term} - {self.course_reference_number}"
 
 
     def get_linked_crns(self) -> list[list[str]]:
@@ -52,7 +60,7 @@ class Section(models.Model):
 
         key = f"linked_crns_{self.id}"
         if key not in cache:
-            result = get_linked_sections(self.term, self.course_reference_number)
+            result = get_linked_sections(self.term.term, self.course_reference_number)
             linked_crns = [
                 [section['courseReferenceNumber'] for section in sections]
                 for sections in result['linkedData']
@@ -67,7 +75,7 @@ class Section(models.Model):
         
         key = f"enrollment_info_{self.id}"
         if (key not in cache) or force_refresh:
-            result = get_enrollment_info(self.term, self.course_reference_number)
+            result = get_enrollment_info(self.term.term, self.course_reference_number)
             cache.set(key, result, timeout=60 * 60 * 24)
 
         return cache.get(key)

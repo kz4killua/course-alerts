@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
-from courses.models import Course, Section
+from courses.models import Course, Term, Section
 from courses.api import get_sections
 
 
@@ -54,12 +54,16 @@ class Command(BaseCommand):
                 }
             )
 
+            # Create or update each term
+            term, _ = Term.objects.update_or_create(
+                term=section["term"],
+                defaults={"term_desc": section["termDesc"]}
+            )
+
             # Create or update each section
             section, _ = Section.objects.update_or_create(
                 id=section["id"],
                 defaults={
-                    "term": section["term"],
-                    "term_desc": section["termDesc"],
                     "course_reference_number": section["courseReferenceNumber"],
                     "part_of_term": section["partOfTerm"],
                     "sequence_number": section["sequenceNumber"],
@@ -74,6 +78,7 @@ class Command(BaseCommand):
                     "faculty": section["faculty"],
                     "meetings_faculty": section["meetingsFaculty"],
                     "course": course,
+                    "term": term,
                     "is_primary_section": section['courseReferenceNumber'] in primary_section_crns,
                 }
             )

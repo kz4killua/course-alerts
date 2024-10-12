@@ -29,7 +29,7 @@ class TestSection(TestCase):
     def test_get_linked_crns(self):
         
         section = Section.objects.get(
-            term="202309",
+            term__term="202309",
             course_reference_number="42684"
         )
         linked_crns = section.get_linked_crns()
@@ -43,7 +43,7 @@ class TestSection(TestCase):
         self.assertSequenceEqual(linked_crns, expected)
 
         section = Section.objects.get(
-            term="202309",
+            term__term="202309",
             course_reference_number="44746"
         )
         self.assertSequenceEqual(
@@ -54,17 +54,17 @@ class TestSection(TestCase):
     def test_get_section_time_bitmap(self):
         
         # COMM1050U, LEC, Online
-        section = Section.objects.get(term="202309", course_reference_number="42750")
+        section = Section.objects.get(term__term="202309", course_reference_number="42750")
         self.assertEqual(section.get_time_bitmap(), TimeBitmap())
 
         # SCCO 0999U, LEC, Online
-        section = Section.objects.get(term="202309", course_reference_number="45203")
+        section = Section.objects.get(term__term="202309", course_reference_number="45203")
         self.assertEqual(section.get_time_bitmap(), TimeBitmap())
 
         # MATH1010U, LEC, Tuesday + Friday 12:40 - 14:00
-        section = Section.objects.get(term="202309", course_reference_number="40288")
+        section = Section.objects.get(term__term="202309", course_reference_number="40288")
         self.assertEqual(section.get_time_bitmap(), TimeBitmap.from_begin_and_end_time('1240', '1400', 'tuesday') | TimeBitmap.from_begin_and_end_time('1240', '1400', 'friday'))
 
         # CSCI1030U, LAB, Thursday 09:40 - 11:00
-        section = Section.objects.get(term="202309", course_reference_number="42685")
+        section = Section.objects.get(term__term="202309", course_reference_number="42685")
         self.assertEqual(section.get_time_bitmap(), TimeBitmap.from_begin_and_end_time('0940', '1100', 'thursday'))

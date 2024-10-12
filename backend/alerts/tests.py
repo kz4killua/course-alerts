@@ -114,7 +114,7 @@ class TestAlerts(TestCase):
         ]
         for term, crn in subscriptions:
             section = Section.objects.get(
-                term=term, course_reference_number=crn
+                term__term=term, course_reference_number=crn
             )
             Subscription.objects.create(user=user, section=section)
 
@@ -127,17 +127,17 @@ class TestAlerts(TestCase):
         expected = {
             user: {
                 Subscription.OPEN: {
-                    Section.objects.get(term='202309', course_reference_number='44746'),
-                    Section.objects.get(term='202309', course_reference_number='42684'),
-                    Section.objects.get(term='202401', course_reference_number='73772'),
-                    Section.objects.get(term='202401', course_reference_number='70154'),
+                    Section.objects.get(term__term='202309', course_reference_number='44746'),
+                    Section.objects.get(term__term='202309', course_reference_number='42684'),
+                    Section.objects.get(term__term='202401', course_reference_number='73772'),
+                    Section.objects.get(term__term='202401', course_reference_number='70154'),
                 },
                 Subscription.WAITLIST_OPEN: set(),
                 Subscription.CLOSED: {
-                    Section.objects.get(term='202309', course_reference_number='42752'),
-                    Section.objects.get(term='202309', course_reference_number='41942'),
-                    Section.objects.get(term='202401', course_reference_number='73773'),
-                    Section.objects.get(term='202401', course_reference_number='72741'),
+                    Section.objects.get(term__term='202309', course_reference_number='42752'),
+                    Section.objects.get(term__term='202309', course_reference_number='41942'),
+                    Section.objects.get(term__term='202401', course_reference_number='73773'),
+                    Section.objects.get(term__term='202401', course_reference_number='72741'),
                 }
             }
         }

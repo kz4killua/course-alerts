@@ -23,7 +23,7 @@ class SubscriptionListCreateDeleteView(APIView):
         
         subscriptions = Subscription.objects.filter(
             user=self.request.user, 
-            section__term=term
+            section__term__term=term
         )
         sections = [subscription.section for subscription in subscriptions]
 
@@ -44,7 +44,7 @@ class SubscriptionListCreateDeleteView(APIView):
         
         sections = {
             section.course_reference_number: section
-            for section in Section.objects.filter(term=term, course_reference_number__in=course_reference_numbers)
+            for section in Section.objects.filter(term__term=term, course_reference_number__in=course_reference_numbers)
         }
         if len(sections) != len(course_reference_numbers):
             return Response({'detail': 'One or more sections not found.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -80,7 +80,7 @@ class SubscriptionListCreateDeleteView(APIView):
         
         subscriptions = Subscription.objects.filter(
             user=self.request.user, 
-            section__term=term,
+            section__term__term=term,
             section__course_reference_number__in=course_reference_numbers
         )
         subscriptions.delete()

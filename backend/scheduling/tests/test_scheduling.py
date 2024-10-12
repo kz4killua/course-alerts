@@ -55,37 +55,37 @@ class TestFiltering(TestCase):
 
     def test_is_section_downtown(self):
             
-        section = Section.objects.get(term="202309", course_reference_number="40424")
+        section = Section.objects.get(term__term="202309", course_reference_number="40424")
         self.assertTrue(is_section_downtown(section))
     
-        section = Section.objects.get(term="202309", course_reference_number="43546")
+        section = Section.objects.get(term__term="202309", course_reference_number="43546")
         self.assertFalse(is_section_downtown(section))
 
 
     def test_is_section_before(self):
 
-        section = Section.objects.get(term="202309", course_reference_number="40291")
+        section = Section.objects.get(term__term="202309", course_reference_number="40291")
         self.assertTrue(is_section_before(section, "0900"))
     
-        section = Section.objects.get(term="202309", course_reference_number="40288")
+        section = Section.objects.get(term__term="202309", course_reference_number="40288")
         self.assertFalse(is_section_before(section, "0900"))
 
 
     def test_is_section_after(self):
 
-        section = Section.objects.get(term="202309", course_reference_number="40291")
+        section = Section.objects.get(term__term="202309", course_reference_number="40291")
         self.assertFalse(is_section_after(section, "0940"))
 
-        section = Section.objects.get(term="202309", course_reference_number="40288")
+        section = Section.objects.get(term__term="202309", course_reference_number="40288")
         self.assertTrue(is_section_after(section, "1210"))
 
 
     def test_is_section_closed(self):
 
-        section = Section.objects.get(term="202309", course_reference_number="40372")
+        section = Section.objects.get(term__term="202309", course_reference_number="40372")
         self.assertFalse(is_section_closed(section))
     
-        section = Section.objects.get(term="202309", course_reference_number="40371")
+        section = Section.objects.get(term__term="202309", course_reference_number="40371")
         self.assertTrue(is_section_closed(section))
 
 
