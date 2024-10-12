@@ -3,28 +3,31 @@ from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from rest_framework import status
 from rest_framework import generics
+from rest_framework import filters
+import django_filters.rest_framework
 
-from .models import Term
-from .serializers import TermSerializer
+from .models import Term, Course
+from .serializers import TermSerializer, CourseSerializer
 
 
 class TermsView(generics.ListAPIView):
+    queryset = Term.objects.all()
     serializer_class = TermSerializer
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ["registration_open"]
 
-    def get_queryset(self):
-        queryset = Term.objects.all()
 
-        registration_open = self.request.query_params.get("registration_open")
-        if registration_open is None:
-            pass
-        elif registration_open.lower() == "true":
-            registration_open = True
-        elif registration_open.lower() == "false":
-            registration_open = False
-        else:
-            registration_open = None
+class CoursesView(generics.ListAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["subject_description", "subject_course", "course_title"]
+    
 
-        if registration_open is not None:
-            queryset = queryset.filter(registration_open=registration_open)
-
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        term = self.request.query_params.get("term")
+        if term:
+            queryset = queryset.filter(section__term__term=term).distinct()
+        queryset = queryset[:20]
         return queryset

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_celery_beat',
     'corsheaders',
+    'django_filters',
 
     'accounts.apps.AccountsConfig',
     'courses.apps.CoursesConfig',

@@ -13,6 +13,9 @@ class Course(models.Model):
     course_title = models.CharField(max_length=128)
     course_number = models.CharField(max_length=128)
 
+    class Meta:
+        ordering = ["subject_course"]
+
     def __str__(self) -> str:
         return f"Course: {self.subject_course}"
     
@@ -51,6 +54,8 @@ class Section(models.Model):
     is_primary_section = models.BooleanField()
     _time_bitmap = models.CharField(max_length=512, editable=False)
 
+    class Meta:
+        ordering = ["course__subject_course", "course_reference_number"]
 
     def __str__(self) -> str:
         return f"Section: {self.term.term} - {self.course_reference_number}"
