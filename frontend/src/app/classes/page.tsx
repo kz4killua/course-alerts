@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
-import { SearchIcon } from "lucide-react"
+import { Loader, SearchIcon } from "lucide-react"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import type { Term, Course } from "@/types"
 import { listTerms, listCourses } from "@/services/courses"
@@ -98,21 +98,27 @@ function SearchResults({
 
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(false)
-  const [lastQuery, setLastQuery] = useState<string>("")
-  const [lastSelectedTerm, setLastSelectedTerm] = useState<Term>()
+  const [debouncedQuery, setDebouncedQuery] = useState<string>("")
+  const [debouncedTerm, setDebouncedTerm] = useState<Term | undefined>()
 
 
-  function handleSearch(query: string, term: Term) {
-    setLastQuery(query)
-    setLastSelectedTerm(term)
+  function handleSearch(query: string, term: Term | undefined) {
+    setDebouncedQuery(query)
+    setDebouncedTerm(term)
 
-    if (query.length > 0) {
+    if ((query.length > 0) && term) {
+
+      setLoading(true)
+
       listCourses(term.term, query)
       .then(response => {
         setCourses(response.data)
       })
       .catch(error => {
         console.error(error)
+      })
+      .finally(() => {
+        setLoading(false)
       })
     } else {
       setCourses([])
@@ -131,10 +137,13 @@ function SearchResults({
 
   return (
     <div>
-      <p className="text-sm">
+      <p className="text-sm h-8 flex items-center">
         {
-          lastQuery.length !== 0 && (
-            <span>Found {courses.length} results for &ldquo;{lastQuery}&rdquo; in {lastSelectedTerm?.term_desc}</span>
+          loading ? (
+            <Loader size={14} className="animate-spin" />
+          ) :
+          debouncedQuery.length !== 0 && (
+            <span>Found {courses.length} results for &ldquo;{debouncedQuery}&rdquo; in {debouncedTerm?.term_desc}</span>
           )
         }
       </p>
@@ -152,7 +161,7 @@ function SearchResults({
               <p className="text-lg font-bold">{course.course_title}</p>
               <div className="flex items-center justify-between">
                 <p className="text-sm">{course.subject_course}</p>
-                <p className="text-sm">{lastSelectedTerm?.term_desc}</p>
+                <p className="text-sm">{debouncedTerm?.term_desc}</p>
               </div>
             </div>
           )
