@@ -21,7 +21,7 @@ class CoursesView(generics.ListAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["subject_description", "subject_course", "course_title"]
+    search_fields = ["subject_course", "course_title"]
     
 
     def filter_queryset(self, queryset):
