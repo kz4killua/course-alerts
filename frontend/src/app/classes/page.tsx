@@ -224,7 +224,7 @@ function SectionsDialog({
                 <Skeleton className="h-4 w-full" />
               ) : (
               <span>
-                We found {numSections} sections for this class.
+                We found {numSections} {numSections === 1 ? "section" : "sections"} for this course.
               </span>
               )
             }
