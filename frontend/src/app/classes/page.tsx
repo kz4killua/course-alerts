@@ -14,8 +14,9 @@ import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
 import { Loader, SearchIcon } from "lucide-react"
 import { useState, useEffect, useCallback, useMemo } from "react"
-import type { Term, Course } from "@/types"
-import { listTerms, listCourses } from "@/services/courses"
+import type { Term, Course, Section } from "@/types"
+import { formatMeetingTimes } from "@/lib/utils"
+import { listTerms, listCourses, listSections } from "@/services/courses"
 import { debounce } from "lodash"
 
 
@@ -90,10 +91,12 @@ function TermSelect({
 
 function SearchResults({
   query,
-  selectedTerm
+  selectedTerm,
+  setSelectedCourse
 }: {
   query: string,
-  selectedTerm: Term | undefined
+  selectedTerm: Term | undefined,
+  setSelectedCourse: (course: Course) => void
 }) {
 
   const [courses, setCourses] = useState<Course[]>([])
@@ -157,6 +160,7 @@ function SearchResults({
                 "rounded-md border px-8 py-4 cursor-pointer",
                 "flex flex-col gap-y-1",
               )}
+              onClick={() => setSelectedCourse(course)}
             >
               <p className="text-lg font-bold">{course.course_title}</p>
               <div className="flex items-center justify-between">
@@ -172,37 +176,101 @@ function SearchResults({
 }
 
 
-function SectionsDialog() {
+function SectionsDialog({
+  selectedCourse, 
+  setSelectedCourse,
+  selectedCourseSections,
+  setSelectedCourseSections
+} : {
+  selectedCourse: Course | undefined,
+  setSelectedCourse: (course: Course | undefined) => void,
+  selectedCourseSections: Section[],
+  setSelectedCourseSections: (sections: Section[]) => void
+}) {
+  
+  const open = selectedCourse !== undefined
+
+  function handleOpenChange(open: boolean) {
+    if (!open) {
+      setSelectedCourse(undefined)
+    }
+  }
+
+  const numSections = selectedCourseSections.length
+  const numLectures = selectedCourseSections.filter(
+    section => section.schedule_type_description === "Lecture"
+  ).length
+  const numLaboratories = selectedCourseSections.filter(
+    section => section.schedule_type_description === "Laboratory"
+  ).length
+  const numTutorials = selectedCourseSections.filter(
+    section => section.schedule_type_description === "Tutorial"
+  ).length
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Open Dialog</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-5xl p-10">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-5xl p-10 max-h-screen">
         <DialogHeader>
           <DialogTitle className="text-3xl">
-            MATH 1010U - Calculus I
+            {selectedCourse?.subject_course} - {selectedCourse?.course_title}
           </DialogTitle>
         </DialogHeader>
-        <div>
-          <p className="text-sm">
-            We found 3 lectures, 32 labs, and 16 tutorials for this class. 
+
+        <div className="max-h-80 overflow-y-auto">
+
+          <p className="text-sm h-4">
+            {
+              numSections === 0 ? (
+                <Skeleton className="h-4 w-full" />
+              ) : (
+              <span>
+                We found {numSections} sections for this class.
+              </span>
+              )
+            }
           </p>
 
           <div className="mt-8">
             <p className="mb-4 font-bold">
               Choose the classes to get alerts for.
             </p>
-            <div className="flex gap-4">
-              <Button variant="secondary">
-                🎓 Sign up for all lectures.
-              </Button>
-              <Button variant="secondary">
-                📘 Sign up for all tutorials.
-              </Button>
-              <Button variant="secondary">
-                🧪 Sign up for all labs.
-              </Button>
+            <div className="flex flex-wrap gap-4">
+              {
+                numSections === 0 ? (
+                  <>
+                    <Skeleton className="h-9 w-44" />
+                    <Skeleton className="h-9 w-44" />
+                    <Skeleton className="h-9 w-44" />
+                  </>
+                ) : (
+                  <>
+                    {
+                      numLectures > 0 && (
+                        <Button variant="secondary">
+                          🎓 Sign up for all lectures.
+                        </Button>
+                      )
+                    }
+                    {
+                      numTutorials > 0 && (
+                        <Button variant="secondary">
+                          📘 Sign up for all tutorials.
+                        </Button>
+                      )
+                    }
+                    {
+                      numLaboratories > 0 && (
+                        <Button variant="secondary">
+                          🧪 Sign up for all labs.
+                        </Button>
+                      )
+                    }
+                    <Button variant="secondary">
+                      📚 Sign up for all sections.
+                    </Button>
+                  </>
+                )
+              }
             </div>
           </div>
 
@@ -210,25 +278,37 @@ function SectionsDialog() {
             <p className="mb-4 font-bold">
               Or pick classes yourself...
             </p>
-            <div>
-
-              <div className="flex items-center justify-center gap-3">
-                <Checkbox id="42343" />
-                <div className={clsx(
-                  "rounded-md border px-8 py-4 cursor-pointer",
-                  "grow flex flex-col gap-y-1",
-                )}>
-                  <div className="flex items-center justify-between">
-                    <p className="text-lg font-bold">Lecture</p>
-                    <p className="text-sm">CRN: 40234</p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm">MATH 1010U</p>
-                    <p className="text-sm">Mon & Thur · 9:40am - 11:00am</p>
-                  </div>
-                </div>
-              </div>
-
+            <div className="flex flex-col gap-4 pb-8">
+              {
+                numSections === 0 ? (
+                  <>
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </>
+                ) : (
+                  selectedCourseSections.map(section => (
+                    <div className="flex items-center justify-center gap-3" key={section.id}>
+                      <Checkbox id={section.id} />
+                      <div className={clsx(
+                        "rounded-md border px-8 py-4 cursor-pointer",
+                        "grow flex flex-col gap-y-1",
+                      )}>
+                        <div className="flex items-center justify-between">
+                          <p className="text-lg font-bold">{section.schedule_type_description}</p>
+                          <p className="text-sm">CRN: {section.course_reference_number}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm">{selectedCourse?.subject_course}</p>
+                          <p className="text-sm">{formatMeetingTimes(section.meeting_times)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )
+              }
             </div>
           </div>
         </div>
@@ -246,6 +326,8 @@ export default function Classes() {
   const [terms, setTerms] = useState<Term[]>([])
   const [selectedTerm, setSelectedTerm] = useState<Term>()
   const [query, setQuery] = useState<string>("")
+  const [selectedCourse, setSelectedCourse] = useState<Course>()
+  const [selectedCourseSections, setSelectedCourseSections] = useState<Section[]>([])
 
   useEffect(() => {
     listTerms(true)
@@ -260,6 +342,20 @@ export default function Classes() {
       console.error(error)
     })
   }, [])
+
+  useEffect(() => {
+    if (selectedCourse && selectedTerm) {
+      listSections(selectedCourse.subject_course, selectedTerm.term)
+      .then(response => {
+        setSelectedCourseSections(response.data)
+      })
+      .catch(error => {
+        console.error(error)
+      })
+    } else {
+      setSelectedCourseSections([])
+    }
+  }, [selectedCourse, selectedTerm])
 
   return (
     <Container className="flex flex-col min-h-screen">
@@ -279,8 +375,16 @@ export default function Classes() {
           <SearchResults 
             query={query} 
             selectedTerm={selectedTerm} 
+            setSelectedCourse={setSelectedCourse}
           />
         </div>
+
+        <SectionsDialog 
+          selectedCourse={selectedCourse} 
+          setSelectedCourse={setSelectedCourse}
+          selectedCourseSections={selectedCourseSections}
+          setSelectedCourseSections={setSelectedCourseSections}
+        />
 
       </main>
       <Footer />

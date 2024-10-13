@@ -1,6 +1,6 @@
 import instance from "@/services/base";
 
-import type { Term, Course } from "@/types";
+import type { Term, Course, Section } from "@/types";
 
 
 export async function listTerms(registrationOpen?: boolean) {
@@ -13,5 +13,12 @@ export async function listTerms(registrationOpen?: boolean) {
 export async function listCourses(term?: string, search?: string) {
   return await instance.get<Course[]>("courses/", {
     params: { term, search },
+  });
+}
+
+
+export async function listSections(course: string, term?: string) {
+  return await instance.get<Section[]>(`courses/${course}/sections/`, {
+    params: { term },
   });
 }
