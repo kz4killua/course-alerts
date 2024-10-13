@@ -55,7 +55,7 @@ class Section(models.Model):
     _time_bitmap = models.CharField(max_length=512, editable=False)
 
     class Meta:
-        ordering = ["course__subject_course", "course_reference_number"]
+        ordering = ["course__subject_course", "schedule_type_description", "course_reference_number"]
 
     def __str__(self) -> str:
         return f"Section: {self.term.term} - {self.course_reference_number}"
