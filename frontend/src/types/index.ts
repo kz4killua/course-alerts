@@ -25,8 +25,8 @@ export interface Section {
 
 
 export interface MeetingTime {
-  begin_time: string;
-  end_time: string;
+  begin_time: string | null;
+  end_time: string | null;
   start_date: string;
   end_date: string;
   days: string[];

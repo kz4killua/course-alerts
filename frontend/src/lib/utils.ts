@@ -6,12 +6,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+function removeDuplicates<T>(array: T[]) {
+  return Array.from(new Set(array));
+}
+
 export function formatMeetingTimes(meetingTimes: MeetingTime[]) {
-  
+
   // Group meeting times by begin_time and end_time
   const timeGroups: { [key: string]: string[] } = {};
 
   meetingTimes.forEach(meeting => {
+
+    // Skip asynchronous meetings
+    if (meeting.days.length === 0 || !meeting.begin_time || !meeting.end_time) {
+      return;
+    }
+
     const timeKey = `${meeting.begin_time}-${meeting.end_time}`;
     const day = meeting.days[0].charAt(0).toUpperCase() + meeting.days[0].slice(1); // Capitalize day
 
@@ -25,7 +35,7 @@ export function formatMeetingTimes(meetingTimes: MeetingTime[]) {
   const formattedGroups = Object.entries(timeGroups).map(([timeKey, days]) => {
 
     // Shorten days to 3 characters and join with "&"
-    const formattedDays = days.map(d => d.slice(0, 3)).join(" & ");
+    const formattedDays = removeDuplicates(days).map(d => d.slice(0, 3)).join(" & ");
     const [beginTime, endTime] = timeKey.split("-");
 
     // Format times
