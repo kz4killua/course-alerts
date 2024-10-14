@@ -180,12 +180,16 @@ function SectionsDialog({
   selectedCourse, 
   setSelectedCourse,
   selectedCourseSections,
-  setSelectedCourseSections
+  setSelectedCourseSections,
+  selectedSections,
+  setSelectedSections
 } : {
   selectedCourse: Course | undefined,
   setSelectedCourse: (course: Course | undefined) => void,
   selectedCourseSections: Section[],
-  setSelectedCourseSections: (sections: Section[]) => void
+  setSelectedCourseSections: (sections: Section[]) => void,
+  selectedSections: Set<Section["id"]>,
+  setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
   
   const open = selectedCourse !== undefined
@@ -194,6 +198,16 @@ function SectionsDialog({
     if (!open) {
       setSelectedCourse(undefined)
     }
+  }
+
+  function toggleSectionSelection(section: Section) {
+    const newSelectedSections = new Set(selectedSections)
+    if (newSelectedSections.has(section.id)) {
+      newSelectedSections.delete(section.id)
+    } else {
+      newSelectedSections.add(section.id)
+    }
+    setSelectedSections(newSelectedSections)
   }
 
   const numSections = selectedCourseSections.length
@@ -207,6 +221,24 @@ function SectionsDialog({
     section => section.schedule_type_description === "Tutorial"
   ).length
 
+  function selectAllSections() {
+    setSelectedSections(
+      new Set(selectedCourseSections.map(section => section.id))
+    )
+  }
+
+  function clearSelectedSections() {
+    setSelectedSections(new Set())
+  }
+
+  function selectAllSectionsOfType(type: Section["schedule_type_description"]) {
+    setSelectedSections(new Set(
+      selectedCourseSections.filter(
+        section => section.schedule_type_description === type
+      ).map(section => section.id)
+    ))
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-5xl p-10 max-h-screen">
@@ -218,7 +250,7 @@ function SectionsDialog({
 
         <div className="max-h-80 overflow-y-auto">
 
-          <p className="text-sm h-4">
+          <div className="text-sm h-4">
             {
               numSections === 0 ? (
                 <Skeleton className="h-4 w-full" />
@@ -228,7 +260,7 @@ function SectionsDialog({
               </span>
               )
             }
-          </p>
+          </div>
 
           <div className="mt-8">
             <p className="mb-4 font-bold">
@@ -246,26 +278,26 @@ function SectionsDialog({
                   <>
                     {
                       numLectures > 0 && (
-                        <Button variant="secondary">
+                        <Button variant="secondary" onClick={() => selectAllSectionsOfType("Lecture")}>
                           🎓 Sign up for all lectures.
                         </Button>
                       )
                     }
                     {
                       numTutorials > 0 && (
-                        <Button variant="secondary">
+                        <Button variant="secondary" onClick={() => selectAllSectionsOfType("Tutorial")}>
                           📘 Sign up for all tutorials.
                         </Button>
                       )
                     }
                     {
                       numLaboratories > 0 && (
-                        <Button variant="secondary">
+                        <Button variant="secondary" onClick={() => selectAllSectionsOfType("Laboratory")}>
                           🧪 Sign up for all labs.
                         </Button>
                       )
                     }
-                    <Button variant="secondary">
+                    <Button variant="secondary" onClick={selectAllSections}>
                       📚 Sign up for all sections.
                     </Button>
                   </>
@@ -290,8 +322,12 @@ function SectionsDialog({
                   </>
                 ) : (
                   selectedCourseSections.map(section => (
-                    <div className="flex items-center justify-center gap-3" key={section.id}>
-                      <Checkbox id={section.id} />
+                    <div 
+                      className="flex items-center justify-center gap-3" 
+                      key={section.id}
+                      onClick={() => toggleSectionSelection(section)}
+                    >
+                      <Checkbox id={section.id} checked={selectedSections.has(section.id)} />
                       <div className={clsx(
                         "rounded-md border px-8 py-4 cursor-pointer",
                         "grow flex flex-col gap-y-1",
@@ -313,7 +349,12 @@ function SectionsDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Save changes</Button>
+          <Button variant="ghost" onClick={clearSelectedSections} disabled={selectedSections.size === 0}>
+            Clear selection
+          </Button>
+          <Button type="submit" disabled={selectedSections.size === 0}>
+            Create alerts
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -328,6 +369,7 @@ export default function Classes() {
   const [query, setQuery] = useState<string>("")
   const [selectedCourse, setSelectedCourse] = useState<Course>()
   const [selectedCourseSections, setSelectedCourseSections] = useState<Section[]>([])
+  const [selectedSections, setSelectedSections] = useState<Set<Section["id"]>>(new Set())
 
   useEffect(() => {
     listTerms(true)
@@ -355,6 +397,8 @@ export default function Classes() {
     } else {
       setSelectedCourseSections([])
     }
+
+    setSelectedSections(new Set())
   }, [selectedCourse, selectedTerm])
 
   return (
@@ -384,6 +428,8 @@ export default function Classes() {
           setSelectedCourse={setSelectedCourse}
           selectedCourseSections={selectedCourseSections}
           setSelectedCourseSections={setSelectedCourseSections}
+          selectedSections={selectedSections}
+          setSelectedSections={setSelectedSections}
         />
 
       </main>
