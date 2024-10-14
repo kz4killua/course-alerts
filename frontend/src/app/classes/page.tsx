@@ -241,14 +241,15 @@ function SectionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-5xl p-10 max-h-screen">
-        <DialogHeader>
+      <DialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
+        
+        <DialogHeader className="bg-background px-10 pt-10">
           <DialogTitle className="text-3xl">
             {selectedCourse?.subject_course} - {selectedCourse?.course_title}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="max-h-80 overflow-y-auto">
+        <div className="px-10 overflow-y-auto grow">
 
           <div className="text-sm h-4">
             {
@@ -348,14 +349,23 @@ function SectionsDialog({
             </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={clearSelectedSections} disabled={selectedSections.size === 0}>
+
+        <DialogFooter className="bg-background px-10 pb-10">
+          <Button 
+            variant="ghost" 
+            onClick={clearSelectedSections} 
+            disabled={selectedSections.size === 0}
+          >
             Clear selection
           </Button>
-          <Button type="submit" disabled={selectedSections.size === 0}>
+          <Button 
+            type="submit" 
+            disabled={selectedSections.size === 0}
+          >
             Create alerts
           </Button>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   )
