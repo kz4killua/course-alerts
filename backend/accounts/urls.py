@@ -15,5 +15,6 @@ urlpatterns = [
     path('token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
     path('token/verify', TokenVerifyView.as_view(), name='token-verify'),
     path('signin/request', views.RequestSignInCode.as_view(), name='request-signin-code'),
-    path('signin/verify', views.VerifySignInCode.as_view(), name='verify-signin-code')
+    path('signin/verify', views.VerifySignInCode.as_view(), name='verify-signin-code'),
+    path('me', views.Me.as_view(), name='me'),
 ]
