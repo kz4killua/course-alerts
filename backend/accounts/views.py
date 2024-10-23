@@ -10,36 +10,36 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer
 from .throttles import RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle
-from .models import EmailVerificationCode
+from .models import EmailVerificationCode, clean_email
 
 
 User = get_user_model()
 
 
-class SignUp(generics.CreateAPIView):
-    """Create an account."""
+class RequestSignInCode(APIView):
     authentication_classes = []
     permission_classes = []
-    serializer_class = UserSerializer
-
-
-class RequestEmailVerification(APIView):
-    """Request an email verification code."""
-    permission_classes = [IsAuthenticated]
     throttle_classes = [RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle]
 
     def post(self, request):
-        
-        if request.user.email_verified:
+
+        email = request.data.get('email')
+        if not email: 
             return Response({
-                'detail': 'Email already verified.'
+                'detail': 'No email provided.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        email = clean_email(email)
+
+        # Create the user if it doesn't exist
+        user, _ = User.objects.get_or_create(email=email)
+        
         email_verification_code, _ = EmailVerificationCode.objects.update_or_create(
-            user=request.user,
+            user=user,
             defaults={
                 'code': ''.join(random.choices(string.digits, k=6)),
                 'expires_at': timezone.now() + timezone.timedelta(minutes=15)
@@ -47,31 +47,41 @@ class RequestEmailVerification(APIView):
         )
 
         send_mail(
-            'Verify your email address',
-            f'Your email verification code is {email_verification_code.code}',
+            'Verification code',
+            f'Your verification code is {email_verification_code.code}',
             settings.DEFAULT_FROM_EMAIL,
-            [request.user.email],
+            [email],
             fail_silently=False,
         )
 
         return Response({
-            'message': 'Email verification code sent.'
+            'detail': 'Email verification code sent.'
         }, status=status.HTTP_200_OK)
 
 
-class VerifyEmail(APIView):
+class VerifySignInCode(APIView):
+    authentication_classes = []
+    permission_classes = []
 
     def post(self, request):
         
         code = request.data.get('code')
+        email = request.data.get('email')
+
+        if not email: 
+            return Response({
+                'detail': 'No email provided.'
+            }, status=status.HTTP_400_BAD_REQUEST)
         if not code:
             return Response({
                 'detail': 'No code provided.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        email = clean_email(email)
+        
         try:
             email_verification_code = EmailVerificationCode.objects.get(
-                user=request.user, code=code
+                user__email=email, code=code
             )
         except EmailVerificationCode.DoesNotExist:
             return Response({
@@ -87,6 +97,19 @@ class VerifyEmail(APIView):
         request.user.save()
         email_verification_code.delete()
 
+        # Provide a set of tokens to the user
+        refresh = RefreshToken.for_user(request.user)
+
         return Response({
-            'message': 'Email verified.'
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
         }, status=status.HTTP_200_OK)
+
+
+class Me(generics.RetrieveUpdateAPIView):
+    """Returns the current user's information."""
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
