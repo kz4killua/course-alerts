@@ -68,12 +68,16 @@ class TestSignIn(APITestCase):
         user1 = User.objects.get(email="user1@example.com")
         email_verification_code = EmailVerificationCode.objects.get(user=user1)
         code = email_verification_code.code
-        self.client.force_authenticate(user=user1)
 
         url = reverse('accounts:verify-signin-code')
 
         # Invalid code
         data = {"email": user1.email, "code": "******"}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Wrong email
+        data = {"email": "wrong@example.com", "code": code}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -88,8 +92,8 @@ class TestSignIn(APITestCase):
         email_verification_code.expires_at = default_expires_at
         email_verification_code.save()
 
-        # Valid code
-        data = {"email": user1.email, "code": code}
+        # Valid code (even if the email is capitalized)
+        data = {"email": user1.email.capitalize(), "code": code}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

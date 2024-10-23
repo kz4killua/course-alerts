@@ -93,12 +93,13 @@ class VerifySignInCode(APIView):
                 'detail': 'Code expired.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        request.user.email_verified = True
-        request.user.save()
+        user = email_verification_code.user
+        user.email_verified = True
+        user.save()
         email_verification_code.delete()
 
         # Provide a set of tokens to the user
-        refresh = RefreshToken.for_user(request.user)
+        refresh = RefreshToken.for_user(user)
 
         return Response({
             'refresh': str(refresh),
