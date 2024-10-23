@@ -35,26 +35,26 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         response = self.client.post(url, {
             'term': '202309',
             'course_reference_numbers': ["42684", "44746"]
-        })
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         self.client.post(url, {
             'term': '202401',
             'course_reference_numbers': ["73772", "70154"]
-        })
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Test invalid terms and course reference numbers
         response = self.client.post(url, {
             'term': '199009',
             'course_reference_numbers': ["42684", "44746"]
-        })
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response = self.client.post(url, {
             'term': '202309',
             'course_reference_numbers': ["73772", "70154"]
-        })
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Test listing subscriptions
@@ -70,7 +70,7 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         response = self.client.delete(url, {
             'term': '202309',
             'course_reference_numbers': ["42684", "44746"]
-        })
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         response = self.client.get(url, {'term': '202309'})
@@ -80,7 +80,7 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         response = self.client.delete(url, {
             'term': '202401',
             'course_reference_numbers': ["73772"]
-        })
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         response = self.client.get(url, {'term': '202401'})
