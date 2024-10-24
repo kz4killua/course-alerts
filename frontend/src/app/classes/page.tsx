@@ -1,21 +1,17 @@
 "use client"
 
 import clsx from "clsx"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
+import { SectionsDialog } from "@/components/classes/sections-dialog"
 import { Loader, SearchIcon } from "lucide-react"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import type { Term, Course, Section } from "@/types"
-import { formatMeetingTimes } from "@/lib/utils"
 import { listTerms, listCourses, listSections } from "@/services/courses"
 import { debounce } from "lodash"
 
@@ -176,202 +172,6 @@ function SearchResults({
 }
 
 
-function SectionsDialog({
-  selectedCourse, 
-  setSelectedCourse,
-  selectedCourseSections,
-  setSelectedCourseSections,
-  selectedSections,
-  setSelectedSections
-} : {
-  selectedCourse: Course | undefined,
-  setSelectedCourse: (course: Course | undefined) => void,
-  selectedCourseSections: Section[],
-  setSelectedCourseSections: (sections: Section[]) => void,
-  selectedSections: Set<Section["id"]>,
-  setSelectedSections: (sections: Set<Section["id"]>) => void
-}) {
-  
-  const open = selectedCourse !== undefined
-
-  function handleOpenChange(open: boolean) {
-    if (!open) {
-      setSelectedCourse(undefined)
-    }
-  }
-
-  function toggleSectionSelection(section: Section) {
-    const newSelectedSections = new Set(selectedSections)
-    if (newSelectedSections.has(section.id)) {
-      newSelectedSections.delete(section.id)
-    } else {
-      newSelectedSections.add(section.id)
-    }
-    setSelectedSections(newSelectedSections)
-  }
-
-  const numSections = selectedCourseSections.length
-  const numLectures = selectedCourseSections.filter(
-    section => section.schedule_type_description === "Lecture"
-  ).length
-  const numLaboratories = selectedCourseSections.filter(
-    section => section.schedule_type_description === "Laboratory"
-  ).length
-  const numTutorials = selectedCourseSections.filter(
-    section => section.schedule_type_description === "Tutorial"
-  ).length
-
-  function selectAllSections() {
-    setSelectedSections(
-      new Set(selectedCourseSections.map(section => section.id))
-    )
-  }
-
-  function clearSelectedSections() {
-    setSelectedSections(new Set())
-  }
-
-  function selectAllSectionsOfType(type: Section["schedule_type_description"]) {
-    setSelectedSections(new Set(
-      selectedCourseSections.filter(
-        section => section.schedule_type_description === type
-      ).map(section => section.id)
-    ))
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
-        
-        <DialogHeader className="bg-background px-10 pt-10">
-          <DialogTitle className="text-3xl">
-            {selectedCourse?.subject_course} - {selectedCourse?.course_title}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="px-10 overflow-y-auto grow">
-
-          <div className="text-sm h-4">
-            {
-              numSections === 0 ? (
-                <Skeleton className="h-4 w-full" />
-              ) : (
-              <span>
-                We found {numSections} {numSections === 1 ? "section" : "sections"} for this course.
-              </span>
-              )
-            }
-          </div>
-
-          <div className="mt-8">
-            <p className="mb-4 font-bold">
-              Choose the classes to get alerts for.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              {
-                numSections === 0 ? (
-                  <>
-                    <Skeleton className="h-9 w-44" />
-                    <Skeleton className="h-9 w-44" />
-                    <Skeleton className="h-9 w-44" />
-                  </>
-                ) : (
-                  <>
-                    {
-                      numLectures > 0 && (
-                        <Button variant="secondary" onClick={() => selectAllSectionsOfType("Lecture")}>
-                          🎓 Sign up for all lectures.
-                        </Button>
-                      )
-                    }
-                    {
-                      numTutorials > 0 && (
-                        <Button variant="secondary" onClick={() => selectAllSectionsOfType("Tutorial")}>
-                          📘 Sign up for all tutorials.
-                        </Button>
-                      )
-                    }
-                    {
-                      numLaboratories > 0 && (
-                        <Button variant="secondary" onClick={() => selectAllSectionsOfType("Laboratory")}>
-                          🧪 Sign up for all labs.
-                        </Button>
-                      )
-                    }
-                    <Button variant="secondary" onClick={selectAllSections}>
-                      📚 Sign up for all sections.
-                    </Button>
-                  </>
-                )
-              }
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="mb-4 font-bold">
-              Or pick classes yourself...
-            </p>
-            <div className="flex flex-col gap-4 pb-8">
-              {
-                numSections === 0 ? (
-                  <>
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </>
-                ) : (
-                  selectedCourseSections.map(section => (
-                    <div 
-                      className="flex items-center justify-center gap-3" 
-                      key={section.id}
-                      onClick={() => toggleSectionSelection(section)}
-                    >
-                      <Checkbox id={section.id} checked={selectedSections.has(section.id)} />
-                      <div className={clsx(
-                        "rounded-md border px-8 py-4 cursor-pointer",
-                        "grow flex flex-col gap-y-1",
-                      )}>
-                        <div className="flex items-center justify-between">
-                          <p className="text-lg font-bold">{section.schedule_type_description}</p>
-                          <p className="text-sm">CRN: {section.course_reference_number}</p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm">{selectedCourse?.subject_course}</p>
-                          <p className="text-sm">{formatMeetingTimes(section.meeting_times)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )
-              }
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="bg-background px-10 pb-10">
-          <Button 
-            variant="ghost" 
-            onClick={clearSelectedSections} 
-            disabled={selectedSections.size === 0}
-          >
-            Clear selection
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={selectedSections.size === 0}
-          >
-            Create alerts
-          </Button>
-        </DialogFooter>
-
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
 export default function Classes() {
 
   const [terms, setTerms] = useState<Term[]>([])
@@ -434,6 +234,7 @@ export default function Classes() {
         </div>
 
         <SectionsDialog 
+          selectedTerm={selectedTerm}
           selectedCourse={selectedCourse} 
           setSelectedCourse={setSelectedCourse}
           selectedCourseSections={selectedCourseSections}
