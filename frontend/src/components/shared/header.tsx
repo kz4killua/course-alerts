@@ -30,7 +30,7 @@ export function Header() {
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="end">
+            <DropdownMenuContent side="bottom" align="end" className="w-56">
               <DropdownMenuLabel>
                 {user.email}
               </DropdownMenuLabel>
