@@ -1,6 +1,7 @@
 import axios from "axios";
-import { getAccessToken, getRefreshToken, setAccessToken, removeAccessToken, removeRefreshToken } from "@/lib/tokens";
+import { getAccessToken, getRefreshToken, setAccessToken } from "@/lib/tokens";
 import { refreshAccessToken } from "@/services/accounts";
+import eventEmitter from '@/lib/event-emitter';
 
 
 const instance = axios.create({
@@ -24,8 +25,7 @@ instance.interceptors.request.use(
 
 
 function logout() {
-  removeAccessToken();
-  removeRefreshToken();
+  eventEmitter.dispatchEvent(new Event('logout'));
 }
 
 

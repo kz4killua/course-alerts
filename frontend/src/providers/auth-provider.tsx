@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@/types';
 import { getAccessToken, removeAccessToken, removeRefreshToken } from '@/lib/tokens';
 import { getProfile } from '@/services/accounts';
+import eventEmitter from '@/lib/event-emitter';
 
 
 interface AuthContextType {
@@ -33,6 +34,11 @@ export function AuthProvider({
       .then(response => {
         setUser(response.data);
       })
+    }
+
+    eventEmitter.addEventListener('logout', logout);
+    return () => {
+      eventEmitter.removeEventListener('logout', logout);
     }
   }, []);
 
