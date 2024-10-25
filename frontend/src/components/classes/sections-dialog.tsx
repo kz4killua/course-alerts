@@ -88,6 +88,10 @@ export function SectionsDialog({
           </DialogTitle>
         </DialogHeader>
 
+        <DialogDescription className="hidden">
+          Choose the classes to get alerts for.
+        </DialogDescription>
+
         <div className="px-10 overflow-y-auto grow">
 
           <div className="text-sm h-4">
