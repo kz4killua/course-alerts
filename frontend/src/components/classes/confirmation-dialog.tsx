@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 import { useToast } from "@/hooks/use-toast"
-import { createAlertSubscription } from "@/services/alerts"
+import { createAlertSubscriptions } from "@/services/alerts"
 
 import { useEffect, useState } from "react"
 
@@ -104,7 +104,7 @@ function AlertsConfirmation({
 
   function handleSubmit() {
     setLoading(true)
-    createAlertSubscription(term.term, sections.map(section => section.course_reference_number))
+    createAlertSubscriptions(term.term, sections.map(section => section.course_reference_number))
     .then(() => {
       toast({
         title: "Success",

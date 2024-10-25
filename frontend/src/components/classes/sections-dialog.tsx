@@ -9,6 +9,7 @@ import type { Term, Course, Section } from "@/types"
 import { formatMeetingTimes } from "@/lib/utils"
 import { ConfirmationDialog } from "./confirmation-dialog"
 import { useState } from "react"
+import { CourseDisplay, CourseDisplaySkeleton } from "@/components/shared/course-display"
 
 
 export function SectionsDialog({
@@ -158,11 +159,11 @@ export function SectionsDialog({
               {
                 numSections === 0 ? (
                   <>
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
+                    <CourseDisplaySkeleton />
+                    <CourseDisplaySkeleton />
+                    <CourseDisplaySkeleton />
+                    <CourseDisplaySkeleton />
+                    <CourseDisplaySkeleton />
                   </>
                 ) : (
                   selectedCourseSections.map(section => (
@@ -172,19 +173,12 @@ export function SectionsDialog({
                       onClick={() => toggleSectionSelection(section)}
                     >
                       <Checkbox id={section.id} checked={selectedSections.has(section.id)} />
-                      <div className={clsx(
-                        "rounded-md border px-8 py-4 cursor-pointer",
-                        "grow flex flex-col gap-y-1",
-                      )}>
-                        <div className="flex items-center justify-between">
-                          <p className="text-lg font-bold">{section.schedule_type_description}</p>
-                          <p className="text-sm">CRN: {section.course_reference_number}</p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm">{selectedCourse?.subject_course}</p>
-                          <p className="text-sm">{formatMeetingTimes(section.meeting_times)}</p>
-                        </div>
-                      </div>
+                      <CourseDisplay 
+                        topLeft={section.schedule_type_description}
+                        topRight={`CRN: ${section.course_reference_number}`}
+                        bottomLeft={selectedCourse?.subject_course}
+                        bottomRight={formatMeetingTimes(section.meeting_times)}
+                      />
                     </div>
                   ))
                 )

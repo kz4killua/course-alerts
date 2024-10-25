@@ -14,33 +14,8 @@ import { useState, useEffect, useMemo } from "react"
 import type { Term, Course, Section } from "@/types"
 import { listTerms, listCourses, listSections } from "@/services/courses"
 import { debounce } from "lodash"
-
-
-
-function CourseSearch({
-  setQuery
-} : {
-  setQuery: (query: string) => void
-}) {
-  return (
-    <div className={clsx(
-      "group flex items-center justify-center",
-      "rounded-md border border-input px-3 py-1",
-      "shadow-sm transition-colors",
-      "focus-within:ring-1 focus-within:ring-ring"
-    )}>
-      <SearchIcon size={16} />
-      <Input 
-        className={clsx(
-          "border-0 ring-0 shadow-none focus-visible:border-0 focus-visible:ring-0 placeholder:font-medium",
-        )}
-        type="text" 
-        placeholder="Search for a class..." 
-        onChange={e => setQuery(e.target.value)}
-      />
-    </div>
-  )
-}
+import { SearchBar } from "@/components/shared/search-bar"
+import { CourseDisplay, CourseDisplaySkeleton } from "@/components/shared/course-display"
 
 
 function TermSelect({
@@ -150,20 +125,13 @@ function SearchResults({
       <div className="mt-4 space-y-4">
         {
           courses.map(course =>
-            <div 
-              key={course.subject_course} 
-              className={clsx(
-                "rounded-md border px-8 py-4 cursor-pointer",
-                "flex flex-col gap-y-1",
-              )}
+            <CourseDisplay
+              key={course.subject_course}
+              topLeft={course.course_title}
+              bottomLeft={course.subject_course}
+              bottomRight={debouncedTerm?.term_desc}
               onClick={() => setSelectedCourse(course)}
-            >
-              <p className="text-lg font-bold">{course.course_title}</p>
-              <div className="flex items-center justify-between">
-                <p className="text-sm">{course.subject_course}</p>
-                <p className="text-sm">{debouncedTerm?.term_desc}</p>
-              </div>
-            </div>
+            />
           )
         }
       </div>
@@ -217,7 +185,7 @@ export default function Classes() {
       <main className="grow w-full max-w-3xl mx-auto pt-10">
 
         <div className="space-y-6">
-          <CourseSearch setQuery={setQuery} />
+          <SearchBar placeholder="Search for a class..." onChange={setQuery} />
           <TermSelect 
             terms={terms} 
             selectedTerm={selectedTerm}
