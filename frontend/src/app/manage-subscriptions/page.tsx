@@ -79,7 +79,7 @@ function SubscriptionsList({
 
   return (
     <div className="mt-10">
-      <p className="text-sm h-8 flex items-center">
+      <div className="text-sm h-8 flex items-center">
         {
           loading ? (
             <Skeleton className="h-4 w-full" />
@@ -89,7 +89,7 @@ function SubscriptionsList({
             `You are currently receiving alerts for ${subscriptions.length} ${subscriptions.length === 1 ? "class" : "classes"}.`
           )
         }
-      </p>
+      </div>
       <div className="mt-4 space-y-4">
         {
           loading ? (
@@ -166,7 +166,7 @@ function DeletionDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button variant={"ghost"}>
           <Trash2Icon size={18} />
         </Button>
