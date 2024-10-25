@@ -32,7 +32,7 @@ export async function verifySignIn(email: string, code: string) {
 
 
 export async function updateAccount(phone: string) {
-  return await instance.patch("accounts/me", {
+  return await instance.patch<User>("accounts/me", {
     phone,
   });
 }
