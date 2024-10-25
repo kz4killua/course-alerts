@@ -104,7 +104,8 @@ function SubscriptionsList({
               <div key={section.id} className="flex items-center justify-center gap-3">
                 <CourseDisplay
                   topLeft={section.course}
-                  bottomLeft={`CRN: ${section.course_reference_number}`}
+                  bottomLeft={section.schedule_type_description}
+                  topRight={`CRN: ${section.course_reference_number}`}
                   bottomRight={`Term: ${section.term}`}
                   className="cursor-auto"
                 />
