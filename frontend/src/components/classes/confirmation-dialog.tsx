@@ -33,8 +33,12 @@ export function ConfirmationDialog({
 
   const [step, setStep] = useState<Step>()
   const { user } = useAuth()
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    if (loaded) return
+
+    setLoaded(true)
     if (user) {
       setStep("confirm-alerts")
     } else {
