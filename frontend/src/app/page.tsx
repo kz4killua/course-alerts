@@ -69,7 +69,7 @@ function Feedback() {
 }
 
 
-export default function Home() {
+export default function Page() {
   return (
     <Container>
       <Header />

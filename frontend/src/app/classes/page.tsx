@@ -140,7 +140,7 @@ function SearchResults({
 }
 
 
-export default function Classes() {
+export default function Page() {
 
   const [terms, setTerms] = useState<Term[]>([])
   const [selectedTerm, setSelectedTerm] = useState<Term>()
