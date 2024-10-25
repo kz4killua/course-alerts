@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@/types';
-import { getAccessToken } from '@/lib/tokens';
+import { getAccessToken, removeAccessToken, removeRefreshToken } from '@/lib/tokens';
 import { getProfile } from '@/services/accounts';
 
 
@@ -42,6 +42,8 @@ export function AuthProvider({
 
   function logout() {
     setUser(undefined);
+    removeAccessToken();
+    removeRefreshToken();
   }
 
   return (
