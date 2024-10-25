@@ -1,6 +1,6 @@
 import Link from "next/link";
 import clsx from "clsx";
-import { BellIcon, GraduationCapIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
+import { BellIcon, GraduationCapIcon, MessageSquareShareIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";
 import { Header } from "@/components/shared/header";
@@ -48,6 +48,27 @@ function Hero() {
 }
 
 
+function Feedback() {
+  return (
+    <div className="w-full rounded-md bg-primary text-white mt-28 px-10 py-10 flex items-center space-x-28">
+      <div className="space-y-5">
+        <h1 className="font-semibold text-3xl">We want to hear from you!</h1>
+        <p>
+          Whether you found a bug, have a question, or just want to share your thoughts, 
+          we&apos;d love to hear from you. 
+        </p>
+        <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={"/"} target="_blank">
+          <RocketIcon size={16} className="mr-2" /> Give feedback
+        </Link>
+      </div>
+      <div className="hidden md:block">
+        <MessageSquareShareIcon strokeWidth={1.25} size={100} />
+      </div>
+    </div>
+  )
+}
+
+
 export default function Home() {
   return (
     <Container>
@@ -55,6 +76,7 @@ export default function Home() {
       <main>
         <Hero />
         <Stats />
+        <Feedback />
       </main>
       <Footer />
     </Container>
