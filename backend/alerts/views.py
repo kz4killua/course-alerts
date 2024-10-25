@@ -15,16 +15,17 @@ class SubscriptionListCreateDeleteView(APIView):
 
 
     def get(self, request):
-        """List all sections the user is subscribed to for the given term."""
+        """List all sections the user is subscribed to."""
 
         term = request.query_params.get('term')
-        if not term:
-            return Response({'detail': 'No term provided.'}, status=status.HTTP_400_BAD_REQUEST)
         
         subscriptions = Subscription.objects.filter(
             user=self.request.user, 
-            section__term__term=term
         )
+
+        if term:
+            subscriptions = subscriptions.filter(section__term__term=term)
+
         sections = [subscription.section for subscription in subscriptions]
 
         serializer = SectionSerializer(sections, many=True)
