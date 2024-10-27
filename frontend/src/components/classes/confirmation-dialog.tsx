@@ -138,11 +138,13 @@ function AlertsConfirmation({
         You are about to sign up for alerts to {sections.length} {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
       </DialogDescription>
 
-      <div className="mt-4 gap-2 flex flex-col">
+      <div className="mt-4 gap-2 flex flex-col overflow-x-hidden">
         {
           user ? (
             <Button className="w-full" onClick={handleSubmit}>
-              { loading ? <LoadingIcon /> : `Continue as ${user.email}` }
+              <span className="truncate">
+                { loading ? <LoadingIcon /> : `Continue as ${user.email}` }
+              </span>
             </Button>
           ) : (
             <Button className="w-full" disabled>
