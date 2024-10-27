@@ -168,7 +168,7 @@ function DeletionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={"ghost"}>
+        <Button variant={"ghost"} className="p-1">
           <Trash2Icon size={18} />
         </Button>
       </DialogTrigger>

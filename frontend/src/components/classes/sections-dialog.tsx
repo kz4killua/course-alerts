@@ -176,8 +176,7 @@ export function SectionsDialog({
                       <CourseDisplay 
                         topLeft={section.schedule_type_description}
                         topRight={`CRN: ${section.course_reference_number}`}
-                        bottomLeft={selectedCourse?.subject_course}
-                        bottomRight={formatMeetingTimes(section.meeting_times)}
+                        bottomLeft={formatMeetingTimes(section.meeting_times)}
                       />
                     </div>
                   ))

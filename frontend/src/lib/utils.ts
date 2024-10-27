@@ -55,5 +55,5 @@ function formatTime(time: string) {
   const minutes = time.slice(2);
   const suffix = hours >= 12 ? "PM" : "AM";
   hours = hours % 12 || 12;
-  return `${hours}:${minutes} ${suffix}`;
+  return `${hours}:${minutes}${suffix}`;
 }

@@ -28,11 +28,11 @@ export function CourseDisplay({
       )}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-x-1 gap-y-1 flex-wrap">
         <p className="text-lg font-bold">{topLeft}</p>
         <p className="text-sm">{topRight}</p>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-x-1 gap-y-1 flex-wrap">
         <p className="text-sm">{bottomLeft}</p>
         <p className="text-sm">{bottomRight}</p>
       </div>
