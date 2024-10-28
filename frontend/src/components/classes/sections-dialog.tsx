@@ -43,6 +43,9 @@ export function SectionsDialog({
   
   function handleOpenChange(open: boolean) {
     setOpen(open)
+    if (!open) {
+      setSelectedSections(new Set())
+    }
   }
 
   function toggleSectionSelection(section: Section) {
@@ -230,6 +233,7 @@ export function SectionsDialog({
           sections={sections.filter(
             section => selectedSections.has(section.id)
           )}
+          setSelectedSections={setSelectedSections}
         />
 
       </DialogContent>
