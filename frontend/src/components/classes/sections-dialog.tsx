@@ -8,36 +8,41 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import type { Term, Course, Section } from "@/types"
 import { formatMeetingTimes } from "@/lib/utils"
 import { ConfirmationDialog } from "./confirmation-dialog"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CourseDisplay, CourseDisplaySkeleton } from "@/components/shared/course-display"
+import { listSections } from "@/services/courses"
 
 
 export function SectionsDialog({
-  selectedTerm,
-  selectedCourse, 
-  setSelectedCourse,
-  selectedCourseSections,
-  setSelectedCourseSections,
+  term,
+  course, 
   selectedSections,
   setSelectedSections
 } : {
-  selectedTerm: Term | undefined,
-  selectedCourse: Course | undefined,
-  setSelectedCourse: (course: Course | undefined) => void,
-  selectedCourseSections: Section[],
-  setSelectedCourseSections: (sections: Section[]) => void,
+  term: Term,
+  course: Course,
   selectedSections: Set<Section["id"]>,
   setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
 
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-  
-  const open = selectedCourse !== undefined
+  const [open, setOpen] = useState(false)
+  const [sections, setSections] = useState<Section[]>([])
 
-  function handleOpenChange(open: boolean) {
-    if (!open) {
-      setSelectedCourse(undefined)
+  useEffect(() => {
+    if (open && sections.length === 0) {
+      listSections(course.subject_course, term.term)
+      .then(response => {
+        setSections(response.data)
+      })
+      .catch(error => {
+        console.error(error)
+      })
     }
+  }, [open, course, term])
+  
+  function handleOpenChange(open: boolean) {
+    setOpen(open)
   }
 
   function toggleSectionSelection(section: Section) {
@@ -50,20 +55,20 @@ export function SectionsDialog({
     setSelectedSections(newSelectedSections)
   }
 
-  const numSections = selectedCourseSections.length
-  const numLectures = selectedCourseSections.filter(
+  const numSections = sections.length
+  const numLectures = sections.filter(
     section => section.schedule_type_description === "Lecture"
   ).length
-  const numLaboratories = selectedCourseSections.filter(
+  const numLaboratories = sections.filter(
     section => section.schedule_type_description === "Laboratory"
   ).length
-  const numTutorials = selectedCourseSections.filter(
+  const numTutorials = sections.filter(
     section => section.schedule_type_description === "Tutorial"
   ).length
 
   function selectAllSections() {
     setSelectedSections(
-      new Set(selectedCourseSections.map(section => section.id))
+      new Set(sections.map(section => section.id))
     )
   }
 
@@ -73,7 +78,7 @@ export function SectionsDialog({
 
   function selectAllSectionsOfType(type: Section["schedule_type_description"]) {
     setSelectedSections(new Set(
-      selectedCourseSections.filter(
+      sections.filter(
         section => section.schedule_type_description === type
       ).map(section => section.id)
     ))
@@ -81,11 +86,21 @@ export function SectionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
+
+      <DialogTrigger asChild>
+        <CourseDisplay
+          key={course.subject_course}
+          topLeft={course.course_title}
+          bottomLeft={course.subject_course}
+          bottomRight={term.term_desc}
+        />
+      </DialogTrigger>
+
       <DialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
         
         <DialogHeader className="bg-background px-10 pt-10">
           <DialogTitle className="text-3xl">
-            {selectedCourse?.subject_course} - {selectedCourse?.course_title}
+            {course.subject_course} - {course.course_title}
           </DialogTitle>
         </DialogHeader>
 
@@ -166,7 +181,7 @@ export function SectionsDialog({
                     <CourseDisplaySkeleton />
                   </>
                 ) : (
-                  selectedCourseSections.map(section => (
+                  sections.map(section => (
                     <div 
                       className="flex items-center justify-center gap-3" 
                       key={section.id}
@@ -202,18 +217,14 @@ export function SectionsDialog({
           </Button>
         </DialogFooter>
 
-        {
-          selectedTerm && (
-            <ConfirmationDialog
-              open={confirmationDialogOpen}
-              setOpen={setConfirmationDialogOpen}
-              term={selectedTerm}
-              sections={selectedCourseSections.filter(
-                section => selectedSections.has(section.id)
-              )}
-            />
-          )
-        }
+        <ConfirmationDialog
+          open={confirmationDialogOpen}
+          setOpen={setConfirmationDialogOpen}
+          term={term}
+          sections={sections.filter(
+            section => selectedSections.has(section.id)
+          )}
+        />
 
       </DialogContent>
     </Dialog>

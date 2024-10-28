@@ -1,7 +1,6 @@
 "use client"
 
 import clsx from "clsx"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -9,24 +8,37 @@ import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
 import { SectionsDialog } from "@/components/classes/sections-dialog"
-import { Loader, SearchIcon } from "lucide-react"
+import { Loader } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import type { Term, Course, Section } from "@/types"
 import { listTerms, listCourses, listSections } from "@/services/courses"
 import { debounce } from "lodash"
 import { SearchBar } from "@/components/shared/search-bar"
-import { CourseDisplay, CourseDisplaySkeleton } from "@/components/shared/course-display"
 
 
 function TermSelect({
-  terms,
   selectedTerm,
   setSelectedTerm
 }: {
-  terms: Term[],
   selectedTerm: Term | undefined,
   setSelectedTerm: (term: Term | undefined) => void
 }) {
+
+  const [terms, setTerms] = useState<Term[]>([])
+
+  useEffect(() => {
+    listTerms(true)
+    .then(response => {
+      const terms = response.data
+      setTerms(terms)
+      if (terms.length > 0) {
+        setSelectedTerm(terms[0])
+      }
+    })
+    .catch(error => {
+      console.error(error)
+    })
+  }, [])
 
   function handleValueChange(value: string) {
     setSelectedTerm(terms.find(term => term.term === value));
@@ -63,11 +75,13 @@ function TermSelect({
 function SearchResults({
   query,
   selectedTerm,
-  setSelectedCourse
+  selectedSections,
+  setSelectedSections,
 }: {
   query: string,
   selectedTerm: Term | undefined,
-  setSelectedCourse: (course: Course) => void
+  selectedSections: Set<Section["id"]>,
+  setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
 
   const [courses, setCourses] = useState<Course[]>([])
@@ -124,13 +138,13 @@ function SearchResults({
 
       <div className="mt-4 space-y-4">
         {
-          courses.map(course =>
-            <CourseDisplay
+          debouncedTerm && courses.map(course =>
+            <SectionsDialog
               key={course.subject_course}
-              topLeft={course.course_title}
-              bottomLeft={course.subject_course}
-              bottomRight={debouncedTerm?.term_desc}
-              onClick={() => setSelectedCourse(course)}
+              term={debouncedTerm}
+              course={course}
+              selectedSections={selectedSections}
+              setSelectedSections={setSelectedSections}
             />
           )
         }
@@ -142,42 +156,9 @@ function SearchResults({
 
 export default function Page() {
 
-  const [terms, setTerms] = useState<Term[]>([])
-  const [selectedTerm, setSelectedTerm] = useState<Term>()
   const [query, setQuery] = useState<string>("")
-  const [selectedCourse, setSelectedCourse] = useState<Course>()
-  const [selectedCourseSections, setSelectedCourseSections] = useState<Section[]>([])
+  const [selectedTerm, setSelectedTerm] = useState<Term>()
   const [selectedSections, setSelectedSections] = useState<Set<Section["id"]>>(new Set())
-
-  useEffect(() => {
-    listTerms(true)
-    .then(response => {
-      const terms = response.data
-      setTerms(terms)
-      if (terms.length > 0) {
-        setSelectedTerm(terms[0])
-      }
-    })
-    .catch(error => {
-      console.error(error)
-    })
-  }, [])
-
-  useEffect(() => {
-    if (selectedCourse && selectedTerm) {
-      listSections(selectedCourse.subject_course, selectedTerm.term)
-      .then(response => {
-        setSelectedCourseSections(response.data)
-      })
-      .catch(error => {
-        console.error(error)
-      })
-    } else {
-      setSelectedCourseSections([])
-    }
-
-    setSelectedSections(new Set())
-  }, [selectedCourse, selectedTerm])
 
   return (
     <Container className="flex flex-col min-h-screen">
@@ -186,30 +167,17 @@ export default function Page() {
 
         <div className="space-y-6">
           <SearchBar placeholder="Search for a class..." onChange={setQuery} />
-          <TermSelect 
-            terms={terms} 
-            selectedTerm={selectedTerm}
-            setSelectedTerm={setSelectedTerm}
-          />
+          <TermSelect selectedTerm={selectedTerm} setSelectedTerm={setSelectedTerm} />
         </div>
 
         <div className="mt-10">
           <SearchResults 
             query={query} 
             selectedTerm={selectedTerm} 
-            setSelectedCourse={setSelectedCourse}
+            selectedSections={selectedSections}
+            setSelectedSections={setSelectedSections}
           />
         </div>
-
-        <SectionsDialog 
-          selectedTerm={selectedTerm}
-          selectedCourse={selectedCourse} 
-          setSelectedCourse={setSelectedCourse}
-          selectedCourseSections={selectedCourseSections}
-          setSelectedCourseSections={setSelectedCourseSections}
-          selectedSections={selectedSections}
-          setSelectedSections={setSelectedSections}
-        />
 
       </main>
       <Footer />
