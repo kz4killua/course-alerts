@@ -66,14 +66,15 @@ export function SectionsDialog({
     section => section.schedule_type_description === "Tutorial"
   ).length
 
+  function clearSelectedSections() {
+    setSelectedSections(new Set())
+  }
+
   function selectAllSections() {
     setSelectedSections(
       new Set(sections.map(section => section.id))
     )
-  }
-
-  function clearSelectedSections() {
-    setSelectedSections(new Set())
+    handleCreateAlerts()
   }
 
   function selectAllSectionsOfType(type: Section["schedule_type_description"]) {
@@ -82,6 +83,11 @@ export function SectionsDialog({
         section => section.schedule_type_description === type
       ).map(section => section.id)
     ))
+    handleCreateAlerts()
+  }
+
+  function handleCreateAlerts() {
+    setConfirmationDialogOpen(true)
   }
 
   return (
@@ -211,7 +217,7 @@ export function SectionsDialog({
           </Button>
           <Button 
             disabled={selectedSections.size === 0}
-            onClick={() => setConfirmationDialogOpen(true)}
+            onClick={handleCreateAlerts}
           >
             Create alerts
           </Button>
