@@ -23,12 +23,14 @@ export function ConfirmationDialog({
   open, 
   setOpen,
   term,
-  sections
+  sections,
+  setSelectedSections
 } : {
   open: boolean,
   setOpen: (open: boolean) => void,
   term: Term,
-  sections: Section[]
+  sections: Section[],
+  setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
 
   const [step, setStep] = useState<Step>()
@@ -72,6 +74,7 @@ export function ConfirmationDialog({
               setOpen={setOpen}
               term={term}
               sections={sections}
+              setSelectedSections={setSelectedSections}
             />
           ) : (
             <div className="flex items-center justify-center">
@@ -89,12 +92,14 @@ function AlertsConfirmation({
   term,
   sections,
   setStep,
-  setOpen
+  setOpen,
+  setSelectedSections
 } : {
   term: Term,
   sections: Section[],
   setStep: (step: Step) => void,
-  setOpen: (open: boolean) => void
+  setOpen: (open: boolean) => void,
+  setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
 
   const { toast } = useToast()
@@ -111,6 +116,7 @@ function AlertsConfirmation({
         description: "You've successfully signed up for alerts!",
       })
       setOpen(false)
+      setSelectedSections(new Set())
     })
     .catch(error => {
       toast({
