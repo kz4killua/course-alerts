@@ -97,12 +97,14 @@ export function SectionsDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
 
       <DialogTrigger asChild>
-        <CourseDisplay
-          key={course.subject_course}
-          topLeft={course.course_title}
-          bottomLeft={course.subject_course}
-          bottomRight={term.term_desc}
-        />
+        <div>
+          <CourseDisplay
+            key={course.subject_course}
+            topLeft={course.course_title}
+            bottomLeft={course.subject_course}
+            bottomRight={term.term_desc}
+          />
+        </div>
       </DialogTrigger>
 
       <DialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
