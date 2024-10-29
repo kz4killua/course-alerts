@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db.models import Manager
 
 from .models import Subscription
+from .sms import send_sms
 from courses.models import Section
 from accounts.models import User
 
@@ -31,19 +32,36 @@ def send_alerts_task():
     logger.info("Done.")
 
 
-
 def send_alerts(alerts: dict[User, dict]) -> None:
 
     for user, alert in alerts.items():
-        message = render_to_string(
-            "alerts/update.txt", {"alert": alert}
+
+        # Send email alerts
+        email = render_to_string(
+            "alerts/email_update.txt", {"alert": alert}
         )
-        send_mail(
-            subject="Course enrollment updates",
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-        )
+        try:
+            send_mail(
+                subject="Course enrollment updates",
+                message=email,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+            )
+        except Exception as e:
+            logger.error(f"Failed to send email alert to {user.email}: {e}")
+
+        # Send SMS alerts (if a phone number is provided)
+        if user.phone:
+            sms = render_to_string(
+                "alerts/sms_update.txt", {"alert": alert}
+            )
+            try:
+                send_sms(
+                    to=user.phone, 
+                    body=sms,
+                )
+            except Exception as e:
+                logger.error(f"Failed to send SMS alert to {user.phone}: {e}")
 
 
 def get_latest_alerts(subscriptions: Manager[Subscription], enrollment_info: dict[Section, dict]) -> dict[User, dict]:
