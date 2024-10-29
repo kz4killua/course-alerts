@@ -50,10 +50,6 @@ class SubscriptionListCreateDeleteView(APIView):
         if len(sections) != len(course_reference_numbers):
             return Response({'detail': 'One or more sections not found.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Users cannot be subscribed to more than 20 sections at a time
-        if (len(course_reference_numbers) + len(sections)) > 20:
-            return Response({'detail': 'Cannot be subscribed to more than 20 sections per term.'}, status=status.HTTP_400_BAD_REQUEST)
-
         subscriptions = []
         for crn in course_reference_numbers:
             subscription, created = Subscription.objects.get_or_create(
