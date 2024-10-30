@@ -7,7 +7,7 @@ from rest_framework import status
 
 from courses.models import Section
 from alerts.models import Subscription
-from alerts.tasks import get_latest_alerts, get_latest_enrollment_info
+from alerts.tasks import get_alerts, get_section_alert_status
 
 
 User = get_user_model()
@@ -92,54 +92,165 @@ class TestAlerts(TestCase):
 
     def setUp(self) -> None:
         call_command("updatesections", "202309", "--usecache")
-        call_command("updatesections", "202401", "--usecache")
 
 
-    def test_send_alerts_task(self):
+    def test_get_section_alert_status(self):
+        
+        # No seats available
+        enrollment_info = {
+            'enrollment': 250,
+            'maximumEnrollment': 250,
+            'seatsAvailable': None,
+            'waitCapacity': None,
+            'waitCount': None,
+            'waitAvailable': None
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.CLOSED
+        )
+
+        # No seats available (class overenrolled)
+        enrollment_info = {
+            'enrollment': 255,
+            'maximumEnrollment': 250,
+            'seatsAvailable': -5,
+            'waitCapacity': None,
+            'waitCount': None,
+            'waitAvailable': None
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.CLOSED
+        )
+
+        # Seats available + waitlist unavailable
+        enrollment_info = {
+            'enrollment': 245,
+            'maximumEnrollment': 250,
+            'seatsAvailable': 5,
+            'waitCapacity': None,
+            'waitCount': None,
+            'waitAvailable': None
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.OPEN
+        )
+
+        # Seats available + waitlist open
+        enrollment_info = {
+            'enrollment': 240,
+            'maximumEnrollment': 250,
+            'seatsAvailable': 10,
+            'waitCapacity': 20,
+            'waitCount': 10,
+            'waitAvailable': 10
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.OPEN
+        )
+
+        # No seats available + waitlist open
+        enrollment_info = {
+            'enrollment': 250,
+            'maximumEnrollment': 250,
+            'seatsAvailable': 0,
+            'waitCapacity': 20,
+            'waitCount': 10,
+            'waitAvailable': 10
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.WAITLIST_OPEN
+        )
+
+        # No seats available + waitlist full
+        enrollment_info = {
+            'enrollment': 250,
+            'maximumEnrollment': 250,
+            'seatsAvailable': 0,
+            'waitCapacity': 20,
+            'waitCount': 20,
+            'waitAvailable': 0
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.CLOSED
+        )
+
+    
+    def test_get_alerts(self):
 
         user = User.objects.create_user(
             email="user@example.com", password="password"
         )
 
+        section1 = Section.objects.get(term__term='202309', course_reference_number='42684')
+        section2 = Section.objects.get(term__term='202309', course_reference_number='44746')
+        section3 = Section.objects.get(term__term='202309', course_reference_number='42752')
+        section4 = Section.objects.get(term__term='202309', course_reference_number='41942')
+
         # Create subscriptions
-        subscriptions = [
-            ('202309', '42684'),
-            ('202309', '44746'),
-            ('202401', '73772'),
-            ('202401', '70154'),
-            ('202309', '42752'),
-            ('202309', '41942'),
-            ('202401', '73773'),
-            ('202401', '72741'),
-        ]
-        for term, crn in subscriptions:
-            section = Section.objects.get(
-                term__term=term, course_reference_number=crn
-            )
-            Subscription.objects.create(user=user, section=section)
+        subscription1 = Subscription.objects.create(user=user, section=section1)
+        subscription2 = Subscription.objects.create(user=user, section=section2)
+        subscription3 = Subscription.objects.create(user=user, section=section3)
+        subscription4 = Subscription.objects.create(user=user, section=section4)
 
+        enrollment_info = {
+            section1: {
+                'enrollment': 250,
+                'maximumEnrollment': 250,
+                'seatsAvailable': None,
+                'waitCapacity': None,
+                'waitCount': None,
+                'waitAvailable': None
+            },
+            section2: {
+                'enrollment': 245,
+                'maximumEnrollment': 250,
+                'seatsAvailable': 5,
+                'waitCapacity': None,
+                'waitCount': None,
+                'waitAvailable': None
+            },
+            section3: {
+                'enrollment': 250,
+                'maximumEnrollment': 250,
+                'seatsAvailable': 0,
+                'waitCapacity': 20,
+                'waitCount': 10,
+                'waitAvailable': 10
+            },
+            section4: {
+                'enrollment': 250,
+                'maximumEnrollment': 250,
+                'seatsAvailable': 0,
+                'waitCapacity': 20,
+                'waitCount': 20,
+                'waitAvailable': 0
+            },
+        }
 
-        subscriptions = Subscription.objects.all()
-
-        latest_enrollment_info = get_latest_enrollment_info(subscriptions)
-        latest_alerts = get_latest_alerts(subscriptions, latest_enrollment_info)
+        alerts = get_alerts(Subscription.objects.all(), enrollment_info)
 
         expected = {
             user: {
-                Subscription.OPEN: {
-                    Section.objects.get(term__term='202309', course_reference_number='44746'),
-                    Section.objects.get(term__term='202309', course_reference_number='42684'),
-                    Section.objects.get(term__term='202401', course_reference_number='73772'),
-                    Section.objects.get(term__term='202401', course_reference_number='70154'),
-                },
-                Subscription.WAITLIST_OPEN: set(),
-                Subscription.CLOSED: {
-                    Section.objects.get(term__term='202309', course_reference_number='42752'),
-                    Section.objects.get(term__term='202309', course_reference_number='41942'),
-                    Section.objects.get(term__term='202401', course_reference_number='73773'),
-                    Section.objects.get(term__term='202401', course_reference_number='72741'),
-                }
+                Subscription.OPEN: {section2},
+                Subscription.WAITLIST_OPEN: {section3},
+                Subscription.CLOSED: {section1, section4}
             }
         }
 
-        self.assertEqual(latest_alerts, expected)
+        self.assertEqual(alerts, expected)
+
+        # Update the last status of the subscriptions
+        subscription1.last_status = Subscription.CLOSED
+        subscription1.save()
+        subscription2.last_status = Subscription.OPEN
+        subscription2.save()
+        subscription3.last_status = Subscription.WAITLIST_OPEN
+        subscription3.save()
+        subscription4.last_status = Subscription.CLOSED
+        subscription4.save()
+
+        alerts = get_alerts(Subscription.objects.all(), enrollment_info)
+
+        expected = {}
+
+        self.assertEqual(alerts, expected)
