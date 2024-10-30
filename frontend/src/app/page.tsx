@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
 import clsx from "clsx";
-import { BellIcon, GraduationCapIcon, MessageSquareShareIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button"
+import { GraduationCapIcon, MessageSquareShareIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";
 import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
@@ -31,7 +34,7 @@ function Hero() {
           Classes full?
         </h1>
         <h3 className="text-2xl">
-          Sign up for email alerts. 
+          Sign up for alerts. 
           Be the first to know when seats become available.
         </h3>
         <div>
@@ -41,7 +44,13 @@ function Hero() {
         </div>
       </div>
       <div className="hidden md:block">
-        <BellIcon strokeWidth={1.25} size={300} />
+        <Image 
+          alt="notifications" 
+          src={"/hero-image.svg"} 
+          width={600} 
+          height={600}
+          priority
+        />
       </div>
     </div>
   )
@@ -57,7 +66,7 @@ function Feedback() {
           Whether you found a bug, have a question, or just want to share your thoughts, 
           we&apos;d love to hear from you. 
         </p>
-        <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={"/"} target="_blank">
+        <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={"https://forms.gle/n5wJiGU1bKQv6iWV9"} target="_blank">
           <RocketIcon size={16} className="mr-2" /> Give feedback
         </Link>
       </div>

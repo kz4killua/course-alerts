@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { BellIcon, GraduationCapIcon, LogOutIcon, SchoolIcon } from "lucide-react"
+import { GraduationCapIcon, LogOutIcon } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu"
+import { Logo } from "@/components/shared/logo"
 
 
 export function Header() {
@@ -16,7 +17,7 @@ export function Header() {
     <header className="flex flex-row justify-between items-center py-8 gap-3">
       <Link href={"/"}>
         <div className="flex items-center justify-center font-semibold text-lg">
-          <BellIcon size={20} className="mr-2" /> Notify
+          <Logo width={20} height={20} className="mr-2 text-primary fill-primary" /> Course Alerts
         </div>
       </Link>
 

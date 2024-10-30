@@ -289,10 +289,8 @@ function EnterPhoneStep({
   const { login } = useAuth()
 
   const formSchema = z.object({
-    phone: z.string().min(10, {
-      message: "Please enter a valid phone number"
-    }).max(15, {
-      message: "Please enter a valid phone number"
+    phone: z.string().regex(/^[0-9]{10}$/, {
+      message: "Please enter a valid Canadian phone number (without the country code)."
     }),
   })
 
@@ -305,7 +303,8 @@ function EnterPhoneStep({
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setLoading(true)
-    updateAccount(data.phone)
+    const phone = `+1${data.phone}`
+    updateAccount(phone)
     .then((response) => {
       login(response.data)
     })
@@ -339,17 +338,20 @@ function EnterPhoneStep({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
+          <FormField
             control={form.control}
             name="phone"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Phone Number (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="tel" placeholder="+1234567890" {...field} />
+                  <div className="flex items-center gap-x-3">
+                    <span className="text-sm text-muted-foreground">+1</span>
+                    <Input type="tel" placeholder="9055555555" {...field} />
+                  </div>
                 </FormControl>
                 <FormDescription>
-                  Enter your phone number including the country code.
+                  Enter a valid Canadian phone number. Only Canadian phone numbers are supported at this time.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
