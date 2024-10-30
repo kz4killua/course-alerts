@@ -4,7 +4,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { Login } from "@/components/auth/login";
 import { LoadingIcon } from "@/components/shared/loading-icon";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState, useEffect } from "react";
 
 

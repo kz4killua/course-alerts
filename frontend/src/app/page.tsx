@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import clsx from "clsx";
 import { GraduationCapIcon, MessageSquareShareIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";

@@ -39,7 +39,7 @@ export function SectionsDialog({
         console.error(error)
       })
     }
-  }, [open, course, term])
+  }, [open, course, term, sections.length])
   
   function handleOpenChange(open: boolean) {
     setOpen(open)

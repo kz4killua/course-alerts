@@ -12,7 +12,7 @@ import { deleteAlertSubscriptions, listAlertSubscriptions } from "@/services/ale
 import { Section } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 
 
@@ -32,13 +32,13 @@ export default function Page() {
     .catch(error => {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: error.response.data?.detail || "An error occurred. Please try again.",
       })
     })
     .finally(() => {
       setLoading(false)
     })
-  }, [])
+  }, [toast])
 
   return (
     <Container className="flex flex-col min-h-screen">
@@ -153,7 +153,7 @@ function DeletionDialog({
     .catch(error => {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: error.response.data?.detail || "An error occurred. Please try again.",
       })
     })
     .finally(() => {

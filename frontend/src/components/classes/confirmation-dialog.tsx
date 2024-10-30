@@ -1,15 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 import { useToast } from "@/hooks/use-toast"
 import { createAlertSubscriptions } from "@/services/alerts"
 
 import { useEffect, useState } from "react"
 
-import type { Term, Section, User } from "@/types"
+import type { Term, Section } from "@/types"
 import { useAuth } from "@/providers/auth-provider"
 import { Login } from "@/components/auth/login"
 import { LoadingIcon } from "@/components/shared/loading-icon"
@@ -46,7 +45,7 @@ export function ConfirmationDialog({
     } else {
       setStep("authenticate")
     }
-  }, [user])
+  }, [user, loaded])
 
   function handleOpenChange(open: boolean) {
     setOpen(open)
@@ -121,7 +120,7 @@ function AlertsConfirmation({
     .catch(error => {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: error.response.data?.detail || "An error occurred. Please try again.",
       })
     })
     .finally(() => {

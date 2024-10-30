@@ -1,6 +1,5 @@
 "use client"
 
-import clsx from "clsx"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -11,7 +10,7 @@ import { SectionsDialog } from "@/components/classes/sections-dialog"
 import { Loader } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import type { Term, Course, Section } from "@/types"
-import { listTerms, listCourses, listSections } from "@/services/courses"
+import { listTerms, listCourses } from "@/services/courses"
 import { debounce } from "lodash"
 import { SearchBar } from "@/components/shared/search-bar"
 
@@ -38,7 +37,7 @@ function TermSelect({
     .catch(error => {
       console.error(error)
     })
-  }, [])
+  }, [setSelectedTerm])
 
   function handleValueChange(value: string) {
     setSelectedTerm(terms.find(term => term.term === value));
@@ -90,37 +89,38 @@ function SearchResults({
   const [debouncedTerm, setDebouncedTerm] = useState<Term | undefined>()
 
 
-  function handleSearch(query: string, term: Term | undefined) {
-    setDebouncedQuery(query)
-    setDebouncedTerm(term)
+  const debouncedSearch = useMemo(() => {
 
-    if ((query.length > 0) && term) {
-
-      setLoading(true)
-
-      listCourses(term.term, query)
-      .then(response => {
-        setCourses(response.data)
-      })
-      .catch(error => {
-        console.error(error)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    } else {
-      setCourses([])
+    function handleSearch(query: string, term: Term | undefined) {
+      setDebouncedQuery(query)
+      setDebouncedTerm(term)
+  
+      if ((query.length > 0) && term) {
+  
+        setLoading(true)
+  
+        listCourses(term.term, query)
+        .then(response => {
+          setCourses(response.data)
+        })
+        .catch(error => {
+          console.error(error)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+      } else {
+        setCourses([])
+      }
     }
-  }
 
-  const debouncedSearch = useMemo(() => 
-    debounce((query, term) => handleSearch(query, term), 750), 
-  [handleSearch])
+    return debounce((query, term) => handleSearch(query, term), 750)
+  }, [])
 
   useEffect(() => {
     debouncedSearch(query, selectedTerm)
     return debouncedSearch.cancel
-  }, [query, selectedTerm])
+  }, [query, selectedTerm, debouncedSearch])
 
 
   return (

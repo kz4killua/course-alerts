@@ -48,7 +48,7 @@ export function Login({
     } else {
       setStep("enter-email")
     }
-  }, [user, loaded, setLoaded])
+  }, [user, loaded, setLoaded, onLogin])
 
 
   return (
@@ -59,7 +59,7 @@ export function Login({
         ) : step === "enter-code" ? (
           <EnterCodeStep setStep={setStep} email={email} onLogin={onLogin} />
         ) : step === "enter-phone" ? (
-          <EnterPhoneStep setStep={setStep} onLogin={onLogin} />
+          <EnterPhoneStep onLogin={onLogin} />
         ) : (
           <div className="flex items-center justify-center">
             <LoadingIcon />
@@ -105,7 +105,7 @@ function EnterEmailStep({
     .catch(error => {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: error.response.data?.detail || "An error occurred. Please try again.",
       })
     })
     .finally(() => {
@@ -220,7 +220,7 @@ function EnterCodeStep({
     .catch(error => {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: error.response.data?.detail || "An error occurred. Please try again.",
       })
     })
     .finally(() => {
@@ -235,7 +235,7 @@ function EnterCodeStep({
   return (
     <>
       <LoginHeader>
-        You're almost signed in!
+        You&apos;re almost signed in!
       </LoginHeader>
 
       <LoginDescription>
@@ -277,10 +277,8 @@ function EnterCodeStep({
 
 
 function EnterPhoneStep({
-  setStep,
   onLogin,
 } : {
-  setStep: (step: Step) => void,
   onLogin: () => void
 }) {
 
@@ -314,7 +312,7 @@ function EnterPhoneStep({
     .catch(error => {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: error.response.data?.detail || "An error occurred. Please try again.",
       })
     })
     .finally(() => {
