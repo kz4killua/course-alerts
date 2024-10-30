@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster"
 import { Providers } from "@/app/providers";
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <Toaster />
+        <Script src="/made-with-love.js" strategy="beforeInteractive" />
       </body>
     </html>
   );
