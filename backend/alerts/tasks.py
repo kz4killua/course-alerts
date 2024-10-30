@@ -27,7 +27,7 @@ def send_alerts_task():
     alerts = get_alerts(subscriptions, latest_enrollment_info)
 
     logger.info(f"Sending {len(alerts)} alert(s)...")
-    send_alerts(alerts)
+    send_alerts(alerts, subscriptions)
 
     logger.info("Done.")
 
