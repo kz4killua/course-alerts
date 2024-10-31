@@ -1,19 +1,19 @@
-Hi there, 
-
-Here is the latest update on class availability.
+🔔 Course Alert!
 
 Open classes:
 {% for section in alert.open %}
-- {{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})
+- {{ section.course.subject_course }} {{ section.schedule_type_description }} (CRN: {{ section.course_reference_number }})
 {% empty %}
-No open classes.
+- No open classes.
 {% endfor %}
 
 Open waitlists:
 {% for section in alert.waitlist_open %}
-- {{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})
+- {{ section.course.subject_course }} {{ section.schedule_type_description }} (CRN: {{ section.course_reference_number }})
 {% empty %}
-No open waitlists.
+- No open waitlists.
 {% endfor %}
+
+Visit coursealerts.fyi/manage-subscriptions to manage your subscriptions.
 
 Good luck!

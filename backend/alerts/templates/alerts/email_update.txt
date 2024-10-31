@@ -1,19 +1,23 @@
 Hi there, 
 
-Here is the latest update on class availability.
+The following course sections you were subscribed to are now open for registration. Please review the details below, and log in as soon as possible to secure your spot.
 
 Open classes:
 {% for section in alert.open %}
 - {{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})
 {% empty %}
-No open classes.
+- No open classes.
 {% endfor %}
 
 Open waitlists:
 {% for section in alert.waitlist_open %}
 - {{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})
 {% empty %}
-No open waitlists.
+- No open waitlists.
 {% endfor %}
+
+Log in to your student portal to register for the courses above. Seats are limited and may fill up quickly.
+
+To manage the sections you receive alerts for, visit: coursealerts.fyi/manage-subscriptions
 
 Good luck!

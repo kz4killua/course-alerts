@@ -50,7 +50,7 @@ def send_alerts(alerts: dict[User, dict], subscriptions: Manager[Subscription]) 
         )
         try:
             send_mail(
-                subject="Course enrollment updates",
+                subject="🔔 Course Alerts: New Sections Available for Registration!",
                 message=email,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
