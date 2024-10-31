@@ -43,12 +43,21 @@ class SubscriptionListCreateDeleteView(APIView):
         if not course_reference_numbers:
             return Response({'detail': 'No course reference numbers provided.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        sections = {
-            section.course_reference_number: section
-            for section in Section.objects.filter(term__term=term, course_reference_number__in=course_reference_numbers)
-        }
+        # Ensure the sections exist
+        sections = Section.objects.filter(
+            term__term=term, 
+            term__registration_open=True,
+            course_reference_number__in=course_reference_numbers,
+        )
         if len(sections) != len(course_reference_numbers):
             return Response({'detail': 'One or more sections not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        sections = {
+            section.course_reference_number: section
+            for section in Section.objects.filter(
+                term__term=term, course_reference_number__in=course_reference_numbers
+            )
+        }
         
         subscriptions = []
         for crn in course_reference_numbers:

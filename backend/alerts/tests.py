@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from django.core.management import call_command
 from rest_framework import status
 
-from courses.models import Section
+from courses.models import Section, Term
 from alerts.models import Subscription
 from alerts.tasks import get_alerts, get_section_alert_status
 
@@ -30,6 +30,27 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         self.client.force_authenticate(user=user)
 
         url = reverse('subscriptions-list-create-delete')
+
+        # Test closed terms
+        response = self.client.post(url, {
+            'term': '202309',
+            'course_reference_numbers': ["42684", "44746"]
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.client.post(url, {
+            'term': '202401',
+            'course_reference_numbers': ["73772", "70154"]
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Open up registration for both terms
+        t1 = Term.objects.get(term='202309')
+        t2 = Term.objects.get(term='202401')
+        t1.registration_open = True
+        t2.registration_open = True
+        t1.save()
+        t2.save()
 
         # Test creating valid subscriptions
         response = self.client.post(url, {
