@@ -34,7 +34,12 @@ instance.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    if (error.response.status !== 401 || originalRequest._retry) {
+    if (error.response.status !== 401) {
+      return Promise.reject(error);
+    }
+
+    if (originalRequest._retry) {
+      logout();
       return Promise.reject(error);
     }
     if (originalRequest.url.includes('/token/refresh')) {
