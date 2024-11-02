@@ -204,7 +204,7 @@ export function SectionsDialog({
                         topRight={`CRN: ${section.course_reference_number}`}
                         bottomLeft={formatMeetingTimes(section.meeting_times)}
                         className={clsx(
-                          selectedSections.has(section.id) && "bg-primary/5 border-primary"
+                          selectedSections.has(section.id) && "bg-accent border-primary"
                         )}
                       />
                     </div>
