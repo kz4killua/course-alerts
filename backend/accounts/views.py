@@ -57,6 +57,7 @@ class RequestSignInCode(APIView):
         send_mail(
             subject=subject,
             message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             html_message=html_message,
             fail_silently=False,

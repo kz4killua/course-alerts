@@ -56,6 +56,7 @@ def send_alerts(alerts: dict[User, dict], subscriptions: Manager[Subscription]) 
             send_mail(
                 subject=subject,
                 message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 html_message=html_message,
                 fail_silently=False,
