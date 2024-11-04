@@ -1,3 +1,4 @@
+import html
 import json
 from collections import defaultdict
 
@@ -23,7 +24,7 @@ class Command(BaseCommand):
         # Load the course sections from a file or fetch them from the API
         if options["usecache"]:
             try:
-                with open(f"courses/data/raw/sections/{options['term']}.json", "r") as f:
+                with open(f"courses/data/raw/sections/{options['term']}.json", "r", encoding="utf-8") as f:
                     sections = json.load(f)
             except FileNotFoundError:
                 raise CommandError(f"No cached data found for term: {options['term']}")
@@ -35,8 +36,11 @@ class Command(BaseCommand):
         
         # Save the raw data to a file
         if not options["usecache"]:
-            with open(f"courses/data/raw/sections/{options['term']}.json", "w") as f:
+            with open(f"courses/data/raw/sections/{options['term']}.json", "w", encoding="utf-8") as f:
                 json.dump(sections, f, indent=2)
+
+        # Unescape HTML entities
+        sections = unescape(sections)
 
         # Get the CRNs of the primary sections for each course
         primary_section_crns = get_primary_section_crns(sections)
@@ -142,3 +146,15 @@ def get_primary_section_crns(sections: list) -> set:
                 primary_sections.add(section['courseReferenceNumber'])
 
     return primary_sections
+
+
+def unescape(data: dict | list | str):
+    """Recursively unescape HTML entities."""
+    if isinstance(data, str):
+        return html.unescape(data)
+    elif isinstance(data, list):
+        return [unescape(item) for item in data]
+    elif isinstance(data, dict):
+        return {key: unescape(value) for key, value in data.items()}
+    else:
+        return data
