@@ -1,9 +1,9 @@
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 
 
-class RequestEmailVerificationHourlyThrottle(UserRateThrottle):
-    rate = '20/hour'
+class RequestEmailVerificationHourlyThrottle(AnonRateThrottle):
+    rate = '10/hour'
 
 
-class RequestEmailVerificationDailyThrottle(UserRateThrottle):
-    rate = '50/day'
+class RequestEmailVerificationDailyThrottle(AnonRateThrottle):
+    rate = '30/day'
