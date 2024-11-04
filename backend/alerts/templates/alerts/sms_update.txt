@@ -1,15 +1,15 @@
-🔔 Course Alert!
+Course Alert!
 
 Open classes:
 {% for section in alert.open %}
-- {{ section.course.subject_course }} {{ section.schedule_type_description }} (CRN: {{ section.course_reference_number }})
+- {{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})
 {% empty %}
 - No open classes.
 {% endfor %}
 
 Open waitlists:
 {% for section in alert.waitlist_open %}
-- {{ section.course.subject_course }} {{ section.schedule_type_description }} (CRN: {{ section.course_reference_number }})
+- {{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})
 {% empty %}
 - No open waitlists.
 {% endfor %}

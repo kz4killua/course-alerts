@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -46,11 +48,17 @@ class RequestSignInCode(APIView):
             }
         )
 
+        subject = render_to_string('accounts/verification_code_subject.txt')
+        html_message = render_to_string('accounts/verification_code_body.html', {
+            'code': email_verification_code.code
+        })
+        plain_message = strip_tags(html_message)
+
         send_mail(
-            'Verification code',
-            f'Your verification code is {email_verification_code.code}',
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
+            subject=subject,
+            message=plain_message,
+            recipient_list=[email],
+            html_message=html_message,
             fail_silently=False,
         )
 

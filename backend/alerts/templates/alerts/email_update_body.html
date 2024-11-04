@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <p>Hi there,</p>
+    <p>
+        The following course sections you subscribed to are now open for registration. 
+        Please review the details below, and log in as soon as possible to secure your spot. 
+    </p>
+    <div>
+        <h3>Open classes:</h3>
+        <ul>
+            {% for section in alert.open %}
+                <li>{{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})</li>
+            {% empty %}
+                <li>No open classes.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h3>Open waitlists:</h3>
+        <ul>
+            {% for section in alert.waitlist_open %}
+                <li>{{ section.course.subject_course }} (CRN: {{ section.course_reference_number }})</li>
+            {% empty %}
+                <li>No open waitlists.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <p>
+        Log in to your student portal to register for the courses above. 
+        Seats are limited and may fill up quickly.
+    </p>
+    <p>
+        To manage the sections you receive alerts for, visit: <a href="https://coursealerts.fyi/manage-subscriptions">https://coursealerts.fyi/manage-subscriptions</a>
+    </p>
+    <p>Good luck!</p>
+</body>
+</html>

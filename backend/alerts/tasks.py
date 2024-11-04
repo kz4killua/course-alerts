@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models import Manager
+from django.utils.html import strip_tags
 
 from .models import Subscription
 from .sms import send_sms
@@ -45,15 +46,19 @@ def send_alerts(alerts: dict[User, dict], subscriptions: Manager[Subscription]) 
         sent = False
 
         # Send email alerts
-        email = render_to_string(
-            "alerts/email_update.txt", {"alert": alert}
+        subject = render_to_string("alerts/email_update_subject.txt")
+        html_message = render_to_string(
+            "alerts/email_update_body.html", {"alert": alert}
         )
+        plain_message = strip_tags(html_message)
+
         try:
             send_mail(
-                subject="🔔 Course Alerts: New Sections Available for Registration!",
-                message=email,
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                subject=subject,
+                message=plain_message,
                 recipient_list=[user.email],
+                html_message=html_message,
+                fail_silently=False,
             )
             sent = True
         except Exception as e:
