@@ -11,15 +11,24 @@ class MailgunEmailBackend(BaseEmailBackend):
         count = 0
 
         for message in email_messages:
+
+            data = {
+                "from": message.from_email,
+                "to": message.to,
+                "subject": message.subject,
+                "text": message.body,
+            }
+
+            if hasattr(message, 'alternatives') and message.alternatives:
+                for content, mimetype in message.alternatives:
+                    if mimetype == 'text/html':
+                        data['html'] = content
+                        break
+
             response = requests.post(
                 f"https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages",
                 auth=("api", settings.MAILGUN_API_KEY),
-                data={
-                    "from": message.from_email,
-                    "to": message.to,
-                    "subject": message.subject,
-                    "text": message.body,
-                },
+                data=data,
             )
 
             if response.ok:
