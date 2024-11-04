@@ -275,3 +275,20 @@ class TestAlerts(TestCase):
         expected = {}
 
         self.assertEqual(alerts, expected)
+
+        # Alerts should only be sent if there are open seats
+        for section in enrollment_info:
+            enrollment_info[section] = {
+                'enrollment': 250,
+                'maximumEnrollment': 250,
+                'seatsAvailable': 0,
+                'waitCapacity': None,
+                'waitCount': None,
+                'waitAvailable': None
+            }
+
+        alerts = get_alerts(Subscription.objects.all(), enrollment_info)
+
+        expected = {}
+
+        self.assertEqual(alerts, expected)

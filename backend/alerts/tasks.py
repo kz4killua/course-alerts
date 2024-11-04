@@ -111,8 +111,8 @@ def get_alerts(subscriptions: Manager[Subscription], enrollment_info: dict[Secti
             if subscription.last_status != status:
                 is_new = True
 
-        # Only send alerts if there are new updates
-        if is_new:
+        # Only send alerts if there are new open or waitlist open sections
+        if is_new and (user_alert[Subscription.OPEN] or user_alert[Subscription.WAITLIST_OPEN]):
             alerts[user] = user_alert
 
     return alerts
