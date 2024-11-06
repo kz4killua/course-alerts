@@ -167,6 +167,7 @@ function EnterCodeStep({
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
+  const [wait, setWait] = useState(30)
 
   const formSchema = z.object({
     code: z.string().length(6, {
@@ -216,6 +217,7 @@ function EnterCodeStep({
         title: "Code resent",
         description: "We've sent a new code to your email.",
       })
+      setWait(60)
     })
     .catch(error => {
       toast({
@@ -231,6 +233,14 @@ function EnterCodeStep({
   function handleBack() {
     setStep("enter-email")
   }
+
+  useEffect(() => {
+    if (wait === 0) return;
+    const timer = setTimeout(() => {
+      setWait(wait - 1)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [wait, setWait])
 
   return (
     <>
@@ -254,7 +264,15 @@ function EnterCodeStep({
                   <Input placeholder="Code" {...field} />
                 </FormControl>
                 <FormDescription>
-                  Didn&apos;t get the code? <Button className="p-0 underline" type="button" variant={"link"} onClick={handleResendCode}>Resend code.</Button>
+                  Didn&apos;t get the code? Check your Spam folder or{" "}
+
+                  {wait === 0 ? (
+                    <Button className="p-0 underline" type="button" variant={"link"} onClick={handleResendCode}>
+                      resend code.
+                    </Button>
+                  ) : (
+                    <span>resend in {wait} seconds.</span>
+                  )}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
