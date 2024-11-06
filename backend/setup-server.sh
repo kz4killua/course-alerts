@@ -1,5 +1,10 @@
+#!/bin/bash
+
+set -e
+
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
+rm get-docker.sh
 
 sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
@@ -19,6 +24,13 @@ sudo ufw allow OpenSSH
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw enable
+
+echo "Log into your domain registrar and create the following record:"
+echo "Type: A"
+echo "Name: api"
+echo "Value: <server-ip>"
+echo "Press any key to continue..."
+read -n 1 -s
 
 sudo apt update
 sudo apt install nginx
@@ -43,6 +55,11 @@ sudo nano /etc/nginx/sites-available/api.coursealerts.fyi
 #         proxy_set_header X-Forwarded-Proto $scheme;
 #     }
 # }
+
+if [ ! -f /etc/nginx/sites-available/api.coursealerts.fyi ]; then
+    echo "NGINX configuration file was not created. Exiting..."
+    exit 1
+fi
 
 sudo ln -s /etc/nginx/sites-available/api.coursealerts.fyi /etc/nginx/sites-enabled
 sudo nginx -t
