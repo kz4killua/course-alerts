@@ -18,6 +18,10 @@ read -n 1 -s
 
 chmod 600 .env
 
+# Enable memory overcommit to prevent Redis from crashing
+echo "vm.overcommit_memory = 1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
 docker compose up -d --build
 
 sudo ufw allow OpenSSH
