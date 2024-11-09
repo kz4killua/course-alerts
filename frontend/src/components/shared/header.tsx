@@ -17,7 +17,7 @@ export function Header() {
     <header className="flex flex-row justify-between items-center py-8 gap-3">
       <Link href={"/"}>
         <div className="flex items-center justify-center font-semibold text-lg">
-          <Logo width={20} height={20} className="mr-2 text-primary fill-primary" /> Course Alerts
+          <Logo width={24} height={24} className="mr-2 text-primary fill-primary" /> Course Alerts
         </div>
       </Link>
 

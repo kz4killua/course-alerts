@@ -27,7 +27,7 @@ function Stats() {
 
 function Hero() {
   return (
-    <div className="flex items-center space-x-28 pt-28 pb-28">
+    <div className="flex items-center space-x-20 pt-20 pb-20">
       <div className="grow space-y-8">
         <h1 className="font-extrabold text-6xl">
           Classes full?
@@ -58,7 +58,7 @@ function Hero() {
 
 function Feedback() {
   return (
-    <div className="w-full rounded-md bg-primary text-white mt-28 px-10 py-10 flex items-center space-x-28">
+    <div className="w-full rounded-md bg-primary text-white mt-20 px-10 py-10 flex items-center space-x-20">
       <div className="space-y-5">
         <h1 className="font-semibold text-3xl">We want to hear from you!</h1>
         <p>
