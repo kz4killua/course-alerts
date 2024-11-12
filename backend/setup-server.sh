@@ -37,34 +37,10 @@ echo "Press any key to continue..."
 read -n 1 -s
 
 sudo apt update
+
+# Install and configure Nginx
 sudo apt install nginx
-
-echo "In the next step, you will be prompted to create an NGINX configuration file."
-echo "Ensure you have the configuration ready before continuing."
-echo "Press any key to continue..."
-read -n 1 -s
-
-sudo nano /etc/nginx/sites-available/api.coursealerts.fyi
-
-# Paste the following configuration from nginx-config.txt (assuming the server is running on port 8000):
-# server {
-#     listen 80;
-#     server_name api.coursealerts.fyi;
-
-#     location / {
-#         proxy_pass http://localhost:8000;
-#         proxy_set_header Host $host;
-#         proxy_set_header X-Real-IP $remote_addr;
-#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-#         proxy_set_header X-Forwarded-Proto $scheme;
-#     }
-# }
-
-if [ ! -f /etc/nginx/sites-available/api.coursealerts.fyi ]; then
-    echo "NGINX configuration file was not created. Exiting..."
-    exit 1
-fi
-
+sudo cat nginx-config.txt > /etc/nginx/sites-available/api.coursealerts.fyi
 sudo ln -s /etc/nginx/sites-available/api.coursealerts.fyi /etc/nginx/sites-enabled
 sudo nginx -t
 sudo systemctl restart nginx
@@ -72,6 +48,9 @@ sudo systemctl restart nginx
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d api.coursealerts.fyi
 sudo certbot renew --dry-run
+
+# Enable automatic updates for security patches
+sudo dpkg-reconfigure --priority=low unattended-upgrades
 
 # To set up the database, use the following format: 
 # docker exec -it backend-web-1 python manage.py updatesections 202409 --usecache
