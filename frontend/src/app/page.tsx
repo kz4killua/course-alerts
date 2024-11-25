@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";
 import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
+import { FEEDBACK_URL } from "@/lib/constants";
 
 
 function Stats() {
@@ -65,7 +66,7 @@ function Feedback() {
           Whether you found a bug, have a question, or just want to share your thoughts, 
           we&apos;d love to hear from you. 
         </p>
-        <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={"https://forms.gle/n5wJiGU1bKQv6iWV9"} target="_blank">
+        <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={FEEDBACK_URL} target="_blank">
           <RocketIcon size={16} className="mr-2" /> Give feedback
         </Link>
       </div>

@@ -1,0 +1,1 @@
+export const FEEDBACK_URL = "https://forms.gle/n5wJiGU1bKQv6iWV9";
