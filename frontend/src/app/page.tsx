@@ -23,7 +23,7 @@ function Statistics() {
         </div>
         <div className="flex flex-col items-center justify-center gap-3">
           <BellIcon size={32} />
-          <span>500+ alerts sent</span>
+          <span>1,000+ alerts sent</span>
         </div>
       </div>
     </div>
