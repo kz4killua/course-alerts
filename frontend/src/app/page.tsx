@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { GraduationCapIcon, MessageSquareShareIcon, RocketIcon, SearchIcon, UserIcon } from "lucide-react";
+import { BellIcon, MessageSquareShareIcon, SearchIcon, SquarePenIcon, UserIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";
 import { Header } from "@/components/shared/header";
@@ -10,16 +10,21 @@ import { Footer } from "@/components/shared/footer";
 import { FEEDBACK_URL } from "@/lib/constants";
 
 
-function Stats() {
+function Statistics() {
   return (
-    <div className="flex items-center justify-center gap-x-8">
-      <div className="flex flex-col items-center justify-center gap-3">
-        <UserIcon size={32} />
-        <span>60+ users</span>
-      </div>
-      <div className="flex flex-col items-center justify-center gap-3">
-        <GraduationCapIcon size={32} />
-        <span>500+ classes</span>
+    <div className="space-y-8">
+      <p className="text-center font-semibold">
+        Made for Ontario Tech University
+      </p>
+      <div className="flex items-center justify-center gap-x-8">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <UserIcon size={32} />
+          <span>100+ users</span>
+        </div>
+        <div className="flex flex-col items-center justify-center gap-3">
+          <BellIcon size={32} />
+          <span>500+ alerts sent</span>
+        </div>
       </div>
     </div>
   )
@@ -29,13 +34,12 @@ function Stats() {
 function Hero() {
   return (
     <div className="flex items-center space-x-20 pt-20 pb-20">
-      <div className="grow space-y-8">
+      <div className="grow space-y-7">
         <h1 className="font-extrabold text-6xl">
           Classes full?
         </h1>
-        <h3 className="text-2xl">
-          Sign up for alerts. 
-          Be the first to know when seats become available.
+        <h3 className="text-xl">
+          Sign up for alerts. Be the first to know when seats become available.
         </h3>
         <div>
           <Link className={`${buttonVariants({ variant: "default", size: "lg" })} text-base h-12 px-8`} href={"/classes"}>
@@ -67,7 +71,7 @@ function Feedback() {
           we&apos;d love to hear from you. 
         </p>
         <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={FEEDBACK_URL} target="_blank">
-          <RocketIcon size={16} className="mr-2" /> Give feedback
+          <SquarePenIcon size={16} className="mr-2" /> Give feedback
         </Link>
       </div>
       <div className="hidden md:block">
@@ -84,7 +88,7 @@ export default function Page() {
       <Header />
       <main>
         <Hero />
-        <Stats />
+        <Statistics />
         <Feedback />
       </main>
       <Footer />
