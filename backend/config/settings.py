@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'corsheaders',
     'django_filters',
+    'django_cleanup.apps.CleanupConfig',
 
     'accounts.apps.AccountsConfig',
     'courses.apps.CoursesConfig',
