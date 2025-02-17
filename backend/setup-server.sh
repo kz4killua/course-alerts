@@ -40,7 +40,7 @@ sudo apt update
 
 # Install and configure Nginx
 sudo apt install nginx
-sudo cat nginx-config.txt | sudo tee /etc/nginx/sites-available/api.coursealerts.fyi > /dev/null
+sudo cat nginx.conf | sudo tee /etc/nginx/sites-available/api.coursealerts.fyi > /dev/null
 sudo ln -s /etc/nginx/sites-available/api.coursealerts.fyi /etc/nginx/sites-enabled
 sudo nginx -t
 sudo systemctl restart nginx
