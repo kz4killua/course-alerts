@@ -14,6 +14,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
     depends_on:
       db:
         condition: service_healthy
