@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
-APP_PORT=${PORT:-8000}
+APP_PORT=${PORT}
 
 cd /app/
 
