@@ -1,6 +1,14 @@
 .git
+.gitignore
+.env
+.venv
+.dockerignore
+.vscode
 __pycache__
-cache
+Dockerfile
+compose.yaml
 venv
+cache
 media
+staticfiles
 *.sqlite3
