@@ -7,8 +7,7 @@ sudo apt update
 
 # Set up environment variables
 echo "Ensure that the environment variables are set in the .env file."
-echo "Press any key to continue..."
-read -n 1 -s
+read -n 1 -s -r -p "Press any key to continue..."
 chmod 600 .env
 
 # Load environment variables
@@ -25,8 +24,7 @@ echo "Log into your domain registrar and create the following record:"
 echo "Type: A"
 echo "Name: api"
 echo "Value: <server-ip>"
-echo "Press any key to continue..."
-read -n 1 -s
+read -n 1 -s -r -p "Press any key to continue..."
 
 # Set up Nginx
 sudo apt install nginx
