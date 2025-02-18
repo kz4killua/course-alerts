@@ -8,7 +8,7 @@ import Script from 'next/script'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Course Alerts | For Ontario Tech University",
+  title: "Course Alerts | Get into any full class",
   description: "Classes full? Get notified as soon as a spot opens up.",
 };
 
