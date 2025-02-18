@@ -28,7 +28,7 @@ read -n 1 -s -r -p "Press any key to continue..."; echo
 
 # Set up Nginx
 sudo apt install nginx
-envsubst < nginx.conf | sudo tee /etc/nginx/sites-available/${DOMAIN} > /dev/null
+envsubst '${DOMAIN} ${PORT}' < nginx.conf | sudo tee /etc/nginx/sites-available/${DOMAIN} > /dev/null
 sudo ln -sf /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled
 sudo nginx -t
 sudo systemctl restart nginx
