@@ -159,6 +159,10 @@ CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
 # User model
 AUTH_USER_MODEL = 'accounts.User'
 
+# Media settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media/'
+
 # Cache settings
 if DEVELOPMENT:
     CACHES = {
