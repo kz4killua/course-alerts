@@ -8,16 +8,14 @@ sudo apt update
 # Set up environment variables
 echo "Ensure that the environment variables are set in the .env file."
 read -n 1 -s -r -p "Press any key to continue..."; echo
-chmod 600 .env
-
-# Load environment variables
 set -o allexport
 source .env
 set +o allexport
+chmod 600 .env
 
 # Start services
-sudo sh setup-mounted-volumes.sh
-sudo sh redeploy.sh
+sudo bash setup-mounted-volumes.sh
+sudo bash redeploy.sh
 
 # Set up DNS
 echo "Log into your domain registrar and create the following record:"

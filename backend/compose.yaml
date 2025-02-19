@@ -6,7 +6,7 @@ services:
       - .env
     ports:
       - "127.0.0.1:${PORT}:${PORT}"
-    command: sh -c "/app/entrypoint.sh"
+    command: /app/entrypoint.sh
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost ${PORT}"]
       interval: 10s
