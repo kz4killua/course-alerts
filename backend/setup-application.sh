@@ -11,7 +11,7 @@ read -n 1 -s -r -p "Press any key to continue..."; echo
 set -o allexport
 source .env
 set +o allexport
-chmod 600 .env
+sudo chmod 600 .env
 
 # Start services
 sudo bash setup-mounted-volumes.sh
