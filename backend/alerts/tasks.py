@@ -20,17 +20,9 @@ logger = get_task_logger(__name__)
 def send_alerts_task():
     
     subscriptions = Subscription.objects.all()
-
-    logger.info("Getting enrollment info...")
     latest_enrollment_info = get_sections_enrollment_info(subscriptions)
-
-    logger.info("Getting alerts...")
     alerts = get_alerts(subscriptions, latest_enrollment_info)
-
-    logger.info(f"Sending {len(alerts)} alert(s)...")
     send_alerts(alerts, subscriptions)
-
-    logger.info("Done.")
 
 
 def send_alerts(alerts: dict[User, dict], subscriptions: Manager[Subscription]) -> None:
