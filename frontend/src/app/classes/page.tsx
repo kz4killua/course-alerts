@@ -2,12 +2,13 @@
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Container } from "@/components/shared/container"
 import { Header } from "@/components/shared/header"
 import { Footer } from "@/components/shared/footer"
 import { SectionsDialog } from "@/components/classes/sections-dialog"
-import { Loader } from "lucide-react"
+import { InfoIcon, Loader } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import type { Term, Course, Section } from "@/types"
 import { listTerms, listCourses } from "@/services/courses"
@@ -23,7 +24,7 @@ function TermSelect({
   setSelectedTerm: (term: Term | undefined) => void
 }) {
 
-  const [terms, setTerms] = useState<Term[]>([])
+  const [terms, setTerms] = useState<Term[]>()
 
   useEffect(() => {
     listTerms(true)
@@ -40,17 +41,27 @@ function TermSelect({
   }, [setSelectedTerm])
 
   function handleValueChange(value: string) {
-    setSelectedTerm(terms.find(term => term.term === value));
+    if (terms !== undefined) {
+      setSelectedTerm(terms.find(term => term.term === value))
+    }
   }
 
   return (
     <div className="flex gap-8">
       {
-        terms.length === 0 ? (
+        terms === undefined ? (
           <div className="flex items-center space-x-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-24" />
           </div>
+        ) : terms.length === 0 ? (
+          <Alert className="bg-blue-50 border-blue-500">
+            <InfoIcon className="w-4 h-4" />
+            <AlertTitle>No terms available</AlertTitle>
+            <AlertDescription>
+              There are no terms available for registration at this time. Check back soon!
+            </AlertDescription>
+          </Alert>
         ) : (
           <RadioGroup defaultValue={selectedTerm?.term} className="flex gap-4" onValueChange={handleValueChange}>
             {
@@ -130,7 +141,7 @@ function SearchResults({
           loading ? (
             <Loader size={14} className="animate-spin" />
           ) :
-          debouncedQuery.length !== 0 && (
+          debouncedQuery.length > 0 && debouncedTerm && (
             <span>Found {courses.length} results for &ldquo;{debouncedQuery}&rdquo; in {debouncedTerm?.term_desc}</span>
           )
         }
@@ -171,12 +182,16 @@ export default function Page() {
         </div>
 
         <div className="mt-10">
-          <SearchResults 
-            query={query} 
-            selectedTerm={selectedTerm} 
-            selectedSections={selectedSections}
-            setSelectedSections={setSelectedSections}
-          />
+          {
+            selectedTerm && (
+              <SearchResults 
+                query={query} 
+                selectedTerm={selectedTerm} 
+                selectedSections={selectedSections}
+                setSelectedSections={setSelectedSections}
+              />
+            )
+          }
         </div>
 
       </main>
