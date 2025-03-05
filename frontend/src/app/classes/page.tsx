@@ -125,7 +125,7 @@ function SearchResults({
       }
     }
 
-    return debounce((query, term) => handleSearch(query, term), 750)
+    return debounce((query, term) => handleSearch(query, term), 250)
   }, [])
 
   useEffect(() => {
