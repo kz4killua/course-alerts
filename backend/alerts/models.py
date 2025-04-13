@@ -26,4 +26,4 @@ class Subscription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user} subscribed to {self.section}'
+        return f'{self.user} - {self.section}'

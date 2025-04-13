@@ -4,4 +4,4 @@ from .models import Subscription
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    pass
+    raw_id_fields = ['user', 'section']

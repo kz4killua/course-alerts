@@ -17,7 +17,7 @@ class Course(models.Model):
         ordering = ["course_title", "subject_course"]
 
     def __str__(self) -> str:
-        return f"Course: {self.subject_course}"
+        return self.subject_course
     
 
 class Term(models.Model):
@@ -30,7 +30,7 @@ class Term(models.Model):
         ordering = ["term"]
 
     def __str__(self) -> str:
-        return f"Term: {self.term}"
+        return self.term
 
 
 class Section(models.Model):
@@ -58,7 +58,7 @@ class Section(models.Model):
         ordering = ["course__subject_course", "schedule_type_description", "course_reference_number"]
 
     def __str__(self) -> str:
-        return f"Section: {self.term.term} - {self.course_reference_number}"
+        return f"{self.term} - {self.course_reference_number}"
 
 
     def get_linked_crns(self) -> list[list[str]]:

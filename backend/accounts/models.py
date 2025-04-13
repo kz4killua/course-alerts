@@ -44,7 +44,7 @@ class EmailVerificationCode(models.Model):
     expires_at = models.DateTimeField()
 
     def __str__(self) -> str:
-        return self.code
+        return f"{self.user} - {self.code}"
     
     def is_expired(self) -> bool:
         return timezone.now() > self.expires_at
