@@ -1,3 +1,4 @@
+import sys
 import html
 import json
 from collections import defaultdict
@@ -87,9 +88,10 @@ class Command(BaseCommand):
                 }
             )
 
-        self.stdout.write(
-            self.style.SUCCESS('Updated data for term: "%s"' % options["term"])
-        )
+        if "test" not in sys.argv:
+            self.stdout.write(
+                self.style.SUCCESS('Updated data for term: "%s"' % options["term"])
+            )
 
 
 def get_all_sections(term: str, jsessionid: str):

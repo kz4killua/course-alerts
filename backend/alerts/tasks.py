@@ -129,9 +129,11 @@ def get_sections_enrollment_info(subscriptions: Manager[Subscription]) -> dict[S
 
 
 def get_section_alert_status(section_enrollment_info: dict) -> str:
-    if (section_enrollment_info["seatsAvailable"] is not None) and (section_enrollment_info["seatsAvailable"] > 0):
-        return Subscription.OPEN
-    elif (section_enrollment_info["waitAvailable"] is not None) and (section_enrollment_info["waitAvailable"] > 0):
+    """Determine if a section is open, has an open waitlist, or is closed."""
+    if (section_enrollment_info["seatsAvailable"] or 0) > 0:
+        # Open sections are reserved for any waitlisted students
+        if (section_enrollment_info["waitCount"] or 0) == 0:
+            return Subscription.OPEN
+    if (section_enrollment_info["waitAvailable"] or 0) > 0:
         return Subscription.WAITLIST_OPEN
-    else:
-        return Subscription.CLOSED
+    return Subscription.CLOSED

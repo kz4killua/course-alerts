@@ -130,7 +130,7 @@ class TestAlerts(TestCase):
             get_section_alert_status(enrollment_info), Subscription.CLOSED
         )
 
-        # No seats available (class overenrolled)
+        # No seats available + class over-enrolled
         enrollment_info = {
             'enrollment': 255,
             'maximumEnrollment': 250,
@@ -141,32 +141,6 @@ class TestAlerts(TestCase):
         }
         self.assertEqual(
             get_section_alert_status(enrollment_info), Subscription.CLOSED
-        )
-
-        # Seats available + waitlist unavailable
-        enrollment_info = {
-            'enrollment': 245,
-            'maximumEnrollment': 250,
-            'seatsAvailable': 5,
-            'waitCapacity': None,
-            'waitCount': None,
-            'waitAvailable': None
-        }
-        self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.OPEN
-        )
-
-        # Seats available + waitlist open
-        enrollment_info = {
-            'enrollment': 240,
-            'maximumEnrollment': 250,
-            'seatsAvailable': 10,
-            'waitCapacity': 20,
-            'waitCount': 10,
-            'waitAvailable': 10
-        }
-        self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.OPEN
         )
 
         # No seats available + waitlist open
@@ -195,7 +169,46 @@ class TestAlerts(TestCase):
             get_section_alert_status(enrollment_info), Subscription.CLOSED
         )
 
-    
+        # Seats available + no waitlist
+        enrollment_info = {
+            'enrollment': 245,
+            'maximumEnrollment': 250,
+            'seatsAvailable': 5,
+            'waitCapacity': None,
+            'waitCount': None,
+            'waitAvailable': None
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.OPEN
+        )
+
+        # Seats available, but reserved for waitlisted students
+        enrollment_info = {
+            'enrollment': 248, 
+            'maximumEnrollment': 250, 
+            'seatsAvailable': 2, 
+            'waitCapacity': 25, 
+            'waitCount': 25, 
+            'waitAvailable': 0
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.CLOSED
+        )
+
+        # Seats available + waitlist open
+        enrollment_info = {
+            'enrollment': 245,
+            'maximumEnrollment': 250,
+            'seatsAvailable': 5,
+            'waitCapacity': 20,
+            'waitCount': 10,
+            'waitAvailable': 10
+        }
+        self.assertEqual(
+            get_section_alert_status(enrollment_info), Subscription.WAITLIST_OPEN
+        )
+
+
     def test_get_alerts(self):
 
         user = User.objects.create_user(
