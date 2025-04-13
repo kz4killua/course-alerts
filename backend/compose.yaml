@@ -6,7 +6,7 @@ services:
       - .env
     ports:
       - "127.0.0.1:${PORT}:${PORT}"
-    command: /app/entrypoint.sh
+    command: /app/docker-entrypoint.sh
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost ${PORT}"]
       interval: 10s
