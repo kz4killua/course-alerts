@@ -4,7 +4,7 @@ import clsx from "clsx"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogFooter, DrawerDialogHeader, DrawerDialogTitle, DrawerDialogTrigger } from "@/components/shared/drawer-dialog"
 import type { Term, Course, Section } from "@/types"
 import { formatMeetingTimes } from "@/lib/utils"
 import { ConfirmationDialog } from "./confirmation-dialog"
@@ -94,9 +94,9 @@ export function SectionsDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <DrawerDialog open={open} onOpenChange={handleOpenChange}>
 
-      <DialogTrigger asChild>
+      <DrawerDialogTrigger asChild>
         <div>
           <CourseDisplay
             key={course.subject_course}
@@ -105,19 +105,19 @@ export function SectionsDialog({
             bottomRight={term.term_desc}
           />
         </div>
-      </DialogTrigger>
+      </DrawerDialogTrigger>
 
-      <DialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
+      <DrawerDialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
         
-        <DialogHeader className="bg-background px-10 pt-10">
-          <DialogTitle className="text-3xl">
+        <DrawerDialogHeader className="bg-background px-10 pt-10">
+          <DrawerDialogTitle className="text-3xl">
             {course.subject_course} - {course.course_title}
-          </DialogTitle>
-        </DialogHeader>
+          </DrawerDialogTitle>
+        </DrawerDialogHeader>
 
-        <DialogDescription className="hidden">
+        <DrawerDialogDescription className="hidden">
           Choose the classes to get alerts for.
-        </DialogDescription>
+        </DrawerDialogDescription>
 
         <div className="px-10 overflow-y-auto grow">
 
@@ -215,7 +215,7 @@ export function SectionsDialog({
           </div>
         </div>
 
-        <DialogFooter className="bg-background px-10 pb-10">
+        <DrawerDialogFooter className="bg-background px-10 pb-10">
           <Button 
             variant="ghost" 
             onClick={clearSelectedSections} 
@@ -229,7 +229,7 @@ export function SectionsDialog({
           >
             Create alerts
           </Button>
-        </DialogFooter>
+        </DrawerDialogFooter>
 
         <ConfirmationDialog
           open={confirmationDialogOpen}
@@ -241,7 +241,7 @@ export function SectionsDialog({
           setSelectedSections={setSelectedSections}
         />
 
-      </DialogContent>
-    </Dialog>
+      </DrawerDialogContent>
+    </DrawerDialog>
   )
 }
