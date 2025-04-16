@@ -201,7 +201,7 @@ export function SectionsDialog({
                       <Checkbox id={section.id} checked={selectedSections.has(section.id)} />
                       <CourseDisplay 
                         topLeft={section.schedule_type_description}
-                        topRight={`CRN: ${section.course_reference_number}`}
+                        topRight={`CRN ${section.course_reference_number}`}
                         bottomLeft={formatMeetingTimes(section.meeting_times)}
                         className={clsx(
                           selectedSections.has(section.id) && "bg-accent border-primary"

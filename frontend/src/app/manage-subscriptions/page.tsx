@@ -105,8 +105,8 @@ function SubscriptionsList({
                 <CourseDisplay
                   topLeft={section.course}
                   bottomLeft={section.schedule_type_description}
-                  topRight={`CRN: ${section.course_reference_number}`}
-                  bottomRight={`Term: ${section.term}`}
+                  topRight={`CRN ${section.course_reference_number}`}
+                  bottomRight={`${section.term}`}
                   className="cursor-auto"
                 />
                 <DeletionDialog 
