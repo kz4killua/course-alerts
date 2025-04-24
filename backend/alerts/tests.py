@@ -7,7 +7,7 @@ from rest_framework import status
 
 from courses.models import Section, Term
 from alerts.models import Subscription
-from alerts.tasks import get_alerts, get_section_alert_status
+from alerts.tasks import get_alerts, get_status, get_statuses, update_statuses
 
 
 User = get_user_model()
@@ -115,7 +115,7 @@ class TestAlerts(TestCase):
         call_command("updatesections", "202309", "--usecache")
 
 
-    def test_get_section_alert_status(self):
+    def test_get_status(self):
         
         # No seats available
         enrollment_info = {
@@ -127,7 +127,7 @@ class TestAlerts(TestCase):
             'waitAvailable': None
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.CLOSED
+            get_status(enrollment_info), Subscription.CLOSED
         )
 
         # No seats available + class over-enrolled
@@ -140,7 +140,7 @@ class TestAlerts(TestCase):
             'waitAvailable': None
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.CLOSED
+            get_status(enrollment_info), Subscription.CLOSED
         )
 
         # No seats available + waitlist open
@@ -153,7 +153,7 @@ class TestAlerts(TestCase):
             'waitAvailable': 10
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.WAITLIST_OPEN
+            get_status(enrollment_info), Subscription.WAITLIST_OPEN
         )
 
         # No seats available + waitlist full
@@ -166,7 +166,7 @@ class TestAlerts(TestCase):
             'waitAvailable': 0
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.CLOSED
+            get_status(enrollment_info), Subscription.CLOSED
         )
 
         # Seats available + no waitlist
@@ -179,7 +179,7 @@ class TestAlerts(TestCase):
             'waitAvailable': None
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.OPEN
+            get_status(enrollment_info), Subscription.OPEN
         )
 
         # Seats available, but reserved for waitlisted students
@@ -192,7 +192,7 @@ class TestAlerts(TestCase):
             'waitAvailable': 0
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.CLOSED
+            get_status(enrollment_info), Subscription.CLOSED
         )
 
         # Seats available + waitlist open
@@ -205,7 +205,7 @@ class TestAlerts(TestCase):
             'waitAvailable': 10
         }
         self.assertEqual(
-            get_section_alert_status(enrollment_info), Subscription.WAITLIST_OPEN
+            get_status(enrollment_info), Subscription.WAITLIST_OPEN
         )
 
 
@@ -215,18 +215,20 @@ class TestAlerts(TestCase):
             email="user@example.com", password="password"
         )
 
+        # Create sections
         section1 = Section.objects.get(term__term='202309', course_reference_number='42684')
         section2 = Section.objects.get(term__term='202309', course_reference_number='44746')
         section3 = Section.objects.get(term__term='202309', course_reference_number='42752')
         section4 = Section.objects.get(term__term='202309', course_reference_number='41942')
 
         # Create subscriptions
-        subscription1 = Subscription.objects.create(user=user, section=section1)
-        subscription2 = Subscription.objects.create(user=user, section=section2)
-        subscription3 = Subscription.objects.create(user=user, section=section3)
-        subscription4 = Subscription.objects.create(user=user, section=section4)
+        Subscription.objects.create(user=user, section=section1)
+        Subscription.objects.create(user=user, section=section2)
+        Subscription.objects.create(user=user, section=section3)
+        Subscription.objects.create(user=user, section=section4)
 
-        enrollment_info = {
+        # Mock enrollment infos
+        enrollment_infos = {
             section1: {
                 'enrollment': 250,
                 'maximumEnrollment': 250,
@@ -261,8 +263,10 @@ class TestAlerts(TestCase):
             },
         }
 
-        alerts = get_alerts(Subscription.objects.all(), enrollment_info)
-
+        # Test alerts
+        subscriptions = Subscription.objects.all()
+        statuses = get_statuses(subscriptions, enrollment_infos)
+        alerts = get_alerts(subscriptions, statuses)
         expected = {
             user: {
                 Subscription.OPEN: {section2},
@@ -270,38 +274,11 @@ class TestAlerts(TestCase):
                 Subscription.CLOSED: {section1, section4}
             }
         }
-
         self.assertEqual(alerts, expected)
 
-        # Update the last status of the subscriptions
-        subscription1.last_status = Subscription.CLOSED
-        subscription1.save()
-        subscription2.last_status = Subscription.OPEN
-        subscription2.save()
-        subscription3.last_status = Subscription.WAITLIST_OPEN
-        subscription3.save()
-        subscription4.last_status = Subscription.CLOSED
-        subscription4.save()
-
-        alerts = get_alerts(Subscription.objects.all(), enrollment_info)
-
+        # Test repeated alerts
+        update_statuses(subscriptions, statuses, [])
+        statuses = get_statuses(subscriptions, enrollment_infos)
+        alerts = get_alerts(subscriptions, statuses)
         expected = {}
-
-        self.assertEqual(alerts, expected)
-
-        # Alerts should only be sent if there are open seats
-        for section in enrollment_info:
-            enrollment_info[section] = {
-                'enrollment': 250,
-                'maximumEnrollment': 250,
-                'seatsAvailable': 0,
-                'waitCapacity': None,
-                'waitCount': None,
-                'waitAvailable': None
-            }
-
-        alerts = get_alerts(Subscription.objects.all(), enrollment_info)
-
-        expected = {}
-
         self.assertEqual(alerts, expected)
