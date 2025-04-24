@@ -18,7 +18,7 @@ logger = get_task_logger(__name__)
 
 @shared_task
 def send_alerts_task():
-    subscriptions = list(Subscription.objects.all())
+    subscriptions = list(Subscription.objects.select_related("user", "section").all())
     enrollment_infos = get_enrollment_infos(subscriptions)
     statuses = get_statuses(subscriptions, enrollment_infos)
     alerts = get_alerts(subscriptions, statuses)
