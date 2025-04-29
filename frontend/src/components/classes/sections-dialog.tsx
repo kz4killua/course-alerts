@@ -107,9 +107,9 @@ export function SectionsDialog({
         </div>
       </DrawerDialogTrigger>
 
-      <DrawerDialogContent className="max-h-full max-w-full sm:max-w-5xl sm:max-h-[calc(100%-1rem)] p-0 flex flex-col overflow-y-hidden">
+      <DrawerDialogContent className="max-h-[95%] max-w-full sm:max-w-5xl sm:max-h-[95%] p-0 flex flex-col overflow-y-hidden">
         
-        <DrawerDialogHeader className="bg-background px-10 pt-10">
+        <DrawerDialogHeader className="bg-background px-10 pt-5 sm:pt-10">
           <DrawerDialogTitle className="text-3xl">
             {course.subject_course} - {course.course_title}
           </DrawerDialogTitle>
@@ -215,7 +215,7 @@ export function SectionsDialog({
           </div>
         </div>
 
-        <DrawerDialogFooter className="bg-background px-10 pb-10">
+        <DrawerDialogFooter className="bg-background px-10 pb-5 sm:pb-10">
           <Button 
             variant="ghost" 
             onClick={clearSelectedSections} 
