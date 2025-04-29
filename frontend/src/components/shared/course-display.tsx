@@ -24,7 +24,7 @@ export function CourseDisplay({
       className={clsx(
         "rounded-md border px-8 py-4 cursor-pointer",
         "grow flex flex-col gap-y-1",
-        "hover:bg-accent hover:border-primary transition-colors",
+        "sm:hover:bg-accent sm:hover:border-primary transition-colors",
         className
       )}
       onClick={onClick}

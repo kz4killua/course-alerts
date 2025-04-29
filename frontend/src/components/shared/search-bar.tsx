@@ -22,7 +22,7 @@ export function SearchBar({
       <SearchIcon size={16} />
       <Input 
         className={clsx(
-          "border-0 ring-0 shadow-none text-base focus-visible:border-0 focus-visible:ring-0 placeholder:font-medium",
+          "border-0 ring-0 shadow-none focus-visible:border-0 focus-visible:ring-0 placeholder:font-medium",
         )}
         type="text" 
         placeholder={placeholder} 
