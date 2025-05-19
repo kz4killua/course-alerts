@@ -1,10 +1,6 @@
-import random
-import string
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from rest_framework import generics
@@ -14,9 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, RequestSignInCodeSerializer, VerifySignInCodeSerializer
 from .throttles import RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle
-from .models import EmailVerificationCode, clean_email
+from .models import EmailVerificationCode
 
 
 User = get_user_model()
@@ -29,31 +25,20 @@ class RequestSignInCode(APIView):
 
     def post(self, request):
 
-        email = request.data.get('email')
-        if not email: 
-            return Response({
-                'detail': 'No email provided.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        email = clean_email(email)
+        serializer = RequestSignInCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
 
         # Create the user if it doesn't exist
         user, _ = User.objects.get_or_create(email=email)
-        
-        email_verification_code, _ = EmailVerificationCode.objects.update_or_create(
-            user=user,
-            defaults={
-                'code': ''.join(random.choices(string.digits, k=6)),
-                'expires_at': timezone.now() + timezone.timedelta(minutes=15)
-            }
-        )
+        _, code = EmailVerificationCode.generate(user)
 
+        # Send the verification code to the user's email
         subject = render_to_string('accounts/verification_code_subject.txt')
         html_message = render_to_string('accounts/verification_code_body.html', {
-            'code': email_verification_code.code
+            'code': code
         })
         plain_message = strip_tags(html_message)
-
         send_mail(
             subject=subject,
             message=plain_message,
@@ -73,35 +58,29 @@ class VerifySignInCode(APIView):
     permission_classes = []
 
     def post(self, request):
-        
-        code = request.data.get('code')
-        email = request.data.get('email')
 
-        if not email: 
-            return Response({
-                'detail': 'No email provided.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        if not code:
-            return Response({
-                'detail': 'No code provided.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        serializer = VerifySignInCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        code = serializer.validated_data['code']
         
-        email = clean_email(email)
-        
+        # Retrieve the email verification code for the user
         try:
             email_verification_code = EmailVerificationCode.objects.get(
-                user__email=email, code=code
+                user__email=email
             )
         except EmailVerificationCode.DoesNotExist:
             return Response({
                 'detail': 'Invalid code.', 
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        if email_verification_code.is_expired():
+        # Validate the provided code
+        if not email_verification_code.verify(code):
             return Response({
-                'detail': 'Code expired.'
+                'detail': 'Invalid code.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        # Verify the user's email and delete the verification code
         user = email_verification_code.user
         user.email_verified = True
         user.save()
@@ -109,10 +88,11 @@ class VerifySignInCode(APIView):
 
         # Provide a set of tokens to the user
         refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
 
         return Response({
             'refresh': str(refresh),
-            'access': str(refresh.access_token)
+            'access': str(access),
         }, status=status.HTTP_200_OK)
 
 

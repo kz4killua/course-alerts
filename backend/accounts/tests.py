@@ -1,12 +1,11 @@
 from django.urls import reverse
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework import status
 
 from accounts.models import EmailVerificationCode
-from accounts.views import RequestSignInCode, VerifySignInCode
+from accounts.views import RequestSignInCode
 
 
 User = get_user_model()
@@ -65,9 +64,9 @@ class TestSignIn(APITestCase):
         self.assertEqual(User.objects.count(), 1)
         self.assertEqual(EmailVerificationCode.objects.count(), 1)
 
+        # Retrieve the user and the verification code
         user1 = User.objects.get(email="user1@example.com")
-        email_verification_code = EmailVerificationCode.objects.get(user=user1)
-        code = email_verification_code.code
+        email_verification_code, code = EmailVerificationCode.generate(user1)
 
         url = reverse('accounts:verify-signin-code')
 
