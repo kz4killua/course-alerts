@@ -14,9 +14,9 @@ class Subscription(models.Model):
     CLOSED = "closed"
 
     LAST_STATUS_CHOICES = {
-        OPEN: "open",
-        WAITLIST_OPEN: "waitlist open",
-        CLOSED: "closed",
+        OPEN: OPEN,
+        WAITLIST_OPEN: WAITLIST_OPEN,
+        CLOSED: CLOSED,
     }
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
