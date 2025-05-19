@@ -46,7 +46,7 @@ class EmailVerificationCode(models.Model):
     attempts = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    code = models.CharField(max_length=6)
+    code = models.CharField(max_length=128)
 
     CODE_LENGTH = 6
     CODE_EXPIRATION_TIME = 15
