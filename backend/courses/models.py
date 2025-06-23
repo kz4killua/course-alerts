@@ -52,7 +52,7 @@ class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
     is_primary_section = models.BooleanField()
-    _time_bitmap = models.CharField(max_length=512, editable=False)
+    _time_bitmap = models.CharField(max_length=512, editable=False, null=True)
 
     class Meta:
         ordering = ["course__subject_course", "schedule_type_description", "course_reference_number"]
@@ -112,9 +112,12 @@ class Section(models.Model):
 
     def get_time_bitmap(self) -> TimeBitmap:
         """Get the TimeBitmap representing all time slots occupied by a section."""
-        return TimeBitmap(int(self._time_bitmap))
+        # TODO: Fix rounding issues with time bitmaps
+        return TimeBitmap()
+        # return TimeBitmap(int(self._time_bitmap))
     
 
     def save(self, *args, **kwargs) -> None:
-        self._time_bitmap = str(self._calculate_time_bitmap().bitmap)
+        # TODO: Fix rounding issues with time bitmaps
+        # self._time_bitmap = str(self._calculate_time_bitmap().bitmap)
         return super().save(*args, **kwargs)
