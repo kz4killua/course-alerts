@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import UserSerializer, RequestSignInCodeSerializer, VerifySignInCodeSerializer
-from .throttles import RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle
+from .throttles import RequestEmailVerificationHourlyThrottle
 from .models import EmailVerificationCode
 
 
@@ -21,7 +21,7 @@ User = get_user_model()
 class RequestSignInCode(APIView):
     authentication_classes = []
     permission_classes = []
-    throttle_classes = [RequestEmailVerificationHourlyThrottle, RequestEmailVerificationDailyThrottle]
+    throttle_classes = [RequestEmailVerificationHourlyThrottle]
 
     def post(self, request):
 
