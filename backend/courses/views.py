@@ -1,7 +1,3 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.exceptions import APIException
-from rest_framework import status
 from rest_framework import generics
 from rest_framework import filters
 import django_filters.rest_framework
@@ -22,7 +18,6 @@ class CoursesView(generics.ListAPIView):
     serializer_class = CourseSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["subject_course", "course_title"]
-    
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
@@ -31,7 +26,7 @@ class CoursesView(generics.ListAPIView):
             queryset = queryset.filter(section__term__term=term).distinct()
         queryset = queryset[:20]
         return queryset
-    
+
 
 class SectionsView(generics.ListAPIView):
     queryset = Section.objects.all()
@@ -40,9 +35,7 @@ class SectionsView(generics.ListAPIView):
     filterset_fields = []
 
     def get_queryset(self):
-        return Section.objects.filter(
-            course__subject_course=self.kwargs.get("course")
-        )
+        return Section.objects.filter(course__subject_course=self.kwargs.get("course"))
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
