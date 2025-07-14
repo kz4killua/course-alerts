@@ -19,12 +19,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className}`}>
+      <body className={`${inter.className} bg-[#FBFBFB]`}>
         <Providers>
           {children}
         </Providers>
         <Toaster />
-        <Script src="/made-with-love.js" strategy="beforeInteractive" />
+        <Script src="/made-with-love.js" />
       </body>
     </html>
   );

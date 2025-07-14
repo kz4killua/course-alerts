@@ -1,97 +1,94 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { BellIcon, MessageSquareShareIcon, SearchIcon, SquarePenIcon, UserIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/shared/container";
 import { Header } from "@/components/shared/header";
 import { Footer } from "@/components/shared/footer";
-import { FEEDBACK_URL } from "@/lib/constants";
+import { FEEDBACK_URL, GITHUB_URL } from "@/lib/constants";
 
 
-function Statistics() {
+export default function Page() {
   return (
-    <div className="space-y-8">
-      <p className="text-center font-semibold">
-        Made for Ontario Tech University
-      </p>
-      <div className="flex items-center justify-center gap-x-8">
-        <div className="flex flex-col items-center justify-center gap-3">
-          <UserIcon size={32} />
-          <span>100+ users</span>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-3">
-          <BellIcon size={32} />
-          <span>1,000+ alerts sent</span>
-        </div>
-      </div>
+    <div>
+      <Header />
+      <Container>
+        <main className="mt-24 space-y-24">
+          <Hero />
+          <FrequentlyAskedQuestions />
+        </main>
+        <Footer />
+      </Container>
     </div>
-  )
+  );
 }
 
 
 function Hero() {
   return (
-    <div className="flex items-center space-x-20 pt-20 pb-20">
-      <div className="grow space-y-7">
-        <h1 className="font-extrabold text-6xl">
-          Classes full?
+    <section className="grid grid-cols-1 md:grid-cols-2 place-items-center gap-y-20">
+      <div className="space-y-7">
+        <h1 className="font-semibold text-4xl md:text-5xl md:leading-tight">
+          Get into your full classes
         </h1>
-        <h3 className="text-xl">
-          Sign up for alerts. Be the first to know when seats become available.
-        </h3>
+        <h2 className="text-xl md:leading-relaxed text-muted-foreground">
+          Get notified as soon as a spot opens up in any full class at Ontario Tech University.
+        </h2>
         <div>
-          <Link className={`${buttonVariants({ variant: "default", size: "lg" })} text-base h-12 px-8`} href={"/classes"}>
+          <Link className={`${buttonVariants({ variant: "default", size: "lg" })} text-base h-14 px-8`} href={"/classes"}>
             <SearchIcon size={16} className="mr-2" /> Search for a class
           </Link>
         </div>
       </div>
-      <div className="hidden md:block">
-        <Image 
-          alt="notifications" 
-          src={"/hero-image.svg"} 
-          width={600} 
+      <div className="flex items-center justify-center">
+        <Image
+          alt="A student looking notifications on their phone"
+          src={"/hero-image.svg"}
+          width={600}
           height={600}
           priority
         />
       </div>
-    </div>
+    </section>
   )
 }
 
 
-function Feedback() {
+function FrequentlyAskedQuestions() {
   return (
-    <div className="w-full rounded-md bg-primary text-white mt-20 px-10 py-10 flex items-center space-x-20">
-      <div className="space-y-5">
-        <h1 className="font-semibold text-3xl">We want to hear from you!</h1>
-        <p>
-          Whether you found a bug, have a question, or just want to share your thoughts, 
-          we&apos;d love to hear from you. 
-        </p>
-        <Link className={`${buttonVariants({ variant: "secondary", size: "lg" })}`} href={FEEDBACK_URL} target="_blank">
-          <SquarePenIcon size={16} className="mr-2" /> Give feedback
-        </Link>
+    <section>
+      <h2 className="text-3xl md:text-4xl font-semibold mb-10">
+        Frequently Asked Questions
+      </h2>
+      <div className="space-y-8">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">
+            Is it free?
+          </h3>
+          <p className="text-lg text-muted-foreground">
+            Yes! Course Alerts is completely free to use, no strings attached.
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">
+            Can I trust you with my personal information?
+          </h3>
+          <p className="text-lg text-muted-foreground">
+            We only store what we need to send you course notifications.
+            This information is never used for anything else.
+            Plus, Course Alerts is completely open source.
+            You can review the entire codebase <Link href={GITHUB_URL} target="_blank" className="font-medium underline underline-offset-4 hover:text-primary">here</Link>.
+          </p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">
+            I have a different question, comment, or complaint.
+          </h3>
+          <p className="text-lg text-muted-foreground">
+            Please fill out our feedback form <Link href={FEEDBACK_URL} target="_blank" className="font-medium underline underline-offset-4 hover:text-primary">here</Link>.
+          </p>
+        </div>
       </div>
-      <div className="hidden md:block">
-        <MessageSquareShareIcon strokeWidth={1.25} size={100} />
-      </div>
-    </div>
+    </section>
   )
-}
-
-
-export default function Page() {
-  return (
-    <Container>
-      <Header />
-      <main>
-        <Hero />
-        <Statistics />
-        <Feedback />
-      </main>
-      <Footer />
-    </Container>
-  );
 }
