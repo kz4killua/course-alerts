@@ -9,7 +9,7 @@ import type { Term, Course, Section } from "@/types"
 import { formatMeetingTimes } from "@/lib/utils"
 import { ConfirmationDialog } from "./confirmation-dialog"
 import { useEffect, useState } from "react"
-import { CourseDisplay, CourseDisplaySkeleton } from "@/components/shared/course-display"
+import { ItemDisplay, CourseDisplaySkeleton } from "@/components/shared/item-display"
 import { listSections } from "@/services/courses"
 
 
@@ -98,7 +98,7 @@ export function SectionsDialog({
 
       <DrawerDialogTrigger asChild>
         <div>
-          <CourseDisplay
+          <ItemDisplay
             key={course.subject_course}
             topLeft={course.course_title}
             bottomLeft={course.subject_course}
@@ -199,7 +199,7 @@ export function SectionsDialog({
                       onClick={() => toggleSectionSelection(section)}
                     >
                       <Checkbox id={section.id} checked={selectedSections.has(section.id)} />
-                      <CourseDisplay 
+                      <ItemDisplay 
                         topLeft={section.schedule_type_description}
                         topRight={`CRN ${section.course_reference_number}`}
                         bottomLeft={formatMeetingTimes(section.meeting_times)}

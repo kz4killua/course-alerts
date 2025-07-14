@@ -1,10 +1,7 @@
 "use client"
 
-import { Container } from "@/components/shared/container"
-import { Footer } from "@/components/shared/footer"
-import { Header } from "@/components/shared/header"
 import { SearchBar } from "@/components/shared/search-bar"
-import { CourseDisplay, CourseDisplaySkeleton } from "@/components/shared/course-display"
+import { ItemDisplay, CourseDisplaySkeleton } from "@/components/shared/item-display"
 import { Button } from "@/components/ui/button"
 import { Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -14,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { LoadingIcon } from "@/components/shared/loading-icon"
+import { PageLayout } from "@/components/shared/page-layout"
 
 
 export default function Page() {
@@ -41,10 +39,11 @@ export default function Page() {
   }, [toast])
 
   return (
-    <Container className="flex flex-col min-h-screen">
-      <Header />
-      <main className="grow w-full max-w-3xl mx-auto pt-10">
-        <h1 className="text-3xl font-semibold mb-6">Your Subscriptions</h1>
+    <PageLayout>
+      <main className="pt-10">
+        <h1 className="text-3xl font-semibold mb-6">
+          Your Subscriptions
+        </h1>
         <SearchBar placeholder="Search your alerts..." onChange={setQuery} />
         <SubscriptionsList 
           query={query} 
@@ -53,8 +52,7 @@ export default function Page() {
           setSubscriptions={setSubscriptions}
         />
       </main>
-      <Footer />
-    </Container>
+    </PageLayout>
   )
 }
 
@@ -71,7 +69,7 @@ function SubscriptionsList({
   setSubscriptions: (subscriptions: Section[]) => void
 }) {
 
-  // Filter the subscriptions (course + crn) based on the query
+  // Filter the subscriptions (course + CRN) based on the query
   const filteredSubscriptions = subscriptions.filter(section => {
     const tag = section.course + section.course_reference_number
     return tag.toLowerCase().includes(query.toLowerCase())
@@ -102,7 +100,7 @@ function SubscriptionsList({
           ) : (
             filteredSubscriptions.map(section => (
               <div key={section.id} className="flex items-center justify-center gap-3">
-                <CourseDisplay
+                <ItemDisplay
                   topLeft={section.course}
                   bottomLeft={section.schedule_type_description}
                   topRight={`CRN ${section.course_reference_number}`}

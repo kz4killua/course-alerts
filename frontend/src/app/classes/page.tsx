@@ -4,9 +4,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Container } from "@/components/shared/container"
-import { Header } from "@/components/shared/header"
-import { Footer } from "@/components/shared/footer"
 import { SectionsDialog } from "@/components/classes/sections-dialog"
 import { InfoIcon, Loader } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
@@ -14,6 +11,38 @@ import type { Term, Course, Section } from "@/types"
 import { listTerms, listCourses } from "@/services/courses"
 import { debounce } from "lodash"
 import { SearchBar } from "@/components/shared/search-bar"
+import { PageLayout } from "@/components/shared/page-layout"
+
+
+export default function Page() {
+
+  const [query, setQuery] = useState<string>("")
+  const [selectedTerm, setSelectedTerm] = useState<Term>()
+  const [selectedSections, setSelectedSections] = useState<Set<Section["id"]>>(new Set())
+
+  return (
+    <PageLayout>
+      <main className="pt-10">
+        <div className="space-y-6">
+          <SearchBar placeholder="Search for a course..." onChange={setQuery} />
+          <TermSelect selectedTerm={selectedTerm} setSelectedTerm={setSelectedTerm} />
+        </div>
+        <div className="mt-10">
+          {
+            selectedTerm && (
+              <SearchResults 
+                query={query} 
+                selectedTerm={selectedTerm} 
+                selectedSections={selectedSections}
+                setSelectedSections={setSelectedSections}
+              />
+            )
+          }
+        </div>
+      </main>
+    </PageLayout>
+  )
+}
 
 
 function TermSelect({
@@ -136,7 +165,7 @@ function SearchResults({
 
   return (
     <div>
-      <p className="text-sm h-8 flex items-center">
+      <p className="text-sm h-8 flex items-center text-muted-foreground">
         {
           loading ? (
             <Loader size={14} className="animate-spin" />
@@ -161,41 +190,5 @@ function SearchResults({
         }
       </div>
     </div>
-  )
-}
-
-
-export default function Page() {
-
-  const [query, setQuery] = useState<string>("")
-  const [selectedTerm, setSelectedTerm] = useState<Term>()
-  const [selectedSections, setSelectedSections] = useState<Set<Section["id"]>>(new Set())
-
-  return (
-    <Container className="flex flex-col min-h-screen">
-      <Header />
-      <main className="grow w-full max-w-3xl mx-auto pt-10">
-
-        <div className="space-y-6">
-          <SearchBar placeholder="Search for a class..." onChange={setQuery} />
-          <TermSelect selectedTerm={selectedTerm} setSelectedTerm={setSelectedTerm} />
-        </div>
-
-        <div className="mt-10">
-          {
-            selectedTerm && (
-              <SearchResults 
-                query={query} 
-                selectedTerm={selectedTerm} 
-                selectedSections={selectedSections}
-                setSelectedSections={setSelectedSections}
-              />
-            )
-          }
-        </div>
-
-      </main>
-      <Footer />
-    </Container>
   )
 }

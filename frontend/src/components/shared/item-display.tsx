@@ -4,7 +4,7 @@ import clsx from "clsx"
 import { Skeleton } from "@/components/ui/skeleton"
 
 
-export function CourseDisplay({
+export function ItemDisplay({
   onClick,
   className,
   topLeft,
@@ -23,7 +23,7 @@ export function CourseDisplay({
     <div 
       className={clsx(
         "rounded-md border px-8 py-4 cursor-pointer",
-        "grow flex flex-col gap-y-1",
+        "bg-white grow flex flex-col gap-y-1",
         "sm:hover:bg-accent sm:hover:border-primary transition-colors",
         className
       )}

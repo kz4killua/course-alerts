@@ -11,8 +11,10 @@ export function PageLayout({
   return (
     <div>
       <Header />
-      <Container>
-        { children }
+      <Container className="flex flex-col min-h-screen">
+        <div className="grow">
+          { children }
+        </div>
       </Container>
       <Container>
         <Footer />
