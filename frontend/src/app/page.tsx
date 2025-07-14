@@ -2,24 +2,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { SearchIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button"
-import { Container } from "@/components/shared/container";
-import { Header } from "@/components/shared/header";
-import { Footer } from "@/components/shared/footer";
+import { PageLayout } from "@/components/shared/page-layout";
+import { UnderlinedLink } from "@/components/shared/underlined-link";
 import { FEEDBACK_URL, GITHUB_URL } from "@/lib/constants";
 
 
 export default function Page() {
   return (
-    <div>
-      <Header />
-      <Container>
-        <main className="mt-24 space-y-24">
-          <Hero />
-          <FrequentlyAskedQuestions />
-        </main>
-        <Footer />
-      </Container>
-    </div>
+    <PageLayout>
+      <main className="mt-24 space-y-24">
+        <Hero />
+        <FrequentlyAskedQuestions />
+      </main>
+    </PageLayout>
   );
 }
 
@@ -77,7 +72,7 @@ function FrequentlyAskedQuestions() {
             We only store what we need to send you course notifications.
             This information is never used for anything else.
             Plus, Course Alerts is completely open source.
-            You can review the entire codebase <Link href={GITHUB_URL} target="_blank" className="font-medium underline underline-offset-4 hover:text-primary">here</Link>.
+            You can review the entire codebase <UnderlinedLink href={GITHUB_URL}>here</UnderlinedLink>.
           </p>
         </div>
         <div>
@@ -85,7 +80,7 @@ function FrequentlyAskedQuestions() {
             I have a different question, comment, or complaint.
           </h3>
           <p className="text-lg text-muted-foreground">
-            Please fill out our feedback form <Link href={FEEDBACK_URL} target="_blank" className="font-medium underline underline-offset-4 hover:text-primary">here</Link>.
+            Please fill out our feedback form <UnderlinedLink href={FEEDBACK_URL}>here</UnderlinedLink>.
           </p>
         </div>
       </div>
