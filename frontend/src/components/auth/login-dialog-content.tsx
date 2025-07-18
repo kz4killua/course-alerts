@@ -263,10 +263,9 @@ function EnterCodeStep({
                   <Input placeholder="Code" {...field} />
                 </FormControl>
                 <FormDescription>
-                  Didn&apos;t get the code? Check your Spam folder or{" "}
-
+                  Didn&apos;t get the code? Check your Spam folder or&nbsp;
                   {wait === 0 ? (
-                    <Button className="p-0 underline" type="button" variant={"link"} onClick={handleResendCode}>
+                    <Button className="p-0 h-auto underline text-[0.8rem]" type="button" variant={"link"} onClick={handleResendCode}>
                       resend code.
                     </Button>
                   ) : (
