@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { DialogProps, DialogTriggerProps, DialogContentProps, DialogDescriptionProps, DialogTitleProps, DialogCloseProps } from "@radix-ui/react-dialog"
+import { cn } from "@/lib/utils"
 
 
 export function DrawerDialog(props: JSX.IntrinsicAttributes & DialogProps) {
@@ -29,13 +30,13 @@ export function DrawerDialogTrigger(props: JSX.IntrinsicAttributes & DialogTrigg
 }
 
 
-export function DrawerDialogContent(props: JSX.IntrinsicAttributes & DialogContentProps) {
+export function DrawerDialogContent({className, ...props}: JSX.IntrinsicAttributes & DialogContentProps) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerContent {...props} />
+    return <DrawerContent className={cn("p-4 pt-0", className)} {...props} />
   } else {
-    return <DialogContent {...props} />
+    return <DialogContent className={className} {...props} />
   }
 }
 
@@ -44,7 +45,7 @@ export function DrawerDialogHeader(props: React.HTMLAttributes<HTMLDivElement>) 
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerHeader {...props} />
+    return <DrawerHeader className="px-0" {...props} />
   } else {
     return <DialogHeader {...props} />
   }
@@ -73,13 +74,13 @@ export function DrawerDialogDescription(props: JSX.IntrinsicAttributes & DialogD
 }
 
 
-export function DrawerDialogFooter(props: React.HTMLAttributes<HTMLDivElement>) {
+export function DrawerDialogFooter({className, ...props} : React.HTMLAttributes<HTMLDivElement>) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerFooter {...props} />
+    return <DrawerFooter className={cn("flex-col-reverse px-0", className)} {...props} />
   } else {
-    return <DialogFooter {...props} />
+    return <DialogFooter className={className} {...props} />
   }
 }
 

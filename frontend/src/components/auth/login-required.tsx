@@ -2,11 +2,9 @@
 
 import { useAuth } from "@/providers/auth-provider";
 import { Login } from "@/components/auth/login";
-import { LoadingIcon } from "@/components/shared/loading-icon";
-
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DrawerDialog } from "@/components/shared/drawer-dialog";
 import { useState, useEffect } from "react";
-
+import { LoadingDialogContent } from "@/components/shared/loading-dialog-content";
 
 
 export function LoginRequired({ 
@@ -29,10 +27,6 @@ function LoginDialog() {
   const { user } = useAuth()
   const [loaded, setLoaded] = useState(false)
 
-  function handleOpenChange(open: boolean) {
-    setOpen(open)
-  }
-
   useEffect(() => {
     if (!user) {
       setTimeout(() => {
@@ -44,29 +38,14 @@ function LoginDialog() {
   }, [user])
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-
-        <div className="hidden">
-          <DialogHeader>
-            <DialogTitle>Login</DialogTitle>
-            <DialogDescription>
-              You must be logged in to view this page.
-            </DialogDescription>
-          </DialogHeader>
-        </div>
-
-        {
-          loaded ? (
-            <Login onLogin={() => {}} />
-          ) : (
-            <div className="flex items-center justify-center">
-              <LoadingIcon />
-            </div>
-          )
-        }
-
-      </DialogContent>
-    </Dialog>
+    <DrawerDialog open={open} onOpenChange={setOpen}>
+      {
+        loaded ? (
+          <Login onLogin={() => {}} />
+        ) : (
+          <LoadingDialogContent />
+        )
+      }
+    </DrawerDialog>
   );
 }

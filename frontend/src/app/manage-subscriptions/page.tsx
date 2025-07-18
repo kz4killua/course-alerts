@@ -9,7 +9,7 @@ import { deleteAlertSubscriptions, listAlertSubscriptions } from "@/services/ale
 import { Section } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogHeader, DrawerDialogTitle, DrawerDialogTrigger, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 import { PageLayout } from "@/components/shared/page-layout"
 
@@ -164,28 +164,28 @@ function DeletionDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <DrawerDialog open={open} onOpenChange={setOpen}>
+      <DrawerDialogTrigger asChild>
         <Button variant={"ghost"} className="p-1">
           <Trash2Icon size={18} />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete subscription?</DialogTitle>
-          <DialogDescription>
+      </DrawerDialogTrigger>
+      <DrawerDialogContent>
+        <DrawerDialogHeader>
+          <DrawerDialogTitle>Delete subscription?</DrawerDialogTitle>
+          <DrawerDialogDescription>
             Are you sure? You will no longer receive alerts for this class.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
+          </DrawerDialogDescription>
+        </DrawerDialogHeader>
+        <DrawerDialogFooter>
           <Button variant="ghost" disabled={loading} onClick={handleClose}>
             Cancel
           </Button>
           <Button variant={"destructive"} onClick={handleDelete} disabled={loading}>
             {loading ? <LoadingIcon /> : "Delete"}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DrawerDialogFooter>
+      </DrawerDialogContent>
+    </DrawerDialog>
   )
 }

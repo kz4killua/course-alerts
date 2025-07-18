@@ -3,20 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormField, FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-
 import { useToast } from "@/hooks/use-toast"
 import { requestSignIn, verifySignIn, updateAccount, getProfile } from "@/services/accounts"
 import { setAccessToken, setRefreshToken } from "@/lib/tokens"
-
 import { useEffect, useState } from "react"
-
 import type { User } from "@/types"
 import { useAuth } from "@/providers/auth-provider"
 import { LoadingIcon } from "@/components/shared/loading-icon"
+import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerDialogContent, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
 
 
 type Step = "enter-email" | "enter-code" | "enter-phone"
@@ -114,17 +111,18 @@ function EnterEmailStep({
   }
 
   return (
-    <>
-      <LoginHeader>
-        Enter an email for alerts
-      </LoginHeader>
-
-      <LoginDescription>
-        We&apos;ll check if you have an account and help you create one if you don’t. 
-      </LoginDescription>
+    <DrawerDialogContent>
+      <DrawerDialogHeader>
+        <DrawerDialogTitle>
+          Enter an email for alerts
+        </DrawerDialogTitle>
+        <DrawerDialogDescription>
+          We&apos;ll check if you have an account and help you create one if you don’t.
+        </DrawerDialogDescription>
+      </DrawerDialogHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
@@ -142,14 +140,14 @@ function EnterEmailStep({
             )}
           />
 
-          <LoginFooter>
+          <DrawerDialogFooter>
             <Button type="submit" disabled={loading}>
               {loading ? <LoadingIcon /> : "Continue"}
             </Button>
-          </LoginFooter>
+          </DrawerDialogFooter>
         </form>
       </Form>
-    </>
+    </DrawerDialogContent>
   )
 }
 
@@ -243,17 +241,18 @@ function EnterCodeStep({
   }, [wait, setWait])
 
   return (
-    <>
-      <LoginHeader>
-        You&apos;re almost signed in!
-      </LoginHeader>
-
-      <LoginDescription>
-        Enter the code we sent to {email} to finish signing in. 
-      </LoginDescription>
+    <DrawerDialogContent>
+      <DrawerDialogHeader>
+        <DrawerDialogTitle>
+          You&apos;re almost signed in!
+        </DrawerDialogTitle>
+        <DrawerDialogDescription>
+          Enter the code we sent to {email} to finish signing in.
+        </DrawerDialogDescription>
+      </DrawerDialogHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="code"
@@ -279,17 +278,17 @@ function EnterCodeStep({
             )}
           />
 
-          <LoginFooter>
+          <DrawerDialogFooter>
             <Button type="button" variant="secondary" onClick={handleBack}>
               Back
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? <LoadingIcon /> : "Continue"}
             </Button>
-          </LoginFooter>
+          </DrawerDialogFooter>
         </form>
       </Form>
-    </>
+    </DrawerDialogContent>
   )
 }
 
@@ -343,17 +342,18 @@ function EnterPhoneStep({
   }
 
   return (
-    <>
-      <LoginHeader>
-        Do you want to add a phone number?
-      </LoginHeader>
-
-      <LoginDescription>
-        This is optional, but could help you receive alerts quicker. 
-      </LoginDescription>
+    <DrawerDialogContent>
+      <DrawerDialogHeader>
+        <DrawerDialogTitle>
+          Do you want to add a phone number?
+        </DrawerDialogTitle>
+        <DrawerDialogDescription>
+          This is optional, but could help you receive alerts quicker.
+        </DrawerDialogDescription>
+      </DrawerDialogHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="phone"
@@ -374,57 +374,16 @@ function EnterPhoneStep({
             )}
           />
 
-          <LoginFooter>
+          <DrawerDialogFooter>
             <Button variant={"secondary"} onClick={handleSkip}>
               Skip
             </Button>
             <Button type="submit" disabled={loading || form.getValues().phone.length === 0}>
               {loading ? <LoadingIcon /> : "Continue"}
             </Button>
-          </LoginFooter>
+          </DrawerDialogFooter>
         </form>
       </Form>
-    </>
-  )
-}
-
-
-function LoginDescription({
-  children
-} : {
-  children: React.ReactNode
-}) {
-  return (
-    <p className="text-sm text-muted-foreground">
-      {children}
-    </p>
-  )
-}
-
-
-function LoginFooter({
-  children
-} : {
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4">
-      {children}
-    </div>
-  )
-}
-
-
-function LoginHeader({
-  children
-} : {
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col space-y-1.5 text-center sm:text-left">
-      <h1 className="text-lg font-semibold leading-none tracking-tight">
-        {children}
-      </h1>
-    </div>
+    </DrawerDialogContent>
   )
 }

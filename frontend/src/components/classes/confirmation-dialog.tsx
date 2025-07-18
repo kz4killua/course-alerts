@@ -1,18 +1,16 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-
+import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogHeader, DrawerDialogTitle } from "@/components/shared/drawer-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { createAlertSubscriptions } from "@/services/alerts"
-
 import { useEffect, useState } from "react"
-
 import type { Term, Section } from "@/types"
 import { useAuth } from "@/providers/auth-provider"
 import { Login } from "@/components/auth/login"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 import { LoginRequired } from "@/components/auth/login-required"
+import { LoadingDialogContent } from "@/components/shared/loading-dialog-content"
 
 
 type Step = "authenticate" | "confirm-alerts"
@@ -52,42 +50,28 @@ export function ConfirmationDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-
-        <div className="hidden">
-          <DialogHeader>
-            <DialogTitle>Sign in your account</DialogTitle>
-          </DialogHeader>
-          <DialogDescription>
-            Sign in to your account to continue.
-          </DialogDescription>
-        </div>
-
-        {
-          step === "authenticate" ? (
-            <Login onLogin={() => setStep("confirm-alerts")} />
-          ) : step === "confirm-alerts" ? (
-            <AlertsConfirmation 
-              setStep={setStep}
-              setOpen={setOpen}
-              term={term}
-              sections={sections}
-              setSelectedSections={setSelectedSections}
-            />
-          ) : (
-            <div className="flex items-center justify-center">
-              <LoadingIcon />
-            </div>
-          )
-        }
-      </DialogContent>
-    </Dialog>
+    <DrawerDialog open={open} onOpenChange={handleOpenChange}>
+      {
+        step === "authenticate" ? (
+          <Login onLogin={() => setStep("confirm-alerts")} />
+        ) : step === "confirm-alerts" ? (
+          <ConfirmationDialogContent 
+            setStep={setStep}
+            setOpen={setOpen}
+            term={term}
+            sections={sections}
+            setSelectedSections={setSelectedSections}
+          />
+        ) : (
+          <LoadingDialogContent />
+        )
+      }
+    </DrawerDialog>
   )
 }
 
 
-function AlertsConfirmation({
+function ConfirmationDialogContent({
   term,
   sections,
   setStep,
@@ -135,32 +119,32 @@ function AlertsConfirmation({
 
   return (
     <LoginRequired>
-      <DialogHeader>
-        <DialogTitle>Confirm alerts</DialogTitle>
-      </DialogHeader>
-
-      <DialogDescription>
-        You are about to sign up for alerts to {sections.length} {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
-      </DialogDescription>
-
-      <div className="mt-4 gap-2 flex flex-col overflow-x-hidden">
-        {
-          user ? (
-            <Button className="w-full" onClick={handleSubmit}>
-              <span className="truncate">
-                { loading ? <LoadingIcon /> : `Continue as ${user.email}` }
-              </span>
-            </Button>
-          ) : (
-            <Button className="w-full" disabled>
-              <LoadingIcon />
-            </Button>
-          )
-        }
-        <Button className="w-full" variant="secondary" onClick={handleChangeEmail}>
-          Use a different email
-        </Button>
-      </div>
+      <DrawerDialogContent>
+        <DrawerDialogHeader>
+          <DrawerDialogTitle>Confirm alerts</DrawerDialogTitle>
+          <DrawerDialogDescription>
+            You are about to sign up for alerts to {sections.length} {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
+          </DrawerDialogDescription>
+        </DrawerDialogHeader>
+        <div className="mt-4 gap-2 flex flex-col overflow-x-hidden">
+          {
+            user ? (
+              <Button className="w-full" onClick={handleSubmit}>
+                <span className="truncate">
+                  { loading ? <LoadingIcon /> : `Continue as ${user.email}` }
+                </span>
+              </Button>
+            ) : (
+              <Button className="w-full" disabled>
+                <LoadingIcon />
+              </Button>
+            )
+          }
+          <Button className="w-full" variant="secondary" onClick={handleChangeEmail}>
+            Use a different email
+          </Button>
+        </div>
+      </DrawerDialogContent>
     </LoginRequired>
   )
 }
