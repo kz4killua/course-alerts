@@ -82,9 +82,13 @@ function SubscriptionsList({
           loading ? (
             <Skeleton className="h-4 w-full" />
           ) : query.length > 0 ? (
-            `Found ${filteredSubscriptions.length} subscriptions matching "${query}"`
+            <p className="text-muted-foreground">
+              Found {filteredSubscriptions.length} subscriptions matching "{query}"
+            </p>
           ) : (
-            `You are currently receiving alerts for ${subscriptions.length} ${subscriptions.length === 1 ? "class" : "classes"}.`
+            <p className="text-muted-foreground">
+              You are currently receiving alerts for {subscriptions.length} {subscriptions.length === 1 ? "class" : "classes"}.
+            </p>
           )
         }
       </div>

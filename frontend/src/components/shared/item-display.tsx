@@ -31,11 +31,11 @@ export function ItemDisplay({
     >
       <div className="flex items-center justify-between gap-x-1 gap-y-1 flex-wrap">
         <p className="text-lg font-bold">{topLeft}</p>
-        <p className="text-sm">{topRight}</p>
+        <p className="text-sm text-muted-foreground">{topRight}</p>
       </div>
       <div className="flex items-center justify-between gap-x-1 gap-y-1 flex-wrap">
-        <p className="text-sm">{bottomLeft}</p>
-        <p className="text-sm">{bottomRight}</p>
+        <p className="text-sm text-muted-foreground">{bottomLeft}</p>
+        <p className="text-sm text-muted-foreground">{bottomRight}</p>
       </div>
     </div>
   )

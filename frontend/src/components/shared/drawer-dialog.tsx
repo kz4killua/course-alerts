@@ -19,13 +19,13 @@ export function DrawerDialog(props: JSX.IntrinsicAttributes & DialogProps) {
 }
 
 
-export function DrawerDialogTrigger(props: JSX.IntrinsicAttributes & DialogTriggerProps) {
+export function DrawerDialogTrigger({className, ...props}: JSX.IntrinsicAttributes & DialogTriggerProps) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerTrigger {...props} />
+    return <DrawerTrigger className={className} {...props} />
   } else {
-    return <DialogTrigger {...props} />
+    return <DialogTrigger className={className} {...props} />
   }
 }
 
@@ -41,35 +41,35 @@ export function DrawerDialogContent({className, ...props}: JSX.IntrinsicAttribut
 }
 
 
-export function DrawerDialogHeader(props: React.HTMLAttributes<HTMLDivElement>) {
+export function DrawerDialogHeader({className, ...props}: React.HTMLAttributes<HTMLDivElement>) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerHeader className="px-0" {...props} />
+    return <DrawerHeader className={cn("px-0", className)} {...props} />
   } else {
-    return <DialogHeader {...props} />
+    return <DialogHeader className={className} {...props} />
   }
 }
 
 
-export function DrawerDialogTitle(props: JSX.IntrinsicAttributes & DialogTitleProps) {
+export function DrawerDialogTitle({className, ...props}: JSX.IntrinsicAttributes & DialogTitleProps) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerTitle {...props} />
+    return <DrawerTitle className={className} {...props} />
   } else {
-    return <DialogTitle {...props} />
+    return <DialogTitle className={className} {...props} />
   }
 }
 
 
-export function DrawerDialogDescription(props: JSX.IntrinsicAttributes & DialogDescriptionProps) {
+export function DrawerDialogDescription({className, ...props}: JSX.IntrinsicAttributes & DialogDescriptionProps) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerDescription {...props} />
+    return <DrawerDescription className={className} {...props} />
   } else {
-    return <DialogDescription {...props} />
+    return <DialogDescription className={className} {...props} />
   }
 }
 
@@ -85,12 +85,12 @@ export function DrawerDialogFooter({className, ...props} : React.HTMLAttributes<
 }
 
 
-export function DrawerDialogClose(props: JSX.IntrinsicAttributes & DialogCloseProps) {
+export function DrawerDialogClose({className, ...props}: JSX.IntrinsicAttributes & DialogCloseProps) {
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerClose {...props} />
+    return <DrawerClose className={className} {...props} />
   } else {
-    return <DialogClose {...props} />
+    return <DialogClose className={className} {...props} />
   }
 }

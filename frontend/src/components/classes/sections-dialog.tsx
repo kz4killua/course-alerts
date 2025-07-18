@@ -113,11 +113,11 @@ export function SectionsDialog({
           <DrawerDialogTitle className="text-3xl">
             {course.subject_course} - {course.course_title}
           </DrawerDialogTitle>
+          <DrawerDialogDescription className="hidden">
+            Choose the classes to get alerts for.
+          </DrawerDialogDescription>
         </DrawerDialogHeader>
 
-        <DrawerDialogDescription className="hidden">
-          Choose the classes to get alerts for.
-        </DrawerDialogDescription>
 
         <div className="px-10 overflow-y-auto grow">
 
@@ -126,7 +126,7 @@ export function SectionsDialog({
               numSections === 0 ? (
                 <Skeleton className="h-4 w-full" />
               ) : (
-              <span>
+              <span className="text-muted-foreground">
                 We found {numSections} {numSections === 1 ? "section" : "sections"} for this course.
               </span>
               )
