@@ -1,7 +1,7 @@
 "use client"
 
 import { SearchBar } from "@/components/shared/search-bar"
-import { ItemDisplay, CourseDisplaySkeleton } from "@/components/shared/item-display"
+import { ItemDisplay, ItemDisplaySkeleton } from "@/components/shared/item-display"
 import { Button } from "@/components/ui/button"
 import { Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -92,10 +92,10 @@ function SubscriptionsList({
         {
           loading ? (
             <>
-              <CourseDisplaySkeleton />
-              <CourseDisplaySkeleton />
-              <CourseDisplaySkeleton />
-              <CourseDisplaySkeleton />
+              <ItemDisplaySkeleton />
+              <ItemDisplaySkeleton />
+              <ItemDisplaySkeleton />
+              <ItemDisplaySkeleton />
             </>
           ) : (
             filteredSubscriptions.map(section => (

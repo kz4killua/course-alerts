@@ -9,7 +9,7 @@ import type { Term, Course, Section } from "@/types"
 import { formatMeetingTimes } from "@/lib/utils"
 import { ConfirmationDialog } from "./confirmation-dialog"
 import { useEffect, useState } from "react"
-import { ItemDisplay, CourseDisplaySkeleton } from "@/components/shared/item-display"
+import { ItemDisplay, ItemDisplaySkeleton } from "@/components/shared/item-display"
 import { listSections } from "@/services/courses"
 
 
@@ -185,11 +185,11 @@ export function SectionsDialog({
               {
                 numSections === 0 ? (
                   <>
-                    <CourseDisplaySkeleton />
-                    <CourseDisplaySkeleton />
-                    <CourseDisplaySkeleton />
-                    <CourseDisplaySkeleton />
-                    <CourseDisplaySkeleton />
+                    <ItemDisplaySkeleton />
+                    <ItemDisplaySkeleton />
+                    <ItemDisplaySkeleton />
+                    <ItemDisplaySkeleton />
+                    <ItemDisplaySkeleton />
                   </>
                 ) : (
                   sections.map(section => (

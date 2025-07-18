@@ -1,6 +1,6 @@
 "use client"
 
-import clsx from "clsx"
+import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 
@@ -21,10 +21,10 @@ export function ItemDisplay({
 }) {
   return (
     <div 
-      className={clsx(
+      className={cn(
         "rounded-md border px-8 py-4 cursor-pointer",
         "bg-white grow flex flex-col gap-y-1",
-        "sm:hover:bg-accent sm:hover:border-primary transition-colors",
+        "sm:hover:bg-accent",
         className
       )}
       onClick={onClick}
@@ -42,7 +42,7 @@ export function ItemDisplay({
 }
 
 
-export function CourseDisplaySkeleton() {
+export function ItemDisplaySkeleton() {
   return (
     <Skeleton className="h-16 w-full" />
   )
