@@ -3,7 +3,7 @@
 import { useAuth } from "@/providers/auth-provider";
 import { Login } from "@/components/auth/login";
 import { DrawerDialog } from "@/components/shared/drawer-dialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LoadingDialogContent } from "@/components/shared/loading-dialog-content";
 
 
@@ -24,26 +24,15 @@ export function LoginRequired({
 function LoginDialog() {
 
   const [open, setOpen] = useState(true)
-  const { user } = useAuth()
-  const [loaded, setLoaded] = useState(false)
-
-  useEffect(() => {
-    if (!user) {
-      setTimeout(() => {
-        setLoaded(true)
-      }, 2500);
-    } else {
-      setOpen(false)
-    }
-  }, [user])
+  const { loading } = useAuth()
 
   return (
     <DrawerDialog open={open} onOpenChange={setOpen}>
       {
-        loaded ? (
-          <Login onLogin={() => {}} />
-        ) : (
+        loading ? (
           <LoadingDialogContent />
+        ) : (
+          <Login onLogin={() => setOpen(false)} />
         )
       }
     </DrawerDialog>

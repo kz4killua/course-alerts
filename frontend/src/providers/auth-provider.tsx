@@ -9,12 +9,14 @@ import eventEmitter from '@/lib/event-emitter';
 
 interface AuthContextType {
   user: User | undefined;
+  loading: boolean;
   login: (user: User) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: undefined,
+  loading: true,
   login: () => {},
   logout: () => {},
 });
@@ -26,6 +28,7 @@ export function AuthProvider({
 }>) {
 
   const [user, setUser] = useState<User>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const accessToken = getAccessToken();
@@ -34,6 +37,11 @@ export function AuthProvider({
       .then(response => {
         setUser(response.data);
       })
+      .finally(() => {
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
     }
 
     eventEmitter.addEventListener('logout', logout);
@@ -53,12 +61,16 @@ export function AuthProvider({
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
