@@ -34,9 +34,9 @@ export function DrawerDialogContent({className, ...props}: JSX.IntrinsicAttribut
   const isMobile = useIsMobile()
   
   if (isMobile) {
-    return <DrawerContent className={cn("p-4 pt-0", className)} {...props} />
+    return <DrawerContent className={cn("max-h-[95%] p-4 pt-0", className)} {...props} />
   } else {
-    return <DialogContent className={className} {...props} />
+    return <DialogContent className={cn("max-h-[95%]", className)} {...props} />
   }
 }
 

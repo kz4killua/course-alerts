@@ -107,7 +107,7 @@ export function SectionsDialog({
         </div>
       </DrawerDialogTrigger>
 
-      <DrawerDialogContent className="max-h-[95%] max-w-full sm:max-w-5xl sm:max-h-[95%] p-0 flex flex-col overflow-y-hidden">
+      <DrawerDialogContent className="p-0 max-w-5xl flex flex-col overflow-y-hidden">
         
         <DrawerDialogHeader className="bg-background px-10 pt-5 sm:pt-10">
           <DrawerDialogTitle className="text-3xl">
@@ -126,9 +126,9 @@ export function SectionsDialog({
               numSections === 0 ? (
                 <Skeleton className="h-4 w-full" />
               ) : (
-              <span className="text-muted-foreground">
+              <p className="text-muted-foreground text-center sm:text-left">
                 We found {numSections} {numSections === 1 ? "section" : "sections"} for this course.
-              </span>
+              </p>
               )
             }
           </div>
