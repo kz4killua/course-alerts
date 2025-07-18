@@ -83,7 +83,7 @@ function SubscriptionsList({
             <Skeleton className="h-4 w-full" />
           ) : query.length > 0 ? (
             <p className="text-muted-foreground">
-              Found {filteredSubscriptions.length} subscriptions matching "{query}"
+              Found {filteredSubscriptions.length} subscriptions matching &ldquo;{query}&rdquo;
             </p>
           ) : (
             <p className="text-muted-foreground">

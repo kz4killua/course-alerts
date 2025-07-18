@@ -2,10 +2,10 @@
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { SectionsDialog } from "@/components/classes/sections-dialog"
-import { InfoIcon, Loader } from "lucide-react"
+import { Loader } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import type { Term, Course, Section } from "@/types"
 import { listTerms, listCourses } from "@/services/courses"
