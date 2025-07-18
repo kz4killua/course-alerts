@@ -19,7 +19,7 @@ import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerD
 type Step = "enter-email" | "enter-code" | "enter-phone"
 
 
-export function Login({
+export function LoginDialogContent({
   onLogin,
 } : {
   onLogin: () => void

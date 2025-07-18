@@ -7,7 +7,7 @@ import { createAlertSubscriptions } from "@/services/alerts"
 import { useEffect, useState } from "react"
 import type { Term, Section } from "@/types"
 import { useAuth } from "@/providers/auth-provider"
-import { Login } from "@/components/auth/login"
+import { LoginDialogContent } from "@/components/auth/login-dialog-content"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 import { LoginRequired } from "@/components/auth/login-required"
 import { LoadingDialogContent } from "@/components/shared/loading-dialog-content"
@@ -53,7 +53,7 @@ export function ConfirmationDialog({
     <DrawerDialog open={open} onOpenChange={handleOpenChange}>
       {
         step === "authenticate" ? (
-          <Login onLogin={() => setStep("confirm-alerts")} />
+          <LoginDialogContent onLogin={() => setStep("confirm-alerts")} />
         ) : step === "confirm-alerts" ? (
           <ConfirmationDialogContent 
             setStep={setStep}

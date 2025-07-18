@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuth } from "@/providers/auth-provider";
-import { Login } from "@/components/auth/login";
+import { LoginDialogContent } from "@/components/auth/login-dialog-content";
 import { DrawerDialog } from "@/components/shared/drawer-dialog";
 import { useState } from "react";
 import { LoadingDialogContent } from "@/components/shared/loading-dialog-content";
@@ -32,7 +32,7 @@ function LoginDialog() {
         loading ? (
           <LoadingDialogContent />
         ) : (
-          <Login onLogin={() => setOpen(false)} />
+          <LoginDialogContent onLogin={() => setOpen(false)} />
         )
       }
     </DrawerDialog>
