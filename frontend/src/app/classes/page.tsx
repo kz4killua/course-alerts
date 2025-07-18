@@ -85,10 +85,8 @@ function TermSelect({
           </div>
         ) : terms.length === 0 ? (
           <Alert className="bg-blue-50 border-blue-500">
-            <InfoIcon className="w-4 h-4" />
-            <AlertTitle>No terms available</AlertTitle>
             <AlertDescription>
-              There are no terms available for registration at this time. Check back soon!
+              There are no classes available for registration at this time. Check back soon!
             </AlertDescription>
           </Alert>
         ) : (
