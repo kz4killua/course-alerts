@@ -1,7 +1,6 @@
 from django.db import models
-from django.core.cache import cache
 
-from .api import get_linked_sections, get_enrollment_info
+from .api import get_enrollment_info
 
 
 class Course(models.Model):
@@ -64,29 +63,6 @@ class Section(models.Model):
     def __str__(self) -> str:
         return f"{self.term} - {self.course_reference_number}"
 
-    def get_linked_crns(self) -> list[list[str]]:
-        """Return the CRNs of the linked sections for this class (from the cache if available)."""
-
-        if not self.is_section_linked:
-            return []
-
-        key = f"linked_crns_{self.id}"
-        if key not in cache:
-            result = get_linked_sections(self.term.term, self.course_reference_number)
-            linked_crns = [
-                [section["courseReferenceNumber"] for section in sections]
-                for sections in result["linkedData"]
-            ]
-            cache.set(key, linked_crns, timeout=None)
-
-        return cache.get(key)
-
-    def get_enrollment_info(self, force_refresh=False) -> dict:
+    def get_enrollment_info(self) -> dict:
         """Return the enrollment information for this section (from the cache if available)."""
-
-        key = f"enrollment_info_{self.id}"
-        if (key not in cache) or force_refresh:
-            result = get_enrollment_info(self.term.term, self.course_reference_number)
-            cache.set(key, result, timeout=60 * 60 * 24)
-
-        return cache.get(key)
+        return get_enrollment_info(self.term.term, self.course_reference_number)

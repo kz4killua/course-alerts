@@ -160,6 +160,6 @@ def get_enrollment_infos(subscriptions: Iterable[Subscription]) -> dict[Section,
     for subscription in subscriptions:
         if subscription.section not in enrollment_infos:
             enrollment_infos[subscription.section] = (
-                subscription.section.get_enrollment_info(force_refresh=True)
+                subscription.section.get_enrollment_info()
             )
     return enrollment_infos
