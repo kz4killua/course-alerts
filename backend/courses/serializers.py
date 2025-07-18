@@ -32,6 +32,7 @@ class SectionSerializer(serializers.ModelSerializer):
         model = Section
         fields = [
             "id",
+            "sequence_number",
             "course_reference_number",
             "course",
             "term",
