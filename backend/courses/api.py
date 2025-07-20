@@ -1,10 +1,13 @@
 import re
 
 import requests
+from django.conf import settings
 
 
 BASE_URL = "https://ssp.mycampus.ca/StudentRegistrationSsb/ssb"
 MEP_CODE = "UOIT"
+# This is a temporary fix for ssp.mycampus.ca's SSL certificate issues.
+CA_BUNDLE_PATH = settings.BASE_DIR / "ca_bundle.pem"
 
 
 def search_course_codes(query: str, term: str, offset: int = 1, limit: int = 10):
@@ -18,7 +21,7 @@ def search_course_codes(query: str, term: str, offset: int = 1, limit: int = 10)
         "max": limit,
         "mepCode": MEP_CODE,
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, verify=CA_BUNDLE_PATH)
     response.raise_for_status()
     return response.json()
 
@@ -31,7 +34,7 @@ def reset_data_form(jsessionid: str):
     }
 
     url = f"{BASE_URL}/classSearch/resetDataForm"
-    response = requests.post(url, cookies=cookies)
+    response = requests.post(url, cookies=cookies, verify=CA_BUNDLE_PATH)
     response.raise_for_status()
 
 
@@ -57,7 +60,7 @@ def get_sections(jsessionid: str, term: str, course_code: str = None, schedule_t
         "sortDirection": "asc",
         "mepCode": MEP_CODE,
     }
-    response = requests.get(url, params=params, cookies=cookies)
+    response = requests.get(url, params=params, cookies=cookies, verify=CA_BUNDLE_PATH)
     response.raise_for_status()
 
     data = response.json()
@@ -76,7 +79,7 @@ def get_linked_sections(term: str, course_reference_number: str):
         "courseReferenceNumber": course_reference_number,
         "mepCode": MEP_CODE,
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, verify=CA_BUNDLE_PATH)
     response.raise_for_status()
 
     return response.json()
@@ -91,7 +94,7 @@ def get_enrollment_info(term: str, course_reference_number: str):
         "courseReferenceNumber": course_reference_number,
         "mepCode": MEP_CODE,
     }
-    response = requests.post(url, params=params)
+    response = requests.post(url, params=params, verify=CA_BUNDLE_PATH)
     response.raise_for_status()
 
     # Parse response.text to get enrollment info
