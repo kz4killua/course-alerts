@@ -1,7 +1,9 @@
 import sys
 import html
 import json
+import asyncio
 
+import aiohttp
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
 from courses.models import Course, Term, Section
@@ -43,7 +45,9 @@ class Command(BaseCommand):
                 raise CommandError(f"No cached data found for term: {options['term']}")
         else:
             try:
-                sections = get_all_sections(options["term"], options["jsessionid"])
+                sections = asyncio.run(
+                    get_all_sections(options["term"], options["jsessionid"])
+                )
             except BaseException as e:
                 raise CommandError(f"Failed to retrieve course sections: {e}")
 
@@ -104,20 +108,23 @@ class Command(BaseCommand):
             )
 
 
-def get_all_sections(term: str, jsessionid: str):
+async def get_all_sections(term: str, jsessionid: str):
     """Retrieve all course sections for a given term."""
 
     data = []
     offset = 0
     limit = 500
 
-    while True:
-        result = get_sections(jsessionid, term, offset=offset, limit=limit)
-        data.extend(result["data"])
+    async with aiohttp.ClientSession() as session:
+        while True:
+            result = await get_sections(
+                session, jsessionid, term, offset=offset, limit=limit
+            )
+            data.extend(result["data"])
 
-        offset += limit
-        if offset >= result["totalCount"]:
-            break
+            offset += limit
+            if offset >= result["totalCount"]:
+                break
 
     return data
 

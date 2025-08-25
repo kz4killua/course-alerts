@@ -1,6 +1,8 @@
+import asyncio
 from typing import Iterable
 from collections import defaultdict
 
+import aiohttp
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.mail import send_mail
@@ -17,9 +19,10 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def send_alerts_task():
-    subscriptions = list(Subscription.objects.select_related("user", "section").all())
-    enrollment_infos = get_enrollment_infos(subscriptions)
+def handle_alerts():
+    """Periodic task to update subscriptions and send alerts to users."""
+    subscriptions = list(Subscription.objects.select_related("user", "section__term").all())
+    enrollment_infos = asyncio.run(get_enrollment_infos(subscriptions))
     statuses = get_statuses(subscriptions, enrollment_infos)
     alerts = get_alerts(subscriptions, statuses)
     failed = send_alerts(alerts)
@@ -154,12 +157,13 @@ def get_status(enrollment_info: dict) -> str:
     return Subscription.CLOSED
 
 
-def get_enrollment_infos(subscriptions: Iterable[Subscription]) -> dict[Section, dict]:
-    """Map each section to its enrollment info."""
-    enrollment_infos = {}
-    for subscription in subscriptions:
-        if subscription.section not in enrollment_infos:
-            enrollment_infos[subscription.section] = (
-                subscription.section.get_enrollment_info()
-            )
-    return enrollment_infos
+async def get_enrollment_infos(subscriptions: Iterable[Subscription]) -> dict[Section, dict]:
+    """Retrieve enrollment information for all subscriptions."""
+    
+    sections = list(set(subscription.section for subscription in subscriptions))
+
+    async with aiohttp.ClientSession() as session:
+        tasks = [section.get_enrollment_info(session) for section in sections]
+        results = await asyncio.gather(*tasks)
+
+    return dict(zip(sections, results))

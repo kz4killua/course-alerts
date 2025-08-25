@@ -1,3 +1,4 @@
+import aiohttp
 from django.db import models
 
 from .api import get_enrollment_info
@@ -63,6 +64,6 @@ class Section(models.Model):
     def __str__(self) -> str:
         return f"{self.term} - {self.course_reference_number}"
 
-    def get_enrollment_info(self) -> dict:
+    async def get_enrollment_info(self, session: aiohttp.ClientSession) -> dict:
         """Return the enrollment information for this section (from the cache if available)."""
-        return get_enrollment_info(self.term.term, self.course_reference_number)
+        return await get_enrollment_info(session, self.term.term, self.course_reference_number)
