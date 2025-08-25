@@ -121,12 +121,12 @@ async def get_enrollment_info(
         # Parse the response text to get enrollment info
         text = await response.text()
         patterns = {
-            "enrollment": r"Enrollment Actual:</span>\s*<span[^>]*>\s*(\d+)",
-            "maximumEnrollment": r"Enrollment Maximum:</span>\s*<span[^>]*>\s*(\d+)",
-            "seatsAvailable": r"Enrollment Seats Available:</span>\s*<span[^>]*>\s*(\d+)",
-            "waitCapacity": r"Waitlist Capacity:</span>\s*<span[^>]*>\s*(\d+)",
-            "waitCount": r"Waitlist Actual:</span>\s*<span[^>]*>\s*(\d+)",
-            "waitAvailable": r"Waitlist Seats Available:</span>\s*<span[^>]*>\s*(\d+)",
+            "enrollment": r"Enrollment Actual:</span>\s*<span[^>]*>\s*(-?\d+)",
+            "maximumEnrollment": r"Enrollment Maximum:</span>\s*<span[^>]*>\s*(-?\d+)",
+            "seatsAvailable": r"Enrollment Seats Available:</span>\s*<span[^>]*>\s*(-?\d+)",
+            "waitCapacity": r"Waitlist Capacity:</span>\s*<span[^>]*>\s*(-?\d+)",
+            "waitCount": r"Waitlist Actual:</span>\s*<span[^>]*>\s*(-?\d+)",
+            "waitAvailable": r"Waitlist Seats Available:</span>\s*<span[^>]*>\s*(-?\d+)",
         }
 
         data = {}
