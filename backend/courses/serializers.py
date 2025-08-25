@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Course, Section, Term
 
+from .models import Course, Section, Term
 
 DAYS = [
     "monday",

@@ -1,13 +1,13 @@
-import sys
+import asyncio
 import html
 import json
-import asyncio
+import sys
 
 import aiohttp
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
-from courses.models import Course, Term, Section
 from courses.api import get_sections
+from courses.models import Course, Section, Term
 
 
 class Command(BaseCommand):
@@ -29,7 +29,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if not options["usecache"] and not options["jsessionid"]:
             raise CommandError(
-                "You must provide a JSESSIONID cookie value when not the --usecache option"
+                "You must provide a JSESSIONID cookie value when not using "
+                "the --usecache option."
             )
 
         # Load the course sections from a file or fetch them from the API
@@ -37,19 +38,20 @@ class Command(BaseCommand):
             try:
                 with open(
                     f"courses/data/raw/sections/{options['term']}.json",
-                    "r",
                     encoding="utf-8",
                 ) as f:
                     sections = json.load(f)
-            except FileNotFoundError:
-                raise CommandError(f"No cached data found for term: {options['term']}")
+            except FileNotFoundError as e:
+                raise CommandError(
+                    f"No cached data found for term: {options['term']}"
+                ) from e
         else:
             try:
                 sections = asyncio.run(
                     get_all_sections(options["term"], options["jsessionid"])
                 )
             except BaseException as e:
-                raise CommandError(f"Failed to retrieve course sections: {e}")
+                raise CommandError(f"Failed to retrieve course sections: {e}") from e
 
         # Save the raw data to a file
         if not options["usecache"]:
@@ -104,7 +106,7 @@ class Command(BaseCommand):
 
         if "test" not in sys.argv:
             self.stdout.write(
-                self.style.SUCCESS('Updated data for term: "%s"' % options["term"])
+                self.style.SUCCESS(f"Updated data for term: {options['term']}")
             )
 
 

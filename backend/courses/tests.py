@@ -1,19 +1,17 @@
-from django.urls import reverse
 from django.core.management import call_command
+from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from courses.models import Term
 
 
 class TestTermsView(APITestCase):
-
     def setUp(self) -> None:
         Term.objects.create(term="202309", registration_open=True)
         Term.objects.create(term="202401", registration_open=True)
         Term.objects.create(term="202409")
 
     def test_terms_view(self):
-
         url = reverse("terms")
 
         response = self.client.get(url)
@@ -42,13 +40,11 @@ class TestTermsView(APITestCase):
 
 
 class TestCoursesView(APITestCase):
-
     def setUp(self) -> None:
         call_command("updatesections", "202309", "--usecache")
         call_command("updatesections", "202401", "--usecache")
 
     def test_courses_view(self):
-
         url = reverse("courses")
 
         response = self.client.get(url)

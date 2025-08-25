@@ -1,8 +1,7 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 from .models import clean_email
-
 
 User = get_user_model()
 
@@ -15,8 +14,8 @@ class EmailValidationMixin:
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'email_verified', 'phone', 'phone_verified']
-        read_only_fields = ['id', 'email', 'email_verified', 'phone_verified']
+        fields = ["id", "email", "email_verified", "phone", "phone_verified"]
+        read_only_fields = ["id", "email", "email_verified", "phone_verified"]
 
 
 class RequestSignInCodeSerializer(serializers.Serializer, EmailValidationMixin):

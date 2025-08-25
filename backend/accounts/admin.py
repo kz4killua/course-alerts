@@ -1,14 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from accounts.models import User, EmailVerificationCode
+
+from accounts.models import EmailVerificationCode, User
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    ordering = ['email']
-    list_display = ['email', 'email_verified', 'phone', 'phone_verified']
-    list_filter = ['email_verified', 'phone_verified']
-    search_fields = ['email']
+    ordering = ["email"]
+    list_display = ["email", "email_verified", "phone", "phone_verified"]
+    list_filter = ["email_verified", "phone_verified"]
+    search_fields = ["email"]
     fieldsets = [
         ("Personal info", {"fields": ("email", "phone")}),
         ("Verifications", {"fields": ("email_verified", "phone_verified")}),

@@ -1,17 +1,14 @@
 import requests
-from django.core.mail.backends.base import BaseEmailBackend
-from django.core.mail import EmailMessage
 from django.conf import settings
+from django.core.mail import EmailMessage
+from django.core.mail.backends.base import BaseEmailBackend
 
 
 class MailgunEmailBackend(BaseEmailBackend):
-
     def send_messages(self, email_messages: list[EmailMessage]) -> int:
-        
         count = 0
 
         for message in email_messages:
-
             data = {
                 "from": message.from_email,
                 "to": message.to,
@@ -19,10 +16,10 @@ class MailgunEmailBackend(BaseEmailBackend):
                 "text": message.body,
             }
 
-            if hasattr(message, 'alternatives') and message.alternatives:
+            if hasattr(message, "alternatives") and message.alternatives:
                 for content, mimetype in message.alternatives:
-                    if mimetype == 'text/html':
-                        data['html'] = content
+                    if mimetype == "text/html":
+                        data["html"] = content
                         break
 
             response = requests.post(

@@ -1,14 +1,14 @@
-from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-
-from .models import Subscription
-from .serializers import CreateSubscriptionSerializer, DeleteSubscriptionSerializer
+from rest_framework.views import APIView
 
 from accounts.permissions import EmailVerifiedPermission
 from courses.models import Section
 from courses.serializers import SectionSerializer
+
+from .models import Subscription
+from .serializers import CreateSubscriptionSerializer, DeleteSubscriptionSerializer
 
 
 class SubscriptionListCreateDeleteView(APIView):

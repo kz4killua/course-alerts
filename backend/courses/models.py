@@ -65,5 +65,7 @@ class Section(models.Model):
         return f"{self.term} - {self.course_reference_number}"
 
     async def get_enrollment_info(self, session: aiohttp.ClientSession) -> dict:
-        """Return the enrollment information for this section (from the cache if available)."""
-        return await get_enrollment_info(session, self.term.term, self.course_reference_number)
+        """Return the enrollment information for this section."""
+        return await get_enrollment_info(
+            session, self.term.term, self.course_reference_number
+        )

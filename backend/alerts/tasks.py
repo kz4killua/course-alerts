@@ -1,19 +1,20 @@
 import asyncio
-from typing import Iterable
 from collections import defaultdict
+from collections.abc import Iterable
 
 import aiohttp
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.conf import settings
 from django.utils.html import strip_tags
+
+from accounts.models import User
+from courses.models import Section
 
 from .models import Subscription
 from .sms import send_sms
-from courses.models import Section
-from accounts.models import User
 
 logger = get_task_logger(__name__)
 
@@ -21,7 +22,9 @@ logger = get_task_logger(__name__)
 @shared_task
 def handle_alerts():
     """Periodic task to update subscriptions and send alerts to users."""
-    subscriptions = list(Subscription.objects.select_related("user", "section__term").all())
+    subscriptions = list(
+        Subscription.objects.select_related("user", "section__term").all()
+    )
     enrollment_infos = asyncio.run(get_enrollment_infos(subscriptions))
     statuses = get_statuses(subscriptions, enrollment_infos)
     alerts = get_alerts(subscriptions, statuses)
@@ -37,7 +40,6 @@ def send_alerts(alerts: dict[User, dict]) -> list[User]:
     failed = []
 
     for user, alert in alerts.items():
-
         sent = False
 
         # Send email alerts
@@ -62,18 +64,16 @@ def send_alerts(alerts: dict[User, dict]) -> list[User]:
 
         # Send SMS alerts (if a phone number is provided)
         if user.phone:
-            sms = render_to_string(
-                "alerts/sms_update.txt", {"alert": alert}
-            )
+            sms = render_to_string("alerts/sms_update.txt", {"alert": alert})
             try:
                 send_sms(
-                    to=user.phone, 
+                    to=user.phone,
                     body=sms,
                 )
                 sent = True
             except Exception as e:
                 logger.error(f"Failed to send SMS alert to {user.phone}: {e}")
-        
+
         # Update the list of failed alerts
         if not sent:
             failed.append(user)
@@ -81,7 +81,9 @@ def send_alerts(alerts: dict[User, dict]) -> list[User]:
     return failed
 
 
-def get_alerts(subscriptions: Iterable[Subscription], statuses: dict[Section, str]) -> dict[User, dict]:
+def get_alerts(
+    subscriptions: Iterable[Subscription], statuses: dict[Section, str]
+) -> dict[User, dict]:
     """Returns notifications of new OPEN or WAITLIST_OPEN sections per user."""
 
     # Group subscriptions by user
@@ -92,16 +94,14 @@ def get_alerts(subscriptions: Iterable[Subscription], statuses: dict[Section, st
     # Check for new updates
     alerts = {}
     for user in user_subscriptions:
-
         user_alert = {
-            Subscription.OPEN: set(), 
-            Subscription.WAITLIST_OPEN: set(), 
-            Subscription.CLOSED: set()
+            Subscription.OPEN: set(),
+            Subscription.WAITLIST_OPEN: set(),
+            Subscription.CLOSED: set(),
         }
         is_new = False
 
         for subscription in user_subscriptions[user]:
-
             status = statuses[subscription.section]
             user_alert[status].add(subscription.section)
 
@@ -110,13 +110,19 @@ def get_alerts(subscriptions: Iterable[Subscription], statuses: dict[Section, st
                 is_new = True
 
         # Only send alerts if there are new open or waitlist open sections
-        if is_new and (user_alert[Subscription.OPEN] or user_alert[Subscription.WAITLIST_OPEN]):
+        if is_new and (
+            user_alert[Subscription.OPEN] or user_alert[Subscription.WAITLIST_OPEN]
+        ):
             alerts[user] = user_alert
 
     return alerts
 
 
-def update_statuses(subscriptions: Iterable[Subscription], statuses: dict[Section, str], failed: list[User]) -> None:
+def update_statuses(
+    subscriptions: Iterable[Subscription],
+    statuses: dict[Section, str],
+    failed: list[User],
+) -> None:
     """Update the last status of successfully sent alerts."""
     updates = []
     for subscription in subscriptions:
@@ -135,7 +141,9 @@ def update_statuses(subscriptions: Iterable[Subscription], statuses: dict[Sectio
         Subscription.objects.bulk_update(updates, ["last_status"])
 
 
-def get_statuses(subscriptions: Iterable[Subscription], enrollment_infos: dict[Section, dict]) -> dict[Section, str]:
+def get_statuses(
+    subscriptions: Iterable[Subscription], enrollment_infos: dict[Section, dict]
+) -> dict[Section, str]:
     """Map each section to its enrollment status."""
     statuses = {}
     for subscription in subscriptions:
@@ -148,22 +156,25 @@ def get_statuses(subscriptions: Iterable[Subscription], enrollment_infos: dict[S
 
 def get_status(enrollment_info: dict) -> str:
     """Determine if a section is OPEN, WAITLIST_OPEN, or CLOSED."""
-    if (enrollment_info["seatsAvailable"] or 0) > 0:
-        # Sections are only open if there are no waitlisted students
-        if (enrollment_info["waitCount"] or 0) == 0:
-            return Subscription.OPEN
+    if ((enrollment_info["seatsAvailable"] or 0) > 0) and (
+        # Note: Sections are only open if there are no waitlisted students
+        (enrollment_info["waitCount"] or 0) == 0
+    ):
+        return Subscription.OPEN
     if (enrollment_info["waitAvailable"] or 0) > 0:
         return Subscription.WAITLIST_OPEN
     return Subscription.CLOSED
 
 
-async def get_enrollment_infos(subscriptions: Iterable[Subscription]) -> dict[Section, dict]:
+async def get_enrollment_infos(
+    subscriptions: Iterable[Subscription],
+) -> dict[Section, dict]:
     """Retrieve enrollment information for all subscriptions."""
-    
+
     sections = list(set(subscription.section for subscription in subscriptions))
 
     async with aiohttp.ClientSession() as session:
         tasks = [section.get_enrollment_info(session) for section in sections]
         results = await asyncio.gather(*tasks)
 
-    return dict(zip(sections, results))
+    return dict(zip(sections, results, strict=False))

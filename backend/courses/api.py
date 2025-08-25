@@ -2,7 +2,6 @@ import re
 
 import aiohttp
 
-
 BASE_URL = "https://ssp.mycampus.ca/StudentRegistrationSsb/ssb"
 MEP_CODE = "UOIT"
 
@@ -117,29 +116,30 @@ async def get_enrollment_info(
 
     async with session.post(url, params=params) as response:
         response.raise_for_status()
-
-        # Parse the response text to get enrollment info
         text = await response.text()
-        patterns = {
-            "enrollment": r"Enrollment Actual:</span>\s*<span[^>]*>\s*(-?\d+)",
-            "maximumEnrollment": r"Enrollment Maximum:</span>\s*<span[^>]*>\s*(-?\d+)",
-            "seatsAvailable": r"Enrollment Seats Available:</span>\s*<span[^>]*>\s*(-?\d+)",
-            "waitCapacity": r"Waitlist Capacity:</span>\s*<span[^>]*>\s*(-?\d+)",
-            "waitCount": r"Waitlist Actual:</span>\s*<span[^>]*>\s*(-?\d+)",
-            "waitAvailable": r"Waitlist Seats Available:</span>\s*<span[^>]*>\s*(-?\d+)",
-        }
 
-        data = {}
-        for key, pattern in patterns.items():
-            match = re.search(pattern, text)
-            if match:
-                data[key] = int(match.group(1))
-            else:
-                raise ValueError(
-                    f"Unable to extract '{key}' from section with CRN '{course_reference_number}' in term '{term}'."
-                )
+    # Parse the response text to get enrollment info
+    patterns = {
+        "enrollment": r"Enrollment Actual:</span>\s*<span[^>]*>\s*(-?\d+)",
+        "maximumEnrollment": r"Enrollment Maximum:</span>\s*<span[^>]*>\s*(-?\d+)",
+        "seatsAvailable": r"Enrollment Seats Available:</span>\s*<span[^>]*>\s*(-?\d+)",
+        "waitCapacity": r"Waitlist Capacity:</span>\s*<span[^>]*>\s*(-?\d+)",
+        "waitCount": r"Waitlist Actual:</span>\s*<span[^>]*>\s*(-?\d+)",
+        "waitAvailable": r"Waitlist Seats Available:</span>\s*<span[^>]*>\s*(-?\d+)",
+    }
 
-        return data
+    data = {}
+    for key, pattern in patterns.items():
+        match = re.search(pattern, text)
+        if match:
+            data[key] = int(match.group(1))
+        else:
+            raise ValueError(
+                f"Unable to extract '{key}' from section with "
+                f"CRN '{course_reference_number}' in term '{term}'."
+            )
+
+    return data
 
 
 def clean_params(params: dict) -> dict:

@@ -1,9 +1,8 @@
-from rest_framework import generics
-from rest_framework import filters
 import django_filters.rest_framework
+from rest_framework import filters, generics
 
-from .models import Term, Course, Section
-from .serializers import TermSerializer, CourseSerializer, SectionSerializer
+from .models import Course, Section, Term
+from .serializers import CourseSerializer, SectionSerializer, TermSerializer
 
 
 class TermsView(generics.ListAPIView):
