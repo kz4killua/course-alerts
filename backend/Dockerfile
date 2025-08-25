@@ -1,23 +1,31 @@
 FROM python:3.11.1
 
-# Install netcat for TCP health checks
-RUN apt-get update && apt-get install -y netcat
-
 # Create a non-root, non-sudo user to run the container
 ARG UID=1001
 ARG GID=1001
 RUN groupadd --gid ${GID} dockeruser && \
     useradd --uid ${UID} --gid ${GID} -m dockeruser
 
-COPY . /app
+# Install system packages
+RUN apt-get update && apt-get install -y --no-install-recommends netcat \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.8.8 /uv /uvx /bin/
+
+# Set working directory
 WORKDIR /app
 
-RUN pip install pip --upgrade && \
-    pip install -r requirements.txt && \
-    chmod +x docker-entrypoint.sh
+# Install project dependencies
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --no-dev
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Copy application files and set permissions
+COPY --chown=dockeruser:dockeruser . /app
+RUN chmod +x docker-entrypoint.sh
 
 # Run the application as a non-root, non-sudo user
-RUN chown -R dockeruser /app
 USER dockeruser
-
 CMD ["/app/docker-entrypoint.sh"]
