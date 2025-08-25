@@ -21,3 +21,21 @@ dependencies = [
     "redis==5.0.8",
     "twilio==9.3.6",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.10",
+]
+
+[tool.ruff]
+exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "I",    # isort
+]
