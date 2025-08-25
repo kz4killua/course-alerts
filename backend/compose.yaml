@@ -25,7 +25,7 @@ services:
   celery:
     container_name: coursealerts-celery
     build: .
-    command: uv run celery -A config worker --loglevel=info --pool=gevent
+    command: uv run --no-sync celery -A config worker --loglevel=info --pool=gevent
     env_file:
       - .env
     depends_on:
@@ -38,7 +38,7 @@ services:
   celery-beat:
     container_name: coursealerts-celery-beat
     build: .
-    command: uv run celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: uv run --no-sync celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     env_file:
       - .env
     depends_on:
