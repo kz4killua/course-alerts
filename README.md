@@ -6,12 +6,11 @@ Students at Ontario Tech University can use the application (for free!) at [cour
 
 ### Running the Backend
 The backend application is built with [Django](https://www.djangoproject.com/). Follow these steps to set up and run the backend:
-1. Make sure [Python 3](https://www.python.org/) is installed on your machine. The backend was written using Python 3.11.1. 
+1. Install [uv](https://github.com/astral-sh/uv) on your machine. You can find installation instructions [here](https://docs.astral.sh/uv/getting-started/installation/).
 2. Navigate to the `backend` directory in your terminal.
 3. Create a `.env` file in this directory and populate it with the needed environment variables. (See `backend/.env.example`.)
-4. Install the project requirements using the following command: `pip install -r requirements.txt`. (It is recommended to first create and activate a [virtual environment](https://docs.python.org/3/library/venv.html) for this.)
-5. Run `python manage.py migrate` to set up the project database.
-6. Finally, run `python manage.py runserver` to start the backend application. By default, this will run on port 8000 and can be accessed at `localhost:8000`.
+4. Run `uv run python manage.py migrate` to set up the project database.
+5. Finally, run `uv run python manage.py runserver` to start the backend application. By default, this will run on port 8000 and can be accessed at `localhost:8000`.
 
 #### With Docker
 Alternatively, you can run the backend using Docker. To do this: 
