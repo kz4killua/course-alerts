@@ -34,7 +34,7 @@ export function Header() {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="end" className="w-60">
-                <DropdownMenuLabel className="overflow-hidden text-ellipsis">
+                <DropdownMenuLabel className="overflow-hidden text-ellipsis text-muted-foreground">
                   {user.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
