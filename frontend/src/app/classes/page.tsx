@@ -24,7 +24,11 @@ export default function Page() {
     <PageLayout>
       <main className="pt-10">
         <div className="space-y-6">
-          <SearchBar placeholder="Search for a course..." onChange={setQuery} />
+          <SearchBar
+            placeholder="Search for a course..."
+            onChange={e => setQuery(e.target.value)} 
+            autoFocus
+          />
           <TermSelect selectedTerm={selectedTerm} setSelectedTerm={setSelectedTerm} />
         </div>
         <div className="mt-10">

@@ -44,7 +44,10 @@ export default function Page() {
         <h1 className="text-3xl font-semibold mb-6">
           Your Subscriptions
         </h1>
-        <SearchBar placeholder="Search your alerts..." onChange={setQuery} />
+        <SearchBar 
+          placeholder="Search your alerts..." 
+          onChange={e => setQuery(e.target.value)} 
+        />
         <SubscriptionsList 
           query={query} 
           loading={loading} 
