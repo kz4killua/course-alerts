@@ -2,4 +2,4 @@ from rest_framework.throttling import AnonRateThrottle
 
 
 class RequestEmailVerificationHourlyThrottle(AnonRateThrottle):
-    rate = "10/hour"
+    rate = "3600/hour"
