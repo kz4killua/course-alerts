@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.html import strip_tags
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -86,6 +87,7 @@ class VerifySignInCode(APIView):
         # Verify the user's email and delete the verification code
         user = email_verification_code.user
         user.email_verified = True
+        user.last_login = timezone.now()
         user.save()
         email_verification_code.delete()
 
