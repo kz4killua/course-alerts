@@ -7,7 +7,7 @@ from accounts.models import EmailVerificationCode, User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     ordering = ["email"]
-    list_display = ["email", "email_verified", "phone", "phone_verified"]
+    list_display = ["email", "email_verified", "phone", "phone_verified", "last_login"]
     list_filter = ["email_verified", "phone_verified"]
     search_fields = ["email"]
     fieldsets = [
