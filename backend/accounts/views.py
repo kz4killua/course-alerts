@@ -32,8 +32,7 @@ class RequestSignInCode(APIView):
         email = serializer.validated_data["email"]
 
         # Create the user if it doesn't exist
-        user, _ = User.objects.get_or_create(email=email)
-        _, code = EmailVerificationCode.generate(user)
+        _, code = EmailVerificationCode.generate(email)
 
         # Send the verification code to the user's email
         subject = render_to_string("accounts/verification_code_subject.txt")
@@ -67,9 +66,7 @@ class VerifySignInCode(APIView):
 
         # Retrieve the email verification code for the user
         try:
-            email_verification_code = EmailVerificationCode.objects.get(
-                user__email=email
-            )
+            email_verification_code = EmailVerificationCode.objects.get(email=email)
         except EmailVerificationCode.DoesNotExist:
             return Response(
                 {
@@ -85,7 +82,7 @@ class VerifySignInCode(APIView):
             )
 
         # Verify the user's email and delete the verification code
-        user = email_verification_code.user
+        user, _ = User.objects.get_or_create(email=email)
         user.email_verified = True
         user.last_login = timezone.now()
         user.save()

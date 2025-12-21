@@ -43,26 +43,26 @@ class User(AbstractUser):
 
 
 class EmailVerificationCode(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=255, unique=True)
+    code = models.CharField(max_length=128)
     attempts = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    code = models.CharField(max_length=128)
 
     CODE_LENGTH = 6
     CODE_EXPIRATION_TIME = 15
     CODE_MAX_ATTEMPTS = 10
 
     def __str__(self) -> str:
-        return f"{self.user}"
+        return f"EmailVerificationCode(email={self.email})"
 
     @classmethod
-    def generate(cls, user: User):
-        """Generate a new verification code for the user."""
+    def generate(cls, email: str):
+        """Generate a verification code for the given email."""
         code = get_random_string(length=cls.CODE_LENGTH, allowed_chars=string.digits)
         expires_at = timezone.now() + timedelta(minutes=cls.CODE_EXPIRATION_TIME)
         obj, _ = cls.objects.update_or_create(
-            user=user,
+            email=email,
             defaults={
                 "attempts": 0,
                 "expires_at": expires_at,
