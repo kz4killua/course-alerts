@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.db.models import F
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
@@ -72,14 +73,17 @@ class EmailVerificationCode(models.Model):
 
     def verify(self, code: str) -> bool:
         """Verify the provided code against the stored hash."""
-        # Check if the code is expired or too many attempts have been made
+        # Check if the code is expired
         if timezone.now() > self.expires_at:
             return False
-        if self.attempts >= self.CODE_MAX_ATTEMPTS:
-            return False
 
-        # Update the number of attempts
-        self.attempts += 1
-        self.save()
+        # Check if too many attempts have been made
+        EmailVerificationCode.objects.filter(pk=self.pk).update(
+            attempts=F("attempts") + 1
+        )
+        self.refresh_from_db()
+
+        if self.attempts > self.CODE_MAX_ATTEMPTS:
+            return False
 
         return check_password(code, self.code)
