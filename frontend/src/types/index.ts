@@ -37,6 +37,4 @@ export interface User {
   id: number;
   email: string;
   phone: string;
-  email_verified: boolean;
-  phone_verified: boolean;
 }
