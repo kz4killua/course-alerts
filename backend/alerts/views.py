@@ -3,7 +3,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.permissions import EmailVerifiedPermission
 from courses.models import Section
 from courses.serializers import SectionSerializer
 
@@ -12,7 +11,7 @@ from .serializers import CreateSubscriptionSerializer, DeleteSubscriptionSeriali
 
 
 class SubscriptionListCreateDeleteView(APIView):
-    permission_classes = [IsAuthenticated, EmailVerifiedPermission]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """List all sections the user is subscribed to."""

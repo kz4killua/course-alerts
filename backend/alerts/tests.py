@@ -19,7 +19,6 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
 
     def test_list_create_delete_subscriptions(self):
         user = User.objects.create_user(email="email@example.com", password="password")
-        user.email_verified = True
         user.save()
         self.client.force_authenticate(user=user)
 

@@ -83,7 +83,6 @@ class VerifySignInCode(APIView):
 
         # Verify the user's email and delete the verification code
         user, _ = User.objects.get_or_create(email=email)
-        user.email_verified = True
         user.last_login = timezone.now()
         user.save()
         email_verification_code.delete()

@@ -30,9 +30,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     email = models.EmailField(max_length=255, unique=True)
-    email_verified = models.BooleanField(default=False)
     phone = models.CharField(max_length=15, blank=True, null=True)
-    phone_verified = models.BooleanField(default=False)
     username = None
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

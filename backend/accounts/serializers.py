@@ -14,8 +14,8 @@ class EmailValidationMixin:
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "email_verified", "phone", "phone_verified"]
-        read_only_fields = ["id", "email", "email_verified", "phone_verified"]
+        fields = ["id", "email", "phone"]
+        read_only_fields = ["id", "email"]
 
 
 class RequestSignInCodeSerializer(serializers.Serializer, EmailValidationMixin):
