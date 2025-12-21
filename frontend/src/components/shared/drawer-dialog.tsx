@@ -1,96 +1,182 @@
-"use client"
+'use client'
 
-import React, { JSX } from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog"
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
-import { DialogProps, DialogTriggerProps, DialogContentProps, DialogDescriptionProps, DialogTitleProps, DialogCloseProps } from "@radix-ui/react-dialog"
-import { cn } from "@/lib/utils"
+import React, { JSX, createContext, useContext } from 'react'
+import { useIsMobile } from '@/hooks/use-mobile'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
+  DialogProps,
+  DialogTriggerProps,
+  DialogContentProps,
+  DialogDescriptionProps,
+  DialogTitleProps,
+  DialogCloseProps,
+} from '@radix-ui/react-dialog'
+import { cn } from '@/lib/utils'
 
+const DrawerDialogContext = createContext({ isMobile: false, isDismissible: true })
 
-export function DrawerDialog(props: JSX.IntrinsicAttributes & DialogProps) {
-  const isMobile = useIsMobile()
-  
-  if (isMobile) {
-    return <Drawer {...props} />
-  } else {
-    return <Dialog {...props} />
-  }
+export function useDrawerDialogContext() {
+  return useContext(DrawerDialogContext)
 }
 
-
-export function DrawerDialogTrigger({className, ...props}: JSX.IntrinsicAttributes & DialogTriggerProps) {
+export function DrawerDialog({
+  isDismissible = true,
+  ...props
+}: DialogProps & { isDismissible?: boolean }) {
   const isMobile = useIsMobile()
-  
+  const contextValue = { isMobile, isDismissible }
+
+  if (isMobile) {
+    return (
+      <Drawer {...props} dismissible={isDismissible}>
+        <DrawerDialogContext.Provider value={contextValue}>
+          {props.children}
+        </DrawerDialogContext.Provider>
+      </Drawer>
+    )
+  }
+  if (isDismissible) {
+    return (
+      <Dialog {...props}>
+        <DrawerDialogContext.Provider value={contextValue}>
+          {props.children}
+        </DrawerDialogContext.Provider>
+      </Dialog>
+    )
+  }
+  return (
+    <AlertDialog {...props}>
+      <DrawerDialogContext.Provider value={contextValue}>
+        {props.children}
+      </DrawerDialogContext.Provider>
+    </AlertDialog>
+  )
+}
+
+export function DrawerDialogTrigger({
+  className,
+  ...props
+}: JSX.IntrinsicAttributes & DialogTriggerProps) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
+
   if (isMobile) {
     return <DrawerTrigger className={className} {...props} />
-  } else {
+  }
+  if (isDismissible) {
     return <DialogTrigger className={className} {...props} />
   }
+  return <AlertDialogTrigger className={className} {...props} />
 }
 
+export function DrawerDialogContent({
+  className,
+  ...props
+}: JSX.IntrinsicAttributes & DialogContentProps) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
 
-export function DrawerDialogContent({className, ...props}: JSX.IntrinsicAttributes & DialogContentProps) {
-  const isMobile = useIsMobile()
-  
   if (isMobile) {
-    return <DrawerContent className={cn("max-h-[95%] p-4 pt-0", className)} {...props} />
-  } else {
-    return <DialogContent className={cn("max-h-[95%]", className)} {...props} />
+    return <DrawerContent className={cn('max-h-[95%] p-4 pt-0', className)} {...props} />
   }
+  if (isDismissible) {
+    return <DialogContent className={cn('max-h-[95%]', className)} {...props} />
+  }
+  return <AlertDialogContent className={cn('max-h-[95%]', className)} {...props} />
 }
 
+export function DrawerDialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
 
-export function DrawerDialogHeader({className, ...props}: React.HTMLAttributes<HTMLDivElement>) {
-  const isMobile = useIsMobile()
-  
   if (isMobile) {
-    return <DrawerHeader className={cn("px-0", className)} {...props} />
-  } else {
+    return <DrawerHeader className={cn('px-0', className)} {...props} />
+  }
+  if (isDismissible) {
     return <DialogHeader className={className} {...props} />
   }
+  return <AlertDialogHeader className={className} {...props} />
 }
 
+export function DrawerDialogTitle({
+  className,
+  ...props
+}: JSX.IntrinsicAttributes & DialogTitleProps) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
 
-export function DrawerDialogTitle({className, ...props}: JSX.IntrinsicAttributes & DialogTitleProps) {
-  const isMobile = useIsMobile()
-  
   if (isMobile) {
     return <DrawerTitle className={className} {...props} />
-  } else {
+  }
+  if (isDismissible) {
     return <DialogTitle className={className} {...props} />
   }
+  return <AlertDialogTitle className={className} {...props} />
 }
 
+export function DrawerDialogDescription({
+  className,
+  ...props
+}: JSX.IntrinsicAttributes & DialogDescriptionProps) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
 
-export function DrawerDialogDescription({className, ...props}: JSX.IntrinsicAttributes & DialogDescriptionProps) {
-  const isMobile = useIsMobile()
-  
   if (isMobile) {
     return <DrawerDescription className={className} {...props} />
-  } else {
+  }
+  if (isDismissible) {
     return <DialogDescription className={className} {...props} />
   }
+  return <AlertDialogDescription className={className} {...props} />
 }
 
+export function DrawerDialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
 
-export function DrawerDialogFooter({className, ...props} : React.HTMLAttributes<HTMLDivElement>) {
-  const isMobile = useIsMobile()
-  
   if (isMobile) {
-    return <DrawerFooter className={cn("flex-col-reverse px-0", className)} {...props} />
-  } else {
+    return <DrawerFooter className={cn('flex-col-reverse px-0', className)} {...props} />
+  }
+  if (isDismissible) {
     return <DialogFooter className={className} {...props} />
   }
+  return <AlertDialogFooter className={className} {...props} />
 }
 
+export function DrawerDialogClose({
+  className,
+  ...props
+}: JSX.IntrinsicAttributes & DialogCloseProps) {
+  const { isMobile, isDismissible } = useDrawerDialogContext()
 
-export function DrawerDialogClose({className, ...props}: JSX.IntrinsicAttributes & DialogCloseProps) {
-  const isMobile = useIsMobile()
-  
   if (isMobile) {
     return <DrawerClose className={className} {...props} />
-  } else {
+  }
+  if (isDismissible) {
     return <DialogClose className={className} {...props} />
   }
+  return <AlertDialogCancel className={className} {...props} />
 }

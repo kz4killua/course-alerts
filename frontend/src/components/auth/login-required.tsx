@@ -27,7 +27,7 @@ function LoginDialog() {
   const { loading } = useAuth()
 
   return (
-    <DrawerDialog open={open} onOpenChange={setOpen}>
+    <DrawerDialog open={open} onOpenChange={setOpen} isDismissible={false}>
       {
         loading ? (
           <LoadingDialogContent />
