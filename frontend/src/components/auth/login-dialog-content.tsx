@@ -165,7 +165,7 @@ function EnterCodeStep({
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
-  const [wait, setWait] = useState(30)
+  const [wait, setWait] = useState(60)
 
   const formSchema = z.object({
     code: z.string().length(6, {
