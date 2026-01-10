@@ -107,7 +107,7 @@ export function SectionsDialog({
         </div>
       </DrawerDialogTrigger>
 
-      <DrawerDialogContent className="p-0 max-w-5xl flex flex-col overflow-y-hidden">
+      <DrawerDialogContent className="p-0 max-w-5xl min-h-[95dvh] flex flex-col overflow-y-hidden">
         
         <DrawerDialogHeader className="bg-background px-10 pt-5 sm:pt-10">
           <DrawerDialogTitle className="text-3xl">
