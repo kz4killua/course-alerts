@@ -185,28 +185,20 @@ class TestAlerts(TestCase):
         user = User.objects.create_user(email="user@example.com", password="password")
 
         # Create sections
-        section1 = Section.objects.get(
-            term__term="202309", course_reference_number="42684"
-        )
-        section2 = Section.objects.get(
-            term__term="202309", course_reference_number="44746"
-        )
-        section3 = Section.objects.get(
-            term__term="202309", course_reference_number="42752"
-        )
-        section4 = Section.objects.get(
-            term__term="202309", course_reference_number="41942"
-        )
+        s1 = Section.objects.get(term__term="202309", course_reference_number="42684")
+        s2 = Section.objects.get(term__term="202309", course_reference_number="44746")
+        s3 = Section.objects.get(term__term="202309", course_reference_number="42752")
+        s4 = Section.objects.get(term__term="202309", course_reference_number="41942")
 
         # Create subscriptions
-        Subscription.objects.create(user=user, section=section1)
-        Subscription.objects.create(user=user, section=section2)
-        Subscription.objects.create(user=user, section=section3)
-        Subscription.objects.create(user=user, section=section4)
+        Subscription.objects.create(user=user, section=s1)
+        Subscription.objects.create(user=user, section=s2)
+        Subscription.objects.create(user=user, section=s3)
+        Subscription.objects.create(user=user, section=s4)
 
         # Mock enrollment infos
         enrollment_infos = {
-            section1: {
+            s1: {
                 "enrollment": 250,
                 "maximumEnrollment": 250,
                 "seatsAvailable": None,
@@ -214,7 +206,7 @@ class TestAlerts(TestCase):
                 "waitCount": None,
                 "waitAvailable": None,
             },
-            section2: {
+            s2: {
                 "enrollment": 245,
                 "maximumEnrollment": 250,
                 "seatsAvailable": 5,
@@ -222,7 +214,7 @@ class TestAlerts(TestCase):
                 "waitCount": None,
                 "waitAvailable": None,
             },
-            section3: {
+            s3: {
                 "enrollment": 250,
                 "maximumEnrollment": 250,
                 "seatsAvailable": 0,
@@ -230,7 +222,7 @@ class TestAlerts(TestCase):
                 "waitCount": 10,
                 "waitAvailable": 10,
             },
-            section4: {
+            s4: {
                 "enrollment": 250,
                 "maximumEnrollment": 250,
                 "seatsAvailable": 0,
@@ -246,9 +238,9 @@ class TestAlerts(TestCase):
         alerts = get_alerts(subscriptions, statuses)
         expected = {
             user: {
-                Subscription.OPEN: {section2},
-                Subscription.WAITLIST_OPEN: {section3},
-                Subscription.CLOSED: {section1, section4},
+                Subscription.OPEN: {s2},
+                Subscription.WAITLIST_OPEN: {s3},
+                Subscription.CLOSED: {s1, s4},
             }
         }
         self.assertEqual(alerts, expected)
