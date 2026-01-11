@@ -1,4 +1,3 @@
-from django.db import transaction
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -37,13 +36,15 @@ class SubscriptionListCreateDeleteView(APIView):
             id__in=section_ids,
         )
 
-        subscriptions = []
-        with transaction.atomic():
-            for section in sections:
-                subscription, _ = Subscription.objects.get_or_create(
-                    user=request.user, section=section
-                )
-                subscriptions.append(subscription)
+        Subscription.objects.bulk_create(
+            [Subscription(user=request.user, section=section) for section in sections],
+            ignore_conflicts=True,
+        )
+
+        # Use a single query to efficiently fetch subscriptions and related data
+        subscriptions = Subscription.objects.filter(
+            user=request.user, section__in=sections
+        ).select_related("section", "section__term")
 
         serializer = SubscriptionSerializer(subscriptions, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
