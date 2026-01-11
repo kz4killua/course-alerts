@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management import call_command
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -41,8 +42,18 @@ class TestTermsView(APITestCase):
 
 class TestCoursesView(APITestCase):
     def setUp(self) -> None:
-        call_command("updatesections", "202309", "--usecache")
-        call_command("updatesections", "202401", "--usecache")
+        call_command(
+            "updatesections",
+            "202309",
+            jsonpath=settings.BASE_DIR / "courses/tests/data/202309.json",
+            verbosity=0,
+        )
+        call_command(
+            "updatesections",
+            "202401",
+            jsonpath=settings.BASE_DIR / "courses/tests/data/202401.json",
+            verbosity=0,
+        )
 
     def test_courses_view(self):
         url = reverse("courses")

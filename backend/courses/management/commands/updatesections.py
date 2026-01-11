@@ -1,7 +1,6 @@
 import asyncio
 import html
 import json
-import sys
 
 import aiohttp
 from django.core.management.base import BaseCommand, CommandError, CommandParser
@@ -15,58 +14,44 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
-            "term", type=str, help="The term to update the course sections for"
-        )
-        parser.add_argument(
-            "--usecache",
-            action="store_true",
-            help="Use cached data instead of fetching from the API",
+            "term", type=str, help="The term to update course sections for"
         )
         parser.add_argument(
             "--jsessionid", type=str, help="A valid JSESSIONID cookie value"
         )
+        parser.add_argument(
+            "--jsonpath",
+            type=str,
+            help="Path to a JSON file containing course section data",
+        )
 
     def handle(self, *args, **options):
-        if not options["usecache"] and not options["jsessionid"]:
+        if not options["jsessionid"] and not options["jsonpath"]:
             raise CommandError(
-                "You must provide a JSESSIONID cookie value when not using "
-                "the --usecache option."
+                "You must provide a JSESSIONID cookie value or specify "
+                "the path to the JSON data using --jsonpath"
             )
 
-        # Load the course sections from a file or fetch them from the API
-        if options["usecache"]:
+        # Load the course sections from the file or fetch them from the API
+        if options["jsonpath"]:
             try:
-                with open(
-                    f"courses/data/raw/sections/{options['term']}.json",
-                    encoding="utf-8",
-                ) as f:
+                with open(options["jsonpath"], encoding="utf-8") as f:
                     sections = json.load(f)
             except FileNotFoundError as e:
-                raise CommandError(
-                    f"No cached data found for term: {options['term']}"
-                ) from e
+                raise CommandError(f"File not found: {options['jsonpath']}") from e
         else:
             try:
                 sections = asyncio.run(
-                    get_all_sections(options["term"], options["jsessionid"])
+                    fetch_all_sections(options["term"], options["jsessionid"])
                 )
-            except BaseException as e:
+            except Exception as e:
                 raise CommandError(f"Failed to retrieve course sections: {e}") from e
-
-        # Save the raw data to a file
-        if not options["usecache"]:
-            with open(
-                f"courses/data/raw/sections/{options['term']}.json",
-                "w",
-                encoding="utf-8",
-            ) as f:
-                json.dump(sections, f, indent=2)
 
         # Unescape HTML entities
         sections = unescape(sections)
 
         for section in sections:
-            # Create or update each course
+            # Create or update each course, term, then section
             course, _ = Course.objects.update_or_create(
                 subject_course=section["subjectCourse"],
                 defaults={
@@ -76,14 +61,10 @@ class Command(BaseCommand):
                     "course_number": section["courseNumber"],
                 },
             )
-
-            # Create or update each term
             term, _ = Term.objects.update_or_create(
                 term=section["term"], defaults={"term_desc": section["termDesc"]}
             )
-
-            # Create or update each section
-            section, _ = Section.objects.update_or_create(
+            Section.objects.update_or_create(
                 id=section["id"],
                 defaults={
                     "course_reference_number": section["courseReferenceNumber"],
@@ -104,15 +85,14 @@ class Command(BaseCommand):
                 },
             )
 
-        if "test" not in sys.argv:
+        if options["verbosity"] > 0:
             self.stdout.write(
                 self.style.SUCCESS(f"Updated data for term: {options['term']}")
             )
 
 
-async def get_all_sections(term: str, jsessionid: str):
-    """Retrieve all course sections for a given term."""
-
+async def fetch_all_sections(term: str, jsessionid: str):
+    """Retrieve all course sections for a given term, handling pagination."""
     data = []
     offset = 0
     limit = 500

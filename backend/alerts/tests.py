@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
@@ -14,8 +15,18 @@ User = get_user_model()
 
 class TestSubscriptionListCreateDeleteView(APITestCase):
     def setUp(self) -> None:
-        call_command("updatesections", "202309", "--usecache")
-        call_command("updatesections", "202401", "--usecache")
+        call_command(
+            "updatesections",
+            "202309",
+            jsonpath=settings.BASE_DIR / "courses/tests/data/202309.json",
+            verbosity=0,
+        )
+        call_command(
+            "updatesections",
+            "202401",
+            jsonpath=settings.BASE_DIR / "courses/tests/data/202401.json",
+            verbosity=0,
+        )
 
     def test_list_create_delete_subscriptions(self):
         user = User.objects.create_user(email="email@example.com", password="password")
@@ -85,7 +96,12 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
 
 class TestAlerts(TestCase):
     def setUp(self) -> None:
-        call_command("updatesections", "202309", "--usecache")
+        call_command(
+            "updatesections",
+            "202309",
+            jsonpath=settings.BASE_DIR / "courses/tests/data/202309.json",
+            verbosity=0,
+        )
 
     def test_get_status(self):
         # No seats available
