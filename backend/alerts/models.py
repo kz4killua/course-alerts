@@ -10,20 +10,26 @@ class Subscription(models.Model):
     OPEN = "open"
     WAITLIST_OPEN = "waitlist_open"
     CLOSED = "closed"
-
     LAST_STATUS_CHOICES = {
-        OPEN: OPEN,
-        WAITLIST_OPEN: WAITLIST_OPEN,
-        CLOSED: CLOSED,
+        OPEN: "Open",
+        WAITLIST_OPEN: "Waitlist Open",
+        CLOSED: "Closed",
     }
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     last_status = models.CharField(
         max_length=20, choices=LAST_STATUS_CHOICES, null=True, blank=True
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "section"], name="unique_user_section"
+            )
+        ]
 
     def __str__(self):
-        return f"{self.user} - {self.section}"
+        return f"Subscription(user={self.user}, section={self.section})"
