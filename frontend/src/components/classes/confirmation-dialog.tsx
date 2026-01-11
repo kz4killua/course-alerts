@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogHeader, DrawerDialogTitle } from "@/components/shared/drawer-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { createAlertSubscriptions } from "@/services/alerts"
+import { createSubscriptions } from "@/services/alerts"
 import { useEffect, useState } from "react"
 import type { Term, Section } from "@/types"
 import { useAuth } from "@/providers/auth-provider"
@@ -92,7 +92,7 @@ function ConfirmationDialogContent({
 
   function handleSubmit() {
     setLoading(true)
-    createAlertSubscriptions(term.term, sections.map(section => section.course_reference_number))
+    createSubscriptions(sections.map(section => section.id))
     .then(() => {
       toast({
         title: "Success",

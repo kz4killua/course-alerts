@@ -38,3 +38,9 @@ export interface User {
   email: string;
   phone: string;
 }
+
+
+export interface Subscription {
+  id: number;
+  section: Section;
+}

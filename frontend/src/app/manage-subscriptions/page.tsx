@@ -5,8 +5,8 @@ import { ItemDisplay, ItemDisplaySkeleton } from "@/components/shared/item-displ
 import { Button } from "@/components/ui/button"
 import { Trash2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
-import { deleteAlertSubscriptions, listAlertSubscriptions } from "@/services/alerts"
-import { Section } from "@/types"
+import { deleteSubscriptions, listSubscriptions } from "@/services/alerts"
+import { Subscription } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogHeader, DrawerDialogTitle, DrawerDialogTrigger, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
@@ -17,13 +17,13 @@ import { PageLayout } from "@/components/shared/page-layout"
 export default function Page() {
 
   const [query, setQuery] = useState("")
-  const [subscriptions, setSubscriptions] = useState<Section[]>([])
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
   
   useEffect(() => {
     setLoading(true)
-    listAlertSubscriptions()
+    listSubscriptions()
     .then(response => {
       setSubscriptions(response.data)
     })
@@ -67,14 +67,14 @@ function SubscriptionsList({
   setSubscriptions
 } : {
   query: string,
-  subscriptions: Section[],
+  subscriptions: Subscription[],
   loading: boolean,
-  setSubscriptions: (subscriptions: Section[]) => void
+  setSubscriptions: (subscriptions: Subscription[]) => void
 }) {
 
   // Filter the subscriptions (course + CRN) based on the query
-  const filteredSubscriptions = subscriptions.filter(section => {
-    const tag = section.course + section.course_reference_number
+  const filteredSubscriptions = subscriptions.filter(subscription => {
+    const tag = subscription.section.course + subscription.section.course_reference_number
     return tag.toLowerCase().includes(query.toLowerCase())
   })
 
@@ -105,17 +105,17 @@ function SubscriptionsList({
               <ItemDisplaySkeleton />
             </>
           ) : (
-            filteredSubscriptions.map(section => (
-              <div key={section.id} className="flex items-center justify-center gap-3">
+            filteredSubscriptions.map(subscription => (
+              <div key={subscription.section.id} className="flex items-center justify-center gap-3">
                 <ItemDisplay
-                  topLeft={section.course}
-                  bottomLeft={section.schedule_type_description}
-                  topRight={`CRN ${section.course_reference_number}`}
-                  bottomRight={`${section.term}`}
+                  topLeft={subscription.section.course}
+                  bottomLeft={subscription.section.schedule_type_description}
+                  topRight={`CRN ${subscription.section.course_reference_number}`}
+                  bottomRight={`${subscription.section.term}`}
                   className="cursor-auto"
                 />
                 <DeletionDialog 
-                  section={section}
+                  subscription={subscription}
                   subscriptions={subscriptions}
                   setSubscriptions={setSubscriptions}
                 />
@@ -130,13 +130,13 @@ function SubscriptionsList({
 
 
 function DeletionDialog({
-  section,
+  subscription,
   subscriptions,
   setSubscriptions,
 } : {
-  section: Section,
-  subscriptions: Section[],
-  setSubscriptions: (subscriptions: Section[]) => void
+  subscription: Subscription,
+  subscriptions: Subscription[],
+  setSubscriptions: (subscriptions: Subscription[]) => void
 }) {
 
   const { toast } = useToast()
@@ -145,9 +145,9 @@ function DeletionDialog({
 
   function handleDelete() {
     setLoading(true)
-    deleteAlertSubscriptions(section.term, [section.course_reference_number])
+    deleteSubscriptions([subscription.id])
     .then(() => {
-      setSubscriptions(subscriptions.filter(s => s.id !== section.id))
+      setSubscriptions(subscriptions.filter(s => s.id !== subscription.id))
     })
     .then(() => {
       toast({
