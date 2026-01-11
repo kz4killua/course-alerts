@@ -29,12 +29,21 @@ class SubscriptionListCreateDeleteView(APIView):
         """Create user subscriptions to the specified sections."""
         serializer = CreateSubscriptionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        section_ids = serializer.validated_data["section_ids"]
+        section_ids = set(serializer.validated_data["section_ids"])
 
         sections = Section.objects.filter(
-            term__registration_open=True,
             id__in=section_ids,
+            term__registration_open=True,
         )
+        if len(sections) != len(section_ids):
+            return Response(
+                {
+                    "detail": (
+                        "One or more sections are invalid or not open for registration."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         Subscription.objects.bulk_create(
             [Subscription(user=request.user, section=section) for section in sections],
@@ -55,12 +64,6 @@ class SubscriptionListCreateDeleteView(APIView):
         serializer.is_valid(raise_exception=True)
         subscription_ids = serializer.validated_data["subscription_ids"]
 
-        subscriptions = Subscription.objects.filter(
-            user=request.user, id__in=subscription_ids
-        )
-        count, _ = subscriptions.delete()
+        Subscription.objects.filter(user=request.user, id__in=subscription_ids).delete()
 
-        return Response(
-            {"detail": f"Deleted {count} subscriptions."},
-            status=status.HTTP_200_OK,
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)

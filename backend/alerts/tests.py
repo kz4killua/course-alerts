@@ -22,22 +22,21 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         user.save()
         self.client.force_authenticate(user=user)
 
+        s1 = Section.objects.get(term__term="202309", course_reference_number="42684")
+        s2 = Section.objects.get(term__term="202309", course_reference_number="44746")
+        s3 = Section.objects.get(term__term="202401", course_reference_number="73772")
+        s4 = Section.objects.get(term__term="202401", course_reference_number="70154")
+
         url = reverse("subscriptions-list-create-delete")
 
-        # Test closed terms
+        # Test subscriptions to sections not open for registration
         response = self.client.post(
             url,
-            {"term": "202309", "course_reference_numbers": ["42684", "44746"]},
+            {"section_ids": [s1.id, s2.id, s3.id, s4.id]},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.client.post(
-            url,
-            {"term": "202401", "course_reference_numbers": ["73772", "70154"]},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Subscription.objects.filter(user=user).count(), 0)
 
         # Open up registration for both terms
         t1 = Term.objects.get(term="202309")
@@ -47,67 +46,41 @@ class TestSubscriptionListCreateDeleteView(APITestCase):
         t1.save()
         t2.save()
 
-        # Test creating valid subscriptions
+        # Test subscriptions to valid sections
         response = self.client.post(
             url,
-            {"term": "202309", "course_reference_numbers": ["42684", "44746"]},
+            {"section_ids": [s1.id, s2.id, s3.id, s4.id]},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Subscription.objects.filter(user=user).count(), 4)
 
-        self.client.post(
-            url,
-            {"term": "202401", "course_reference_numbers": ["73772", "70154"]},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        # Test invalid terms and course reference numbers
+        # Test subscriptions to invalid sections
         response = self.client.post(
             url,
-            {"term": "199009", "course_reference_numbers": ["42684", "44746"]},
+            {"section_ids": [99999, 88888, 77777, 66666]},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        response = self.client.post(
-            url,
-            {"term": "202309", "course_reference_numbers": ["73772", "70154"]},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Subscription.objects.filter(user=user).count(), 4)
 
         # Test listing subscriptions
-        response = self.client.get(url, {"term": "202309"})
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
-
-        response = self.client.get(url, {"term": "202401"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 4)
 
         # Test deleting subscriptions
         response = self.client.delete(
             url,
-            {"term": "202309", "course_reference_numbers": ["42684", "44746"]},
+            {
+                "subscription_ids": [
+                    subscription["id"] for subscription in response.data
+                ]
+            },
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-        response = self.client.get(url, {"term": "202309"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
-
-        response = self.client.delete(
-            url,
-            {"term": "202401", "course_reference_numbers": ["73772"]},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-        response = self.client.get(url, {"term": "202401"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(Subscription.objects.filter(user=user).count(), 0)
 
 
 class TestAlerts(TestCase):
