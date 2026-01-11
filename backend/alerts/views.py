@@ -1,13 +1,17 @@
+from django.db import transaction
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from courses.models import Section
-from courses.serializers import SectionSerializer
 
 from .models import Subscription
-from .serializers import CreateSubscriptionSerializer, DeleteSubscriptionSerializer
+from .serializers import (
+    CreateSubscriptionSerializer,
+    DeleteSubscriptionSerializer,
+    SubscriptionSerializer,
+)
 
 
 class SubscriptionListCreateDeleteView(APIView):
@@ -15,61 +19,47 @@ class SubscriptionListCreateDeleteView(APIView):
 
     def get(self, request):
         """List all sections the user is subscribed to."""
+        subscriptions = Subscription.objects.filter(
+            user=self.request.user
+        ).select_related("section", "section__term")
 
-        term = request.query_params.get("term")
-
-        subscriptions = Subscription.objects.filter(user=self.request.user)
-        if term:
-            subscriptions = subscriptions.filter(section__term__term=term)
-
-        sections = [subscription.section for subscription in subscriptions]
-        serializer = SectionSerializer(sections, many=True)
+        serializer = SubscriptionSerializer(subscriptions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """Create user subscriptions to the specified sections."""
-
         serializer = CreateSubscriptionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        term = serializer.validated_data["term"]
-        course_reference_numbers = serializer.validated_data["course_reference_numbers"]
+        section_ids = serializer.validated_data["section_ids"]
 
         sections = Section.objects.filter(
-            term__term=term,
             term__registration_open=True,
-            course_reference_number__in=course_reference_numbers,
+            id__in=section_ids,
         )
-        if len(sections) != len(course_reference_numbers):
-            return Response(
-                {"detail": "One or more sections not found."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         subscriptions = []
-        for section in sections:
-            subscription, created = Subscription.objects.get_or_create(
-                user=request.user, section=section
-            )
-            if created:
+        with transaction.atomic():
+            for section in sections:
+                subscription, _ = Subscription.objects.get_or_create(
+                    user=request.user, section=section
+                )
                 subscriptions.append(subscription)
 
-        sections = [subscription.section for subscription in subscriptions]
-        serializer = SectionSerializer(sections, many=True)
+        serializer = SubscriptionSerializer(subscriptions, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
         """Delete user subscriptions to the specified sections."""
-
         serializer = DeleteSubscriptionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        term = serializer.validated_data["term"]
-        course_reference_numbers = serializer.validated_data["course_reference_numbers"]
+        subscription_ids = serializer.validated_data["subscription_ids"]
 
         subscriptions = Subscription.objects.filter(
-            user=self.request.user,
-            section__term__term=term,
-            section__course_reference_number__in=course_reference_numbers,
+            user=request.user, id__in=subscription_ids
         )
-        subscriptions.delete()
+        count, _ = subscriptions.delete()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": f"Deleted {count} subscriptions."},
+            status=status.HTTP_200_OK,
+        )
