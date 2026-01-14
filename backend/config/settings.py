@@ -186,7 +186,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULE = {
     "alerts.tasks.handle_alerts": {
         "task": "alerts.tasks.handle_alerts",
-        "schedule": crontab(minute="*/15"),
+        "schedule": crontab(minute="*/5"),
     },
 }
 
