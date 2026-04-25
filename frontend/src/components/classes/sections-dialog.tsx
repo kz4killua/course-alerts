@@ -1,6 +1,7 @@
 "use client"
 
 import clsx from "clsx"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -8,38 +9,22 @@ import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialo
 import type { Term, Course, Section } from "@/types"
 import { formatMeetingTimes } from "@/lib/utils"
 import { ConfirmationDialog } from "./confirmation-dialog"
-import { useEffect, useState } from "react"
 import { ItemDisplay, ItemDisplaySkeleton } from "@/components/shared/item-display"
-import { listSections } from "@/services/courses"
+import { useSections } from "@/hooks/use-sections"
 
 
 export function SectionsDialog({
   term,
   course, 
-  selectedSections,
-  setSelectedSections
 } : {
   term: Term,
   course: Course,
-  selectedSections: Set<Section["id"]>,
-  setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
-
+  
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
   const [open, setOpen] = useState(false)
-  const [sections, setSections] = useState<Section[]>([])
-
-  useEffect(() => {
-    if (open && sections.length === 0) {
-      listSections(course.subject_course, term.term)
-      .then(response => {
-        setSections(response.data)
-      })
-      .catch(error => {
-        console.error(error)
-      })
-    }
-  }, [open, course, term, sections.length])
+  const { data: sections = [], isLoading } = useSections(course.subject_course, term.term, open)
+  const [selectedSections, setSelectedSections] = useState<Set<Section["id"]>>(new Set())
   
   function handleOpenChange(open: boolean) {
     setOpen(open)
@@ -123,7 +108,7 @@ export function SectionsDialog({
 
           <div className="text-sm h-4">
             {
-              numSections === 0 ? (
+              isLoading ? (
                 <Skeleton className="h-4 w-full" />
               ) : (
               <p className="text-muted-foreground text-center sm:text-left">
@@ -139,7 +124,7 @@ export function SectionsDialog({
             </p>
             <div className="flex flex-wrap gap-4">
               {
-                numSections === 0 ? (
+                isLoading ? (
                   <>
                     <Skeleton className="h-9 w-44" />
                     <Skeleton className="h-9 w-44" />
@@ -183,7 +168,7 @@ export function SectionsDialog({
             </p>
             <div className="flex flex-col gap-4 pb-8">
               {
-                numSections === 0 ? (
+                isLoading ? (
                   <>
                     <ItemDisplaySkeleton />
                     <ItemDisplaySkeleton />

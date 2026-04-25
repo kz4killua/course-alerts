@@ -5,20 +5,19 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { SectionsDialog } from "@/components/classes/sections-dialog"
-import { Loader } from "lucide-react"
-import { useState, useEffect, useMemo } from "react"
-import type { Term, Course, Section } from "@/types"
-import { listTerms, listCourses } from "@/services/courses"
-import { debounce } from "lodash"
+import { useState, useEffect } from "react"
+import type { Term } from "@/types"
 import { SearchBar } from "@/components/shared/search-bar"
 import { PageLayout } from "@/components/shared/page-layout"
+import { useTerms } from "@/hooks/use-terms"
+import { useDebounce } from "@uidotdev/usehooks"
+import { useCourses } from "@/hooks/use-courses"
+import { LoadingIcon } from "@/components/shared/loading-icon"
 
 
 export default function Page() {
-
   const [query, setQuery] = useState<string>("")
   const [selectedTerm, setSelectedTerm] = useState<Term>()
-  const [selectedSections, setSelectedSections] = useState<Set<Section["id"]>>(new Set())
 
   return (
     <PageLayout>
@@ -34,12 +33,7 @@ export default function Page() {
         <div className="mt-10">
           {
             selectedTerm && (
-              <SearchResults 
-                query={query} 
-                selectedTerm={selectedTerm} 
-                selectedSections={selectedSections}
-                setSelectedSections={setSelectedSections}
-              />
+              <SearchResults query={query} term={selectedTerm} />
             )
           }
         </div>
@@ -56,22 +50,13 @@ function TermSelect({
   selectedTerm: Term | undefined,
   setSelectedTerm: (term: Term | undefined) => void
 }) {
-
-  const [terms, setTerms] = useState<Term[]>()
+  const { data: terms } = useTerms(true)
 
   useEffect(() => {
-    listTerms(true)
-    .then(response => {
-      const terms = response.data
-      setTerms(terms)
-      if (terms.length > 0) {
-        setSelectedTerm(terms[0])
-      }
-    })
-    .catch(error => {
-      console.error(error)
-    })
-  }, [setSelectedTerm])
+    if (terms && terms.length > 0 && !selectedTerm) {
+      setSelectedTerm(terms[0])
+    }
+  }, [terms, selectedTerm, setSelectedTerm])
 
   function handleValueChange(value: string) {
     if (terms !== undefined) {
@@ -94,7 +79,7 @@ function TermSelect({
             </AlertDescription>
           </Alert>
         ) : (
-          <RadioGroup defaultValue={selectedTerm?.term} className="flex gap-4" onValueChange={handleValueChange}>
+          <RadioGroup defaultValue={terms[0].term} onValueChange={handleValueChange} className="flex gap-4">
             {
               terms.map(term => (
                 <div className="flex items-center space-x-2" key={term.term}>
@@ -115,64 +100,26 @@ function TermSelect({
 
 function SearchResults({
   query,
-  selectedTerm,
-  selectedSections,
-  setSelectedSections,
+  term,
 }: {
   query: string,
-  selectedTerm: Term | undefined,
-  selectedSections: Set<Section["id"]>,
-  setSelectedSections: (sections: Set<Section["id"]>) => void
+  term: Term,
 }) {
-
-  const [courses, setCourses] = useState<Course[]>([])
-  const [loading, setLoading] = useState(false)
-  const [debouncedQuery, setDebouncedQuery] = useState<string>("")
-  const [debouncedTerm, setDebouncedTerm] = useState<Term | undefined>()
-
-
-  const debouncedSearch = useMemo(() => {
-
-    function handleSearch(query: string, term: Term | undefined) {
-      setDebouncedQuery(query)
-      setDebouncedTerm(term)
-  
-      if ((query.length > 0) && term) {
-  
-        setLoading(true)
-  
-        listCourses(term.term, query)
-        .then(response => {
-          setCourses(response.data)
-        })
-        .catch(error => {
-          console.error(error)
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-      } else {
-        setCourses([])
-      }
-    }
-
-    return debounce((query, term) => handleSearch(query, term), 250)
-  }, [])
-
-  useEffect(() => {
-    debouncedSearch(query, selectedTerm)
-    return debouncedSearch.cancel
-  }, [query, selectedTerm, debouncedSearch])
-
+  const debouncedQuery = useDebounce(query, 250)
+  const debouncedTerm = useDebounce(term, 250)
+  const { data: courses = [], isFetching, isError } = useCourses(debouncedTerm?.term, debouncedQuery)
 
   return (
     <div>
       <p className="text-sm h-8 flex items-center text-muted-foreground">
         {
-          loading ? (
-            <Loader size={14} className="animate-spin" />
-          ) :
-          debouncedQuery.length > 0 && debouncedTerm && (
+          isFetching ? (
+            <LoadingIcon />
+          ) : isError ? (
+            <span>
+              An error occurred while searching for courses. Please try again later.
+            </span>
+          ) : debouncedQuery.length > 0 && debouncedTerm && (
             <span>Found {courses.length} results for &ldquo;{debouncedQuery}&rdquo; in {debouncedTerm?.term_desc}</span>
           )
         }
@@ -180,13 +127,11 @@ function SearchResults({
 
       <div className="mt-4 space-y-4">
         {
-          debouncedTerm && courses.map(course =>
+          courses.map(course =>
             <SectionsDialog
               key={course.subject_course}
               term={debouncedTerm}
               course={course}
-              selectedSections={selectedSections}
-              setSelectedSections={setSelectedSections}
             />
           )
         }

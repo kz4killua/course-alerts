@@ -31,10 +31,8 @@ export async function verifySignIn(email: string, code: string) {
 }
 
 
-export async function updateAccount(phone: string) {
-  return await instance.patch<User>("accounts/me", {
-    phone,
-  });
+export async function updateAccount(updates: Partial<User>) {
+  return await instance.patch<User>("accounts/me", updates);
 }
 
 

@@ -4,39 +4,19 @@ import { SearchBar } from "@/components/shared/search-bar"
 import { ItemDisplay, ItemDisplaySkeleton } from "@/components/shared/item-display"
 import { Button } from "@/components/ui/button"
 import { Trash2Icon } from "lucide-react"
-import { useEffect, useState } from "react"
-import { deleteSubscriptions, listSubscriptions } from "@/services/alerts"
+import { useState } from "react"
 import { Subscription } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogHeader, DrawerDialogTitle, DrawerDialogTrigger, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 import { PageLayout } from "@/components/shared/page-layout"
+import { useDeleteSubscriptions, useSubscriptions } from "@/hooks/use-subscriptions"
+import { getErrorMessage } from "@/lib/utils"
 
 
 export default function Page() {
-
   const [query, setQuery] = useState("")
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
-  const [loading, setLoading] = useState(true)
-  const { toast } = useToast()
-  
-  useEffect(() => {
-    setLoading(true)
-    listSubscriptions()
-    .then(response => {
-      setSubscriptions(response.data)
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
-    })
-  }, [toast])
 
   return (
     <PageLayout>
@@ -44,16 +24,11 @@ export default function Page() {
         <h1 className="text-3xl font-semibold mb-6">
           Your Subscriptions
         </h1>
-        <SearchBar 
-          placeholder="Search your alerts..." 
-          onChange={e => setQuery(e.target.value)} 
+        <SearchBar
+          placeholder="Search your alerts..."
+          onChange={e => setQuery(e.target.value)}
         />
-        <SubscriptionsList 
-          query={query} 
-          loading={loading} 
-          subscriptions={subscriptions} 
-          setSubscriptions={setSubscriptions}
-        />
+        <SubscriptionsList query={query} />
       </main>
     </PageLayout>
   )
@@ -62,28 +37,22 @@ export default function Page() {
 
 function SubscriptionsList({
   query,
-  subscriptions,
-  loading,
-  setSubscriptions
-} : {
+}: {
   query: string,
-  subscriptions: Subscription[],
-  loading: boolean,
-  setSubscriptions: (subscriptions: Subscription[]) => void
 }) {
-
-  // Filter the subscriptions (course + CRN) based on the query
-  const filteredSubscriptions = subscriptions.filter(subscription => {
-    const tag = subscription.section.course + subscription.section.course_reference_number
-    return tag.toLowerCase().includes(query.toLowerCase())
-  })
+  const { data: subscriptions, isPending, isError } = useSubscriptions()
+  const filteredSubscriptions = subscriptions ? filterSubscriptions(subscriptions, query) : []
 
   return (
     <div className="mt-10">
       <div className="text-sm h-8 flex items-center">
         {
-          loading ? (
+          isPending ? (
             <Skeleton className="h-4 w-full" />
+          ) : isError ? (
+            <p className="text-muted-foreground">
+              An error occurred while fetching your subscriptions. Please try again later.
+            </p>
           ) : query.length > 0 ? (
             <p className="text-muted-foreground">
               Found {filteredSubscriptions.length} subscriptions matching &ldquo;{query}&rdquo;
@@ -97,7 +66,7 @@ function SubscriptionsList({
       </div>
       <div className="mt-4 space-y-4">
         {
-          loading ? (
+          isPending ? (
             <>
               <ItemDisplaySkeleton />
               <ItemDisplaySkeleton />
@@ -114,11 +83,7 @@ function SubscriptionsList({
                   bottomRight={`${subscription.section.term}`}
                   className="cursor-auto"
                 />
-                <DeletionDialog 
-                  subscription={subscription}
-                  subscriptions={subscriptions}
-                  setSubscriptions={setSubscriptions}
-                />
+                <DeletionDialog subscription={subscription} />
               </div>
             ))
           )
@@ -131,38 +96,28 @@ function SubscriptionsList({
 
 function DeletionDialog({
   subscription,
-  subscriptions,
-  setSubscriptions,
-} : {
+}: {
   subscription: Subscription,
-  subscriptions: Subscription[],
-  setSubscriptions: (subscriptions: Subscription[]) => void
 }) {
 
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const { mutate: deleteSubscriptions, isPending } = useDeleteSubscriptions()
 
   function handleDelete() {
-    setLoading(true)
-    deleteSubscriptions([subscription.id])
-    .then(() => {
-      setSubscriptions(subscriptions.filter(s => s.id !== subscription.id))
-    })
-    .then(() => {
-      toast({
-        title: "Success",
-        description: "You will no longer receive alerts for this class.",
-      })
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
+    deleteSubscriptions([subscription.id], {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "You will no longer receive alerts for this class.",
+        })
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+        })
+      }
     })
   }
 
@@ -185,14 +140,21 @@ function DeletionDialog({
           </DrawerDialogDescription>
         </DrawerDialogHeader>
         <DrawerDialogFooter>
-          <Button variant="ghost" disabled={loading} onClick={handleClose}>
+          <Button variant="ghost" disabled={isPending} onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant={"destructive"} onClick={handleDelete} disabled={loading}>
-            {loading ? <LoadingIcon /> : "Delete"}
+          <Button variant={"destructive"} onClick={handleDelete} disabled={isPending}>
+            {isPending ? <LoadingIcon /> : "Delete"}
           </Button>
         </DrawerDialogFooter>
       </DrawerDialogContent>
     </DrawerDialog>
   )
+}
+
+function filterSubscriptions(subscriptions: Subscription[], query: string) {
+  return subscriptions.filter(subscription => {
+    const tag = subscription.section.course + subscription.section.course_reference_number
+    return tag.toLowerCase().includes(query.toLowerCase())
+  })
 }

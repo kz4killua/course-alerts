@@ -6,8 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-function removeDuplicates<T>(array: T[]) {
-  return Array.from(new Set(array));
+export function getErrorMessage(
+  error: any,
+  defaultMessage = 'An error occurred. Please try again.'
+): string {
+  return error?.response?.data?.detail || defaultMessage
 }
 
 export function formatMeetingTimes(meetingTimes: MeetingTime[]) {
@@ -33,12 +36,11 @@ export function formatMeetingTimes(meetingTimes: MeetingTime[]) {
   });
 
   const formattedGroups = Object.entries(timeGroups).map(([timeKey, days]) => {
-
     // Shorten days to 3 characters and join with "&"
     const formattedDays = removeDuplicates(days).map(d => d.slice(0, 3)).join(" & ");
     const [beginTime, endTime] = timeKey.split("-");
 
-    // Format times
+    // Format times from "HHMM" to "H:MM AM/PM"
     const formattedBeginTime = formatTime(beginTime);
     const formattedEndTime = formatTime(endTime);
 
@@ -48,6 +50,9 @@ export function formatMeetingTimes(meetingTimes: MeetingTime[]) {
   return formattedGroups.join(", ");
 }
 
+function removeDuplicates<T>(array: T[]) {
+  return Array.from(new Set(array));
+}
 
 function formatTime(time: string) {
   // Convert 24-hour time e.g. "1400" to 12-hour time e.g. "2:00 PM"

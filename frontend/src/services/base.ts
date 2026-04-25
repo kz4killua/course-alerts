@@ -32,17 +32,17 @@ function logout() {
 instance.interceptors.response.use(
   response => response,
   async error => {
-    const originalRequest = error.config;
+    const config = error.config;
 
-    if (error.response.status !== 401) {
+    if (error.response?.status !== 401) {
       return Promise.reject(error);
     }
 
-    if (originalRequest._retry) {
+    if (config._retry) {
       logout();
       return Promise.reject(error);
     }
-    if (originalRequest.url.includes('/token/refresh')) {
+    if (config.url.includes('/token/refresh')) {
       logout();
       return Promise.reject(error);
     }
@@ -52,13 +52,13 @@ instance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    originalRequest._retry = true;
+    config._retry = true;
     try {
       const response = await refreshAccessToken(refreshToken);
       const accessToken = response.data.access;
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers.Authorization = `Bearer ${accessToken}`;
       setAccessToken(accessToken);
-      return instance(originalRequest);
+      return instance(config);
     } catch (error) {
       logout();
       return Promise.reject(error);

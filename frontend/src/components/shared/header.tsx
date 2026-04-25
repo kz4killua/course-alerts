@@ -2,17 +2,18 @@
 
 import Link from "next/link"
 import { GraduationCapIcon, LogOutIcon } from "lucide-react"
-import { useAuth } from "@/providers/auth-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu"
 import { Logo } from "@/components/shared/logo"
 import { Container } from "@/components/shared/container"
+import { useUser } from "@/hooks/use-user"
+import { useLogout } from "@/hooks/use-auth"
 
 
 export function Header() {
-
-  const { user, logout } = useAuth()
+  const { data: user } = useUser()
+  const { mutate: logout } = useLogout()
 
   return (
     <header className="bg-white border-b sticky top-0 z-50">
@@ -45,7 +46,7 @@ export function Header() {
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={logout}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
                   <LogOutIcon /> Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>

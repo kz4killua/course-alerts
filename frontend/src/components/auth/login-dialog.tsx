@@ -7,17 +7,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormField, FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
-import { requestSignIn, verifySignIn, updateAccount, getProfile } from "@/services/accounts"
-import { setAccessToken, setRefreshToken } from "@/lib/tokens"
 import { useEffect, useState } from "react"
 import type { User } from "@/types"
-import { useAuth } from "@/providers/auth-provider"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerDialogContent, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
+import { useUser, useUpdateUser } from "@/hooks/use-user"
+import { useRequestSignIn, useVerifySignIn } from "@/hooks/use-auth"
+import { getErrorMessage } from "@/lib/utils"
+import { LoadingDialogContent } from "@/components/shared/loading-dialog-content"
+import { useQueryClient } from "@tanstack/react-query"
+import { DrawerDialog } from "@/components/shared/drawer-dialog"
 
 
 type Step = "enter-email" | "enter-code" | "enter-phone"
 
+
+export function LoginDialog() {
+  const [open, setOpen] = useState(true)
+
+  return (
+    <DrawerDialog open={open} onOpenChange={setOpen} isDismissible={false}>
+      <LoginDialogContent onLogin={() => setOpen(false)} />
+    </DrawerDialog>
+  );
+}
 
 export function LoginDialogContent({
   onLogin,
@@ -27,16 +40,11 @@ export function LoginDialogContent({
 
   const [step, setStep] = useState<Step>()
   const [email, setEmail] = useState<User["email"]>("")
-  const { user } = useAuth()
-  const [loaded, setLoaded] = useState(false)
-
+  const { data: user, isLoading } = useUser()
 
   useEffect(() => {
-    if (loaded) return;
-
     if (user) {
       setEmail(user.email)
-      setLoaded(true)
       if (user.phone) {
         onLogin()
       } else {
@@ -45,11 +53,16 @@ export function LoginDialogContent({
     } else {
       setStep("enter-email")
     }
-  }, [user, loaded, setLoaded, onLogin])
+  }, [user, onLogin])
 
+  if (isLoading) {
+    return (
+      <LoadingDialogContent />
+    )
+  }
 
   return (
-    <>
+    <DrawerDialogContent>
       {
         step === "enter-email" ? (
           <EnterEmailStep setStep={setStep} setEmail={setEmail} />
@@ -58,12 +71,10 @@ export function LoginDialogContent({
         ) : step === "enter-phone" ? (
           <EnterPhoneStep onLogin={onLogin} />
         ) : (
-          <div className="flex items-center justify-center">
-            <LoadingIcon />
-          </div>
+          null
         )
       }
-    </>
+    </DrawerDialogContent>
   )
 }
 
@@ -77,11 +88,11 @@ function EnterEmailStep({
 }) {
 
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
+  const { mutate: requestSignIn, isPending } = useRequestSignIn()
 
   const formSchema = z.object({
     email: z.string().email({
-      message: "Please enter a valid email address"
+      message: "Please enter a valid email address."
     }),
   })
 
@@ -93,25 +104,22 @@ function EnterEmailStep({
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setLoading(true)
-    requestSignIn(data.email)
-    .then(() => {
-      setEmail(data.email)
-      setStep("enter-code")
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
+    requestSignIn(data.email, {
+      onSuccess: () => {
+        setEmail(data.email)
+        setStep("enter-code")
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+        })
+      },
     })
   }
 
   return (
-    <DrawerDialogContent>
+    <>
       <DrawerDialogHeader>
         <DrawerDialogTitle>
           Enter an email for alerts
@@ -141,13 +149,13 @@ function EnterEmailStep({
           />
 
           <DrawerDialogFooter>
-            <Button type="submit" disabled={loading}>
-              {loading ? <LoadingIcon /> : "Continue"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? <LoadingIcon /> : "Continue"}
             </Button>
           </DrawerDialogFooter>
         </form>
       </Form>
-    </DrawerDialogContent>
+    </>
   )
 }
 
@@ -163,13 +171,15 @@ function EnterCodeStep({
 }) {
 
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const queryClient = useQueryClient()
+  const { mutate: verifySignIn, isPending: isVerifyPending } = useVerifySignIn()
+  const { mutate: requestSignIn, isPending: isRequestPending } = useRequestSignIn()
   const [wait, setWait] = useState(60)
+  const pending = isVerifyPending || isRequestPending
 
   const formSchema = z.object({
     code: z.string().length(6, {
-      message: "Please enter a 6-digit code"
+      message: "Please enter a 6-digit code."
     }),
   })
 
@@ -181,50 +191,39 @@ function EnterCodeStep({
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setLoading(true)
-    verifySignIn(email, data.code)
-    .then((response) => {
-      setAccessToken(response.data.access)
-      setRefreshToken(response.data.refresh)
-    })
-    .then(getProfile)
-    .then(response => {
-      login(response.data)
-      if (response.data.phone) {
-        onLogin()
-      } else {
-        setStep("enter-phone")
+    verifySignIn({ email, code: data.code }, {
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+        })
+      },
+      onSuccess: () => {
+        const user = queryClient.getQueryData<User>(["user"])
+        if (user?.phone) {
+          onLogin()
+        } else {
+          setStep("enter-phone")
+        }
       }
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
     })
   }
 
   function handleResendCode() {
-    setLoading(true)
-    requestSignIn(email)
-    .then(() => {
-      toast({
-        title: "Code resent",
-        description: "We've sent a new code to your email.",
-      })
-      setWait(60)
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
+    requestSignIn(email, {
+      onSuccess: () => {
+        toast({
+          title: "Code resent",
+          description: "We've sent a new code to your email.",
+        })
+        setWait(60)
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+        })
+      }
     })
   }
 
@@ -241,7 +240,7 @@ function EnterCodeStep({
   }, [wait, setWait])
 
   return (
-    <DrawerDialogContent>
+    <>
       <DrawerDialogHeader>
         <DrawerDialogTitle>
           You&apos;re almost signed in!
@@ -281,13 +280,13 @@ function EnterCodeStep({
             <Button type="button" variant="secondary" onClick={handleBack}>
               Back
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? <LoadingIcon /> : "Continue"}
+            <Button type="submit" disabled={pending}>
+              {pending ? <LoadingIcon /> : "Continue"}
             </Button>
           </DrawerDialogFooter>
         </form>
       </Form>
-    </DrawerDialogContent>
+    </>
   )
 }
 
@@ -299,12 +298,11 @@ function EnterPhoneStep({
 }) {
 
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { mutate: updateUser, isPending } = useUpdateUser()
 
   const formSchema = z.object({
     phone: z.string().regex(/^[0-9]{10}$/, {
-      message: "Please enter a valid Canadian phone number (without the country code)."
+      message: "Please enter a valid Canadian phone number e.g. 9055555555."
     }),
   })
 
@@ -316,23 +314,13 @@ function EnterPhoneStep({
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setLoading(true)
-    const phone = `+1${data.phone}`
-    updateAccount(phone)
-    .then((response) => {
-      login(response.data)
-    })
-    .then(() => {
-      onLogin()
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
+    updateUser({ phone: `+1${data.phone}` }, {
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+        })
+      },
     })
   }
 
@@ -340,8 +328,10 @@ function EnterPhoneStep({
     onLogin()
   }
 
+  const phone = form.watch("phone")
+
   return (
-    <DrawerDialogContent>
+    <>
       <DrawerDialogHeader>
         <DrawerDialogTitle>
           Do you want to add a phone number?
@@ -374,15 +364,15 @@ function EnterPhoneStep({
           />
 
           <DrawerDialogFooter>
-            <Button variant={"secondary"} onClick={handleSkip}>
+            <Button type="button" variant={"secondary"} onClick={handleSkip}>
               Skip
             </Button>
-            <Button type="submit" disabled={loading || form.getValues().phone.length === 0}>
-              {loading ? <LoadingIcon /> : "Continue"}
+            <Button type="submit" disabled={isPending || phone.length === 0}>
+              {isPending ? <LoadingIcon /> : "Continue"}
             </Button>
           </DrawerDialogFooter>
         </form>
       </Form>
-    </DrawerDialogContent>
+    </>
   )
 }

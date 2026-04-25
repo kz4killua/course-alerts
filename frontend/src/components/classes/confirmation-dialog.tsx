@@ -3,14 +3,15 @@
 import { Button } from "@/components/ui/button"
 import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogHeader, DrawerDialogTitle } from "@/components/shared/drawer-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { createSubscriptions } from "@/services/alerts"
 import { useEffect, useState } from "react"
 import type { Term, Section } from "@/types"
-import { useAuth } from "@/providers/auth-provider"
-import { LoginDialogContent } from "@/components/auth/login-dialog-content"
+import { LoginDialogContent } from "@/components/auth/login-dialog"
 import { LoadingIcon } from "@/components/shared/loading-icon"
-import { LoginRequired } from "@/components/auth/login-required"
 import { LoadingDialogContent } from "@/components/shared/loading-dialog-content"
+import { useUser } from "@/hooks/use-user"
+import { useLogout } from "@/hooks/use-auth"
+import { useCreateSubscriptions } from "@/hooks/use-subscriptions"
+import { getErrorMessage } from "@/lib/utils"
 
 
 type Step = "authenticate" | "confirm-alerts"
@@ -31,26 +32,23 @@ export function ConfirmationDialog({
 }) {
 
   const [step, setStep] = useState<Step>()
-  const { user } = useAuth()
-  const [loaded, setLoaded] = useState(false)
+  const { data: user, isLoading } = useUser()
 
   useEffect(() => {
-    if (loaded) return
+    if (isLoading) {
+      setStep(undefined)
+      return
+    }
 
-    setLoaded(true)
     if (user) {
       setStep("confirm-alerts")
     } else {
       setStep("authenticate")
     }
-  }, [user, loaded])
-
-  function handleOpenChange(open: boolean) {
-    setOpen(open)
-  }
+  }, [user, isLoading])
 
   return (
-    <DrawerDialog open={open} onOpenChange={handleOpenChange}>
+    <DrawerDialog open={open} onOpenChange={setOpen}>
       {
         step === "authenticate" ? (
           <LoginDialogContent onLogin={() => setStep("confirm-alerts")} />
@@ -86,29 +84,26 @@ function ConfirmationDialogContent({
 }) {
 
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const { user, logout } = useAuth()
-
+  const { data: user } = useUser()
+  const { mutate: logout } = useLogout()
+  const { mutate: createSubscriptions, isPending } = useCreateSubscriptions()
 
   function handleSubmit() {
-    setLoading(true)
-    createSubscriptions(sections.map(section => section.id))
-    .then(() => {
-      toast({
-        title: "Success",
-        description: "You've successfully signed up for alerts!",
-      })
-      setOpen(false)
-      setSelectedSections(new Set())
-    })
-    .catch(error => {
-      toast({
-        title: "Error",
-        description: error.response.data?.detail || "An error occurred. Please try again.",
-      })
-    })
-    .finally(() => {
-      setLoading(false)
+    createSubscriptions(sections.map(section => section.id), {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "You've successfully signed up for alerts!",
+        })
+        setOpen(false)
+        setSelectedSections(new Set())
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+        })
+      }
     })
   }
 
@@ -118,33 +113,31 @@ function ConfirmationDialogContent({
   }
 
   return (
-    <LoginRequired>
-      <DrawerDialogContent>
-        <DrawerDialogHeader>
-          <DrawerDialogTitle>Confirm alerts</DrawerDialogTitle>
-          <DrawerDialogDescription>
-            You are about to sign up for alerts to {sections.length} {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
-          </DrawerDialogDescription>
-        </DrawerDialogHeader>
-        <div className="mt-4 gap-2 flex flex-col overflow-x-hidden">
-          {
-            user ? (
-              <Button className="w-full" onClick={handleSubmit}>
-                <span className="truncate">
-                  { loading ? <LoadingIcon /> : `Continue as ${user.email}` }
-                </span>
-              </Button>
-            ) : (
-              <Button className="w-full" disabled>
-                <LoadingIcon />
-              </Button>
-            )
-          }
-          <Button className="w-full" variant="secondary" onClick={handleChangeEmail}>
-            Use a different email
-          </Button>
-        </div>
-      </DrawerDialogContent>
-    </LoginRequired>
+    <DrawerDialogContent>
+      <DrawerDialogHeader>
+        <DrawerDialogTitle>Confirm alerts</DrawerDialogTitle>
+        <DrawerDialogDescription>
+          You are about to sign up for alerts to {sections.length} {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
+        </DrawerDialogDescription>
+      </DrawerDialogHeader>
+      <div className="mt-4 gap-2 flex flex-col overflow-x-hidden">
+        {
+          user ? (
+            <Button className="w-full" onClick={handleSubmit}>
+              <span className="truncate">
+                { isPending ? <LoadingIcon /> : `Continue as ${user.email}` }
+              </span>
+            </Button>
+          ) : (
+            <Button className="w-full" disabled>
+              <LoadingIcon />
+            </Button>
+          )
+        }
+        <Button className="w-full" variant="secondary" onClick={handleChangeEmail}>
+          Use a different email
+        </Button>
+      </div>
+    </DrawerDialogContent>
   )
 }
