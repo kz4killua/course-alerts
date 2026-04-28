@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -13,10 +14,10 @@ export function ItemDisplay({
 }: {
   onClick?: () => void
   className?: string
-  topLeft?: string
-  topRight?: string
-  bottomLeft?: string
-  bottomRight?: string
+  topLeft?: React.ReactNode
+  topRight?: React.ReactNode
+  bottomLeft?: React.ReactNode
+  bottomRight?: React.ReactNode
 }) {
   return (
     <div

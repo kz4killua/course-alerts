@@ -27,6 +27,7 @@ import {
   useSubscriptions,
 } from "@/hooks/use-subscriptions"
 import { getErrorMessage } from "@/lib/utils"
+import { useTerms } from "@/hooks/use-terms"
 
 export default function Page() {
   const [query, setQuery] = useState("")
@@ -46,17 +47,30 @@ export default function Page() {
 }
 
 function SubscriptionsList({ query }: { query: string }) {
-  const { data: subscriptions, isPending, isError } = useSubscriptions()
+  const {
+    data: subscriptions,
+    isPending: subscriptionsPending,
+    isError: subscriptionsError,
+  } = useSubscriptions()
+  const {
+    data: terms,
+    isPending: termsPending,
+    isError: termsError,
+  } = useTerms()
+
   const filteredSubscriptions = subscriptions
     ? filterSubscriptions(subscriptions, query)
     : []
+  const termLabels = terms
+    ? Object.fromEntries(terms.map((t) => [t.term, t.term_desc]))
+    : {}
 
   return (
     <div className="mt-10">
       <div className="text-sm h-8 flex items-center">
-        {isPending ? (
+        {subscriptionsPending ? (
           <Skeleton className="h-4 w-full" />
-        ) : isError ? (
+        ) : subscriptionsError ? (
           <p className="text-muted-foreground">
             An error occurred while fetching your subscriptions. Please try
             again later.
@@ -74,7 +88,7 @@ function SubscriptionsList({ query }: { query: string }) {
         )}
       </div>
       <div className="mt-4 space-y-4">
-        {isPending ? (
+        {subscriptionsPending ? (
           <>
             <ItemDisplaySkeleton />
             <ItemDisplaySkeleton />
@@ -91,7 +105,16 @@ function SubscriptionsList({ query }: { query: string }) {
                 topLeft={subscription.section.course}
                 bottomLeft={subscription.section.schedule_type_description}
                 topRight={`CRN ${subscription.section.course_reference_number}`}
-                bottomRight={`${subscription.section.term}`}
+                bottomRight={
+                  termsPending ? (
+                    <Skeleton className="h-3 w-24" />
+                  ) : termsError ? (
+                    subscription.section.term
+                  ) : (
+                    (termLabels[subscription.section.term] ??
+                    subscription.section.term)
+                  )
+                }
                 className="cursor-auto"
               />
               <DeletionDialog subscription={subscription} />
