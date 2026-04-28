@@ -13,6 +13,7 @@ import { LoadingIcon } from "@/components/shared/loading-icon"
 import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
 import { useRequestSignIn, useVerifySignIn } from "@/hooks/use-auth"
 import { getErrorMessage } from "@/lib/utils"
+import { useCountdown } from "@/hooks/use-countdown"
 
 
 type Step = "enter-email" | "enter-code"
@@ -131,7 +132,7 @@ function EnterCodeStep({
   const { toast } = useToast()
   const { mutate: verifySignIn, isPending: isVerifyPending } = useVerifySignIn()
   const { mutate: requestSignIn, isPending: isRequestPending } = useRequestSignIn()
-  const [wait, setWait] = useState(60)
+  const { count, reset } = useCountdown(60)
   const pending = isVerifyPending || isRequestPending
 
   const formSchema = z.object({
@@ -168,7 +169,7 @@ function EnterCodeStep({
           title: "Code resent",
           description: "We've sent a new code to your email.",
         })
-        setWait(60)
+        reset()
       },
       onError: (error) => {
         toast({
@@ -182,14 +183,6 @@ function EnterCodeStep({
   function handleBack() {
     setEmail("")
   }
-
-  useEffect(() => {
-    if (wait === 0) return;
-    const timer = setTimeout(() => {
-      setWait(wait - 1)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [wait, setWait])
 
   return (
     <>
@@ -215,12 +208,12 @@ function EnterCodeStep({
                 </FormControl>
                 <FormDescription>
                   Didn&apos;t get the code? Check your Spam folder or&nbsp;
-                  {wait === 0 ? (
+                  {count === 0 ? (
                     <Button className="p-0 h-auto underline text-[0.8rem]" type="button" variant={"link"} onClick={handleResendCode}>
                       resend code.
                     </Button>
                   ) : (
-                    <span>resend in {wait} seconds.</span>
+                    <span>resend in {count} seconds.</span>
                   )}
                 </FormDescription>
                 <FormMessage />

@@ -10,7 +10,7 @@ import type { Term } from "@/types"
 import { SearchBar } from "@/components/shared/search-bar"
 import { PageLayout } from "@/components/shared/page-layout"
 import { useTerms } from "@/hooks/use-terms"
-import { useDebounce } from "@uidotdev/usehooks"
+import { useDebounce } from "@/hooks/use-debounce"
 import { useCourses } from "@/hooks/use-courses"
 import { LoadingIcon } from "@/components/shared/loading-icon"
 
