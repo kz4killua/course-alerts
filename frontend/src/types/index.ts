@@ -36,7 +36,7 @@ export interface MeetingTime {
 export interface User {
   id: number;
   email: string;
-  phone: string;
+  phone: string | null;
 }
 
 
