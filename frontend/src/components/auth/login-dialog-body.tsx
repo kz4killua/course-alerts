@@ -10,81 +10,40 @@ import { useToast } from "@/hooks/use-toast"
 import { useEffect, useState } from "react"
 import type { User } from "@/types"
 import { LoadingIcon } from "@/components/shared/loading-icon"
-import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerDialogContent, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
-import { useUser, useUpdateUser } from "@/hooks/use-user"
+import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
 import { useRequestSignIn, useVerifySignIn } from "@/hooks/use-auth"
 import { getErrorMessage } from "@/lib/utils"
-import { LoadingDialogContent } from "@/components/shared/loading-dialog-content"
-import { useQueryClient } from "@tanstack/react-query"
-import { DrawerDialog } from "@/components/shared/drawer-dialog"
 
 
-type Step = "enter-email" | "enter-code" | "enter-phone"
+type Step = "enter-email" | "enter-code"
 
 
-export function LoginDialog() {
-  const [open, setOpen] = useState(true)
-
-  return (
-    <DrawerDialog open={open} onOpenChange={setOpen} isDismissible={false}>
-      <LoginDialogContent onLogin={() => setOpen(false)} />
-    </DrawerDialog>
-  );
-}
-
-export function LoginDialogContent({
-  onLogin,
-} : {
+export function LoginDialogBody({
+  onLogin
+}: {
   onLogin: () => void
 }) {
-
-  const [step, setStep] = useState<Step>()
   const [email, setEmail] = useState<User["email"]>("")
-  const { data: user, isLoading } = useUser()
-
-  useEffect(() => {
-    if (user) {
-      setEmail(user.email)
-      if (user.phone) {
-        onLogin()
-      } else {
-        setStep("enter-phone")
-      }
-    } else {
-      setStep("enter-email")
-    }
-  }, [user, onLogin])
-
-  if (isLoading) {
-    return (
-      <LoadingDialogContent />
-    )
-  }
+  const step: Step = email ? "enter-code" : "enter-email"
 
   return (
-    <DrawerDialogContent>
+    <>
       {
         step === "enter-email" ? (
-          <EnterEmailStep setStep={setStep} setEmail={setEmail} />
-        ) : step === "enter-code" ? (
-          <EnterCodeStep setStep={setStep} email={email} onLogin={onLogin} />
-        ) : step === "enter-phone" ? (
-          <EnterPhoneStep onLogin={onLogin} />
+          <EnterEmailStep setEmail={setEmail} />
         ) : (
-          null
+          <EnterCodeStep email={email} setEmail={setEmail} onLogin={onLogin} />
         )
       }
-    </DrawerDialogContent>
+    </>
   )
 }
 
 
 function EnterEmailStep({
   setEmail,
-  setStep
-} : {
+}: {
   setEmail: (email: string) => void,
-  setStep: (step: Step) => void
 }) {
 
   const { toast } = useToast()
@@ -107,7 +66,6 @@ function EnterEmailStep({
     requestSignIn(data.email, {
       onSuccess: () => {
         setEmail(data.email)
-        setStep("enter-code")
       },
       onError: (error) => {
         toast({
@@ -162,16 +120,15 @@ function EnterEmailStep({
 
 function EnterCodeStep({
   email,
-  setStep,
+  setEmail,
   onLogin,
-} : {
+}: {
   email: string,
-  setStep: (step: Step) => void,
+  setEmail: (email: string) => void,
   onLogin: () => void
 }) {
 
   const { toast } = useToast()
-  const queryClient = useQueryClient()
   const { mutate: verifySignIn, isPending: isVerifyPending } = useVerifySignIn()
   const { mutate: requestSignIn, isPending: isRequestPending } = useRequestSignIn()
   const [wait, setWait] = useState(60)
@@ -199,12 +156,7 @@ function EnterCodeStep({
         })
       },
       onSuccess: () => {
-        const user = queryClient.getQueryData<User>(["user"])
-        if (user?.phone) {
-          onLogin()
-        } else {
-          setStep("enter-phone")
-        }
+        onLogin()
       }
     })
   }
@@ -228,7 +180,7 @@ function EnterCodeStep({
   }
 
   function handleBack() {
-    setStep("enter-email")
+    setEmail("")
   }
 
   useEffect(() => {
@@ -246,7 +198,7 @@ function EnterCodeStep({
           You&apos;re almost signed in!
         </DrawerDialogTitle>
         <DrawerDialogDescription>
-          Enter the code we sent to {email} to finish signing in.
+          Enter the code we sent to <span className="font-medium">{email}</span> to finish signing in.
         </DrawerDialogDescription>
       </DrawerDialogHeader>
 
@@ -282,93 +234,6 @@ function EnterCodeStep({
             </Button>
             <Button type="submit" disabled={pending}>
               {pending ? <LoadingIcon /> : "Continue"}
-            </Button>
-          </DrawerDialogFooter>
-        </form>
-      </Form>
-    </>
-  )
-}
-
-
-function EnterPhoneStep({
-  onLogin,
-} : {
-  onLogin: () => void
-}) {
-
-  const { toast } = useToast()
-  const { mutate: updateUser, isPending } = useUpdateUser()
-
-  const formSchema = z.object({
-    phone: z.string().regex(/^[0-9]{10}$/, {
-      message: "Please enter a valid Canadian phone number e.g. 9055555555."
-    }),
-  })
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      phone: "",
-    },
-  })
-
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    updateUser({ phone: `+1${data.phone}` }, {
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: getErrorMessage(error),
-        })
-      },
-    })
-  }
-
-  function handleSkip() {
-    onLogin()
-  }
-
-  const phone = form.watch("phone")
-
-  return (
-    <>
-      <DrawerDialogHeader>
-        <DrawerDialogTitle>
-          Do you want to add a phone number?
-        </DrawerDialogTitle>
-        <DrawerDialogDescription>
-          This is optional, but could help you receive alerts quicker.
-        </DrawerDialogDescription>
-      </DrawerDialogHeader>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number (Optional)</FormLabel>
-                <FormControl>
-                  <div className="flex items-center gap-x-3">
-                    <span className="text-sm text-muted-foreground">+1</span>
-                    <Input type="tel" placeholder="9055555555" {...field} />
-                  </div>
-                </FormControl>
-                <FormDescription>
-                  Enter a valid Canadian phone number. Only Canadian phone numbers are supported at this time.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <DrawerDialogFooter>
-            <Button type="button" variant={"secondary"} onClick={handleSkip}>
-              Skip
-            </Button>
-            <Button type="submit" disabled={isPending || phone.length === 0}>
-              {isPending ? <LoadingIcon /> : "Continue"}
             </Button>
           </DrawerDialogFooter>
         </form>

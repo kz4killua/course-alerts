@@ -1,10 +1,10 @@
-import { DrawerDialogContent, DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription } from "@/components/shared/drawer-dialog";
+import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription } from "@/components/shared/drawer-dialog";
 import { LoadingIcon } from "@/components/shared/loading-icon";
 
 
-export function LoadingDialogContent() {
+export function LoadingDialogBody() {
   return (
-    <DrawerDialogContent>
+    <>
       {/* A header is required for accessibility, but we hide it visually */}
       <div className="hidden">
         <DrawerDialogHeader>
@@ -15,6 +15,6 @@ export function LoadingDialogContent() {
       <div className="pt-4 flex items-center justify-center">
         <LoadingIcon />
       </div>
-    </DrawerDialogContent>
+    </>
   );
 }
