@@ -1,3 +1,3 @@
-const eventEmitter = new EventTarget();
+const eventEmitter = new EventTarget()
 
-export default eventEmitter;
+export default eventEmitter

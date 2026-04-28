@@ -1,14 +1,14 @@
-'use client'
+"use client"
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
-import { getAccessToken } from '@/lib/tokens'
-import { getProfile, updateAccount } from '@/services/accounts'
-import type { User } from "@/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import axios from "axios"
+import { getAccessToken } from "@/lib/tokens"
+import { getProfile, updateAccount } from "@/services/accounts"
+import type { User } from "@/types"
 
 export function useUser() {
   return useQuery({
-    queryKey: ['user'],
+    queryKey: ["user"],
     queryFn: async (): Promise<User | null> => {
       const accessToken = getAccessToken()
       if (!accessToken) {
@@ -37,7 +37,7 @@ export function useUpdateUser() {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] })
+      queryClient.invalidateQueries({ queryKey: ["user"] })
     },
   })
 }

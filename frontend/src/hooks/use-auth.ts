@@ -1,13 +1,13 @@
-'use client'
+"use client"
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   removeAccessToken,
   removeRefreshToken,
   setAccessToken,
   setRefreshToken,
-} from '@/lib/tokens'
-import { requestSignIn, verifySignIn } from '@/services/accounts'
+} from "@/lib/tokens"
+import { requestSignIn, verifySignIn } from "@/services/accounts"
 
 export function useRequestSignIn() {
   return useMutation({
@@ -28,7 +28,7 @@ export function useVerifySignIn() {
     onSuccess: async (data) => {
       setAccessToken(data.access)
       setRefreshToken(data.refresh)
-      await queryClient.invalidateQueries({ queryKey: ['user'] })
+      await queryClient.invalidateQueries({ queryKey: ["user"] })
     },
   })
 }

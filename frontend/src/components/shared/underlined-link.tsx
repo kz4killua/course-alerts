@@ -1,12 +1,11 @@
-import Link from "next/link";
-
+import Link from "next/link"
 
 export function UnderlinedLink({
   href,
   children,
 }: {
-  href: string;
-  children: React.ReactNode;
+  href: string
+  children: React.ReactNode
 }) {
   return (
     <Link
@@ -16,13 +15,12 @@ export function UnderlinedLink({
     >
       {children}
     </Link>
-  );
+  )
 }
-
 
 function getTarget(href: string) {
   if (href.startsWith("#") || href.startsWith("/")) {
-    return "_self";
+    return "_self"
   }
-  return "_blank";
+  return "_blank"
 }

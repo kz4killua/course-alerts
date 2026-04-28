@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
-
 export function ItemDisplay({
   onClick,
   className,
@@ -11,16 +10,16 @@ export function ItemDisplay({
   topRight,
   bottomLeft,
   bottomRight,
-} : {
-  onClick?: () => void,
-  className?: string,
-  topLeft?: string,
-  topRight?: string,
-  bottomLeft?: string,
-  bottomRight?: string,
+}: {
+  onClick?: () => void
+  className?: string
+  topLeft?: string
+  topRight?: string
+  bottomLeft?: string
+  bottomRight?: string
 }) {
   return (
-    <div 
+    <div
       className={cn(
         "rounded-md border px-8 py-4 cursor-pointer",
         "bg-white grow flex flex-col gap-y-1",
@@ -41,9 +40,6 @@ export function ItemDisplay({
   )
 }
 
-
 export function ItemDisplaySkeleton() {
-  return (
-    <Skeleton className="h-16 w-full" />
-  )
+  return <Skeleton className="h-16 w-full" />
 }

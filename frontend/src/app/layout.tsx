@@ -1,31 +1,29 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import "./globals.css";
+import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
-import { Providers } from "@/app/providers";
-import Script from 'next/script'
+import { Providers } from "@/app/providers"
+import Script from "next/script"
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Course Alerts | Get Into Any Full Class at Ontario Tech University",
   description: "Classes full? Get notified as soon as a spot opens up.",
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
       <body className={`${inter.className} bg-[#FBFBFB]`}>
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
         <Toaster />
         <Script src="/made-with-love.js" />
       </body>
     </html>
-  );
+  )
 }

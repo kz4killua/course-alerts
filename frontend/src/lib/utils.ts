@@ -8,57 +8,58 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getErrorMessage(
   error: any,
-  defaultMessage = 'An error occurred. Please try again.'
+  defaultMessage = "An error occurred. Please try again."
 ): string {
   return error?.response?.data?.detail || defaultMessage
 }
 
 export function formatMeetingTimes(meetingTimes: MeetingTime[]) {
-
   // Group meeting times by begin_time and end_time
-  const timeGroups: { [key: string]: string[] } = {};
+  const timeGroups: { [key: string]: string[] } = {}
 
-  meetingTimes.forEach(meeting => {
-
+  meetingTimes.forEach((meeting) => {
     // Skip asynchronous meetings
     if (meeting.days.length === 0 || !meeting.begin_time || !meeting.end_time) {
-      return;
+      return
     }
 
-    const timeKey = `${meeting.begin_time}-${meeting.end_time}`;
-    const day = meeting.days[0].charAt(0).toUpperCase() + meeting.days[0].slice(1); // Capitalize day
+    const timeKey = `${meeting.begin_time}-${meeting.end_time}`
+    const day =
+      meeting.days[0].charAt(0).toUpperCase() + meeting.days[0].slice(1) // Capitalize day
 
     if (timeGroups[timeKey]) {
-        timeGroups[timeKey].push(day);
+      timeGroups[timeKey].push(day)
     } else {
-        timeGroups[timeKey] = [day];
+      timeGroups[timeKey] = [day]
     }
-  });
+  })
 
   const formattedGroups = Object.entries(timeGroups).map(([timeKey, days]) => {
     // Shorten days to 3 characters and join with "&"
-    const formattedDays = removeDuplicates(days).map(d => d.slice(0, 3)).join(" & ");
-    const [beginTime, endTime] = timeKey.split("-");
+    const formattedDays = removeDuplicates(days)
+      .map((d) => d.slice(0, 3))
+      .join(" & ")
+    const [beginTime, endTime] = timeKey.split("-")
 
     // Format times from "HHMM" to "H:MM AM/PM"
-    const formattedBeginTime = formatTime(beginTime);
-    const formattedEndTime = formatTime(endTime);
+    const formattedBeginTime = formatTime(beginTime)
+    const formattedEndTime = formatTime(endTime)
 
-    return `${formattedDays} · ${formattedBeginTime} - ${formattedEndTime}`;
-  });
+    return `${formattedDays} · ${formattedBeginTime} - ${formattedEndTime}`
+  })
 
-  return formattedGroups.join(", ");
+  return formattedGroups.join(", ")
 }
 
 function removeDuplicates<T>(array: T[]) {
-  return Array.from(new Set(array));
+  return Array.from(new Set(array))
 }
 
 function formatTime(time: string) {
   // Convert 24-hour time e.g. "1400" to 12-hour time e.g. "2:00 PM"
-  let hours = parseInt(time.slice(0, 2), 10);
-  const minutes = time.slice(2);
-  const suffix = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  return `${hours}:${minutes}${suffix}`;
+  let hours = parseInt(time.slice(0, 2), 10)
+  const minutes = time.slice(2)
+  const suffix = hours >= 12 ? "PM" : "AM"
+  hours = hours % 12 || 12
+  return `${hours}:${minutes}${suffix}`
 }

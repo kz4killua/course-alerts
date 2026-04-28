@@ -1,16 +1,19 @@
-'use client'
+"use client"
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createSubscriptions, listSubscriptions, deleteSubscriptions } from '@/services/alerts'
-import { useUser } from '@/hooks/use-user'
-import type { Section, Subscription } from "@/types";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import {
+  createSubscriptions,
+  listSubscriptions,
+  deleteSubscriptions,
+} from "@/services/alerts"
+import { useUser } from "@/hooks/use-user"
+import type { Section, Subscription } from "@/types"
 
 export function useSubscriptions() {
   const { data: user } = useUser()
 
   return useQuery({
-    queryKey: ['subscriptions'],
+    queryKey: ["subscriptions"],
     queryFn: async () => {
       const response = await listSubscriptions()
       return response.data
@@ -18,7 +21,6 @@ export function useSubscriptions() {
     enabled: !!user,
   })
 }
-
 
 export function useCreateSubscriptions() {
   const queryClient = useQueryClient()
@@ -29,9 +31,14 @@ export function useCreateSubscriptions() {
       return response.data
     },
     onSuccess: (newSubscriptions) => {
-      queryClient.setQueryData<Subscription[]>(['subscriptions'], (oldSubscriptions) => {
-        return oldSubscriptions ? [...oldSubscriptions, ...newSubscriptions] : newSubscriptions
-      })
+      queryClient.setQueryData<Subscription[]>(
+        ["subscriptions"],
+        (oldSubscriptions) => {
+          return oldSubscriptions
+            ? [...oldSubscriptions, ...newSubscriptions]
+            : newSubscriptions
+        }
+      )
     },
   })
 }
@@ -45,9 +52,16 @@ export function useDeleteSubscriptions() {
       return subscriptionIds
     },
     onSuccess: (deletedSubscriptionIds) => {
-      queryClient.setQueryData<Subscription[]>(['subscriptions'], (oldSubscriptions) => {
-        return oldSubscriptions ? oldSubscriptions.filter(s => !deletedSubscriptionIds.includes(s.id)) : []
-      })
+      queryClient.setQueryData<Subscription[]>(
+        ["subscriptions"],
+        (oldSubscriptions) => {
+          return oldSubscriptions
+            ? oldSubscriptions.filter(
+                (s) => !deletedSubscriptionIds.includes(s.id)
+              )
+            : []
+        }
+      )
     },
   })
 }

@@ -1,11 +1,10 @@
-import Link from "next/link";
-import Image from "next/image";
-import { SearchIcon } from "lucide-react";
+import Link from "next/link"
+import Image from "next/image"
+import { SearchIcon } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
-import { PageLayout } from "@/components/shared/page-layout";
-import { UnderlinedLink } from "@/components/shared/underlined-link";
-import { FEEDBACK_URL, GITHUB_URL } from "@/lib/constants";
-
+import { PageLayout } from "@/components/shared/page-layout"
+import { UnderlinedLink } from "@/components/shared/underlined-link"
+import { FEEDBACK_URL, GITHUB_URL } from "@/lib/constants"
 
 export default function Page() {
   return (
@@ -15,9 +14,8 @@ export default function Page() {
         <FrequentlyAskedQuestions />
       </main>
     </PageLayout>
-  );
+  )
 }
-
 
 function Hero() {
   return (
@@ -27,10 +25,14 @@ function Hero() {
           Get into your full classes
         </h1>
         <h2 className="text-xl md:leading-relaxed text-muted-foreground">
-          Get notified as soon as a spot opens up in any full class at Ontario Tech University.
+          Get notified as soon as a spot opens up in any full class at Ontario
+          Tech University.
         </h2>
         <div>
-          <Link className={`${buttonVariants({ variant: "default", size: "lg" })} text-base h-14 px-8`} href={"/classes"}>
+          <Link
+            className={`${buttonVariants({ variant: "default", size: "lg" })} text-base h-14 px-8`}
+            href={"/classes"}
+          >
             <SearchIcon size={16} className="mr-2" /> Search for a class
           </Link>
         </div>
@@ -48,7 +50,6 @@ function Hero() {
   )
 }
 
-
 function FrequentlyAskedQuestions() {
   return (
     <section>
@@ -57,9 +58,7 @@ function FrequentlyAskedQuestions() {
       </h2>
       <div className="space-y-8">
         <div>
-          <h3 className="text-lg font-semibold mb-2">
-            Is it free?
-          </h3>
+          <h3 className="text-lg font-semibold mb-2">Is it free?</h3>
           <p className="text-lg text-muted-foreground">
             Yes! Course Alerts is completely free to use, no strings attached.
           </p>
@@ -69,10 +68,10 @@ function FrequentlyAskedQuestions() {
             Can I trust you with my personal information?
           </h3>
           <p className="text-lg text-muted-foreground">
-            We only store what we need to send you course notifications.
-            This information is never used for anything else.
-            Plus, Course Alerts is completely open source.
-            You can review the entire codebase <UnderlinedLink href={GITHUB_URL}>here</UnderlinedLink>.
+            We only store what we need to send you course notifications. This
+            information is never used for anything else. Plus, Course Alerts is
+            completely open source. You can review the entire codebase{" "}
+            <UnderlinedLink href={GITHUB_URL}>here</UnderlinedLink>.
           </p>
         </div>
         <div>
@@ -80,7 +79,8 @@ function FrequentlyAskedQuestions() {
             I have a different question, comment, or complaint.
           </h3>
           <p className="text-lg text-muted-foreground">
-            Please fill out our feedback form <UnderlinedLink href={FEEDBACK_URL}>here</UnderlinedLink>.
+            Please fill out our feedback form{" "}
+            <UnderlinedLink href={FEEDBACK_URL}>here</UnderlinedLink>.
           </p>
         </div>
       </div>

@@ -1,13 +1,15 @@
 "use client"
 
-import { useUser } from "@/hooks/use-user";
-import { LoginDialogBody } from "@/components/auth/login-dialog-body";
-import { DrawerDialog, DrawerDialogContent } from "@/components/shared/drawer-dialog"
-import { LoadingDialogBody } from "@/components/shared/loading-dialog-body";
-
+import { useUser } from "@/hooks/use-user"
+import { LoginDialogBody } from "@/components/auth/login-dialog-body"
+import {
+  DrawerDialog,
+  DrawerDialogContent,
+} from "@/components/shared/drawer-dialog"
+import { LoadingDialogBody } from "@/components/shared/loading-dialog-body"
 
 export function LoginRequired({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
@@ -18,16 +20,14 @@ export function LoginRequired({
     <>
       <DrawerDialog open={open} isDismissible={false}>
         <DrawerDialogContent>
-          {
-            isLoading ? (
-              <LoadingDialogBody />
-            ) : !user ? (
-              <LoginDialogBody onLogin={() => {}} />
-            ) : null
-          }
+          {isLoading ? (
+            <LoadingDialogBody />
+          ) : !user ? (
+            <LoginDialogBody onLogin={() => {}} />
+          ) : null}
         </DrawerDialogContent>
       </DrawerDialog>
       {!open && children}
     </>
-  );
+  )
 }

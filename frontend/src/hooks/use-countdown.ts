@@ -7,7 +7,7 @@ export function useCountdown(initial: number) {
   useEffect(() => {
     if (finished) return
     const id = setInterval(() => {
-      setCount(c => {
+      setCount((c) => {
         if (c <= 1) {
           clearInterval(id)
           return 0

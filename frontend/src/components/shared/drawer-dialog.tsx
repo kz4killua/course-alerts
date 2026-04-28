@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import React, { JSX, createContext, useContext } from 'react'
-import { useIsMobile } from '@/hooks/use-mobile'
+import React, { JSX, createContext, useContext } from "react"
+import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog"
 import {
   Drawer,
   DrawerClose,
@@ -21,7 +21,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer'
+} from "@/components/ui/drawer"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -31,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+} from "@/components/ui/alert-dialog"
 import {
   DialogProps,
   DialogTriggerProps,
@@ -39,10 +39,13 @@ import {
   DialogDescriptionProps,
   DialogTitleProps,
   DialogCloseProps,
-} from '@radix-ui/react-dialog'
-import { cn } from '@/lib/utils'
+} from "@radix-ui/react-dialog"
+import { cn } from "@/lib/utils"
 
-const DrawerDialogContext = createContext({ isMobile: false, isDismissible: true })
+const DrawerDialogContext = createContext({
+  isMobile: false,
+  isDismissible: true,
+})
 
 export function useDrawerDialogContext() {
   return useContext(DrawerDialogContext)
@@ -104,19 +107,29 @@ export function DrawerDialogContent({
   const { isMobile, isDismissible } = useDrawerDialogContext()
 
   if (isMobile) {
-    return <DrawerContent className={cn('max-h-[95%] p-4 pt-0', className)} {...props} />
+    return (
+      <DrawerContent
+        className={cn("max-h-[95%] p-4 pt-0", className)}
+        {...props}
+      />
+    )
   }
   if (isDismissible) {
-    return <DialogContent className={cn('max-h-[95%]', className)} {...props} />
+    return <DialogContent className={cn("max-h-[95%]", className)} {...props} />
   }
-  return <AlertDialogContent className={cn('max-h-[95%]', className)} {...props} />
+  return (
+    <AlertDialogContent className={cn("max-h-[95%]", className)} {...props} />
+  )
 }
 
-export function DrawerDialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function DrawerDialogHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const { isMobile, isDismissible } = useDrawerDialogContext()
 
   if (isMobile) {
-    return <DrawerHeader className={cn('px-0', className)} {...props} />
+    return <DrawerHeader className={cn("px-0", className)} {...props} />
   }
   if (isDismissible) {
     return <DialogHeader className={className} {...props} />
@@ -154,11 +167,19 @@ export function DrawerDialogDescription({
   return <AlertDialogDescription className={className} {...props} />
 }
 
-export function DrawerDialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function DrawerDialogFooter({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const { isMobile, isDismissible } = useDrawerDialogContext()
 
   if (isMobile) {
-    return <DrawerFooter className={cn('flex-col-reverse px-0', className)} {...props} />
+    return (
+      <DrawerFooter
+        className={cn("flex-col-reverse px-0", className)}
+        {...props}
+      />
+    )
   }
   if (isDismissible) {
     return <DialogFooter className={className} {...props} />

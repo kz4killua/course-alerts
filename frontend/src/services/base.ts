@@ -1,70 +1,65 @@
-import axios from "axios";
-import { getAccessToken, getRefreshToken, setAccessToken } from "@/lib/tokens";
-import { refreshAccessToken } from "@/services/accounts";
-import eventEmitter from '@/lib/event-emitter';
-
+import axios from "axios"
+import { getAccessToken, getRefreshToken, setAccessToken } from "@/lib/tokens"
+import { refreshAccessToken } from "@/services/accounts"
+import eventEmitter from "@/lib/event-emitter"
 
 const instance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/`,
-  headers: {'Content-Type': 'application/json'},
-});
-
+  headers: { "Content-Type": "application/json" },
+})
 
 instance.interceptors.request.use(
-  config => {
-    const token = getAccessToken();
+  (config) => {
+    const token = getAccessToken()
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config;
+    return config
   },
-  error => {
-    return Promise.reject(error);
+  (error) => {
+    return Promise.reject(error)
   }
-);
-
+)
 
 function logout() {
-  eventEmitter.dispatchEvent(new Event('logout'));
+  eventEmitter.dispatchEvent(new Event("logout"))
 }
 
-
 instance.interceptors.response.use(
-  response => response,
-  async error => {
-    const config = error.config;
+  (response) => response,
+  async (error) => {
+    const config = error.config
 
     if (error.response?.status !== 401) {
-      return Promise.reject(error);
+      return Promise.reject(error)
     }
 
     if (config._retry) {
-      logout();
-      return Promise.reject(error);
+      logout()
+      return Promise.reject(error)
     }
-    if (config.url.includes('/token/refresh')) {
-      logout();
-      return Promise.reject(error);
+    if (config.url.includes("/token/refresh")) {
+      logout()
+      return Promise.reject(error)
     }
-    const refreshToken = getRefreshToken();
+    const refreshToken = getRefreshToken()
     if (!refreshToken) {
-      logout();
-      return Promise.reject(error);
+      logout()
+      return Promise.reject(error)
     }
 
-    config._retry = true;
+    config._retry = true
     try {
-      const response = await refreshAccessToken(refreshToken);
-      const accessToken = response.data.access;
-      config.headers.Authorization = `Bearer ${accessToken}`;
-      setAccessToken(accessToken);
-      return instance(config);
+      const response = await refreshAccessToken(refreshToken)
+      const accessToken = response.data.access
+      config.headers.Authorization = `Bearer ${accessToken}`
+      setAccessToken(accessToken)
+      return instance(config)
     } catch (error) {
-      logout();
-      return Promise.reject(error);
+      logout()
+      return Promise.reject(error)
     }
   }
-);
+)
 
-
-export default instance;
+export default instance

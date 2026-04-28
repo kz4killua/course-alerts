@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
-import eventEmitter from '@/lib/event-emitter'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { useLogout } from '@/hooks/use-auth'
+import eventEmitter from "@/lib/event-emitter"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
+import { useLogout } from "@/hooks/use-auth"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -33,17 +33,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   )
 }
 
-
 function LogoutListener() {
   const { mutate: logout } = useLogout()
 
   useEffect(() => {
     const handleLogout = () => logout()
-    eventEmitter.addEventListener('logout', handleLogout)
+    eventEmitter.addEventListener("logout", handleLogout)
     return () => {
-      eventEmitter.removeEventListener('logout', handleLogout)
+      eventEmitter.removeEventListener("logout", handleLogout)
     }
   }, [logout])
-  
+
   return null
 }

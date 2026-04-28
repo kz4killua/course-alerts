@@ -1,6 +1,9 @@
-import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription } from "@/components/shared/drawer-dialog";
-import { LoadingIcon } from "@/components/shared/loading-icon";
-
+import {
+  DrawerDialogHeader,
+  DrawerDialogTitle,
+  DrawerDialogDescription,
+} from "@/components/shared/drawer-dialog"
+import { LoadingIcon } from "@/components/shared/loading-icon"
 
 export function LoadingDialogBody() {
   return (
@@ -16,5 +19,5 @@ export function LoadingDialogBody() {
         <LoadingIcon />
       </div>
     </>
-  );
+  )
 }

@@ -3,8 +3,23 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
-import { Form, FormField, FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { DrawerDialog, DrawerDialogContent, DrawerDialogDescription, DrawerDialogFooter, DrawerDialogHeader, DrawerDialogTitle } from "@/components/shared/drawer-dialog"
+import {
+  Form,
+  FormField,
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  DrawerDialog,
+  DrawerDialogContent,
+  DrawerDialogDescription,
+  DrawerDialogFooter,
+  DrawerDialogHeader,
+  DrawerDialogTitle,
+} from "@/components/shared/drawer-dialog"
 import { useToast } from "@/hooks/use-toast"
 import type { Term, Section } from "@/types"
 import { z } from "zod"
@@ -18,24 +33,21 @@ import { getErrorMessage } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 
-
 type Step = "authenticate" | "enter-phone" | "confirm-alerts"
-
 
 export function ConfirmationDialog({
   open,
   setOpen,
   term,
   sections,
-  setSelectedSections
+  setSelectedSections,
 }: {
-  open: boolean,
-  setOpen: (open: boolean) => void,
-  term: Term,
-  sections: Section[],
+  open: boolean
+  setOpen: (open: boolean) => void
+  term: Term
+  sections: Section[]
   setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
-
   const { data: user, isLoading } = useUser()
   const [completedPhoneStep, setCompletedPhoneStep] = useState(false)
 
@@ -53,62 +65,61 @@ export function ConfirmationDialog({
   return (
     <DrawerDialog open={open} onOpenChange={setOpen}>
       <DrawerDialogContent>
-        {
-          step === "authenticate" ? (
-            <LoginDialogBody onLogin={() => { }} />
-          ) : step === "enter-phone" ? (
-            <EnterPhoneDialogBody onExit={() => setCompletedPhoneStep(true)} />
-          ) : step === "confirm-alerts" ? (
-            <ConfirmationDialogBody
-              setOpen={setOpen}
-              term={term}
-              sections={sections}
-              setSelectedSections={setSelectedSections}
-            />
-          ) : (
-            <LoadingDialogBody />
-          )
-        }
+        {step === "authenticate" ? (
+          <LoginDialogBody onLogin={() => {}} />
+        ) : step === "enter-phone" ? (
+          <EnterPhoneDialogBody onExit={() => setCompletedPhoneStep(true)} />
+        ) : step === "confirm-alerts" ? (
+          <ConfirmationDialogBody
+            setOpen={setOpen}
+            term={term}
+            sections={sections}
+            setSelectedSections={setSelectedSections}
+          />
+        ) : (
+          <LoadingDialogBody />
+        )}
       </DrawerDialogContent>
     </DrawerDialog>
   )
 }
 
-
 function ConfirmationDialogBody({
   term,
   sections,
   setOpen,
-  setSelectedSections
+  setSelectedSections,
 }: {
-  term: Term,
-  sections: Section[],
-  setOpen: (open: boolean) => void,
+  term: Term
+  sections: Section[]
+  setOpen: (open: boolean) => void
   setSelectedSections: (sections: Set<Section["id"]>) => void
 }) {
-
   const { toast } = useToast()
   const { data: user } = useUser()
   const { mutate: logout } = useLogout()
   const { mutate: createSubscriptions, isPending } = useCreateSubscriptions()
 
   function handleSubmit() {
-    createSubscriptions(sections.map(section => section.id), {
-      onSuccess: () => {
-        toast({
-          title: "Success",
-          description: "You've successfully signed up for alerts!",
-        })
-        setOpen(false)
-        setSelectedSections(new Set())
-      },
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: getErrorMessage(error),
-        })
+    createSubscriptions(
+      sections.map((section) => section.id),
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "You've successfully signed up for alerts!",
+          })
+          setOpen(false)
+          setSelectedSections(new Set())
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: getErrorMessage(error),
+          })
+        },
       }
-    })
+    )
   }
 
   function handleChangeEmail() {
@@ -120,24 +131,27 @@ function ConfirmationDialogBody({
       <DrawerDialogHeader>
         <DrawerDialogTitle>Confirm alerts</DrawerDialogTitle>
         <DrawerDialogDescription>
-          You are about to sign up for alerts to {sections.length} {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
+          You are about to sign up for alerts to {sections.length}{" "}
+          {sections.length === 1 ? "section" : "sections"} in {term.term_desc}.
         </DrawerDialogDescription>
       </DrawerDialogHeader>
       <div className="mt-4 gap-2 flex flex-col overflow-x-hidden">
-        {
-          user ? (
-            <Button className="w-full" onClick={handleSubmit}>
-              <span className="truncate">
-                {isPending ? <LoadingIcon /> : `Continue as ${user.email}`}
-              </span>
-            </Button>
-          ) : (
-            <Button className="w-full" disabled>
-              <LoadingIcon />
-            </Button>
-          )
-        }
-        <Button className="w-full" variant="secondary" onClick={handleChangeEmail}>
+        {user ? (
+          <Button className="w-full" onClick={handleSubmit}>
+            <span className="truncate">
+              {isPending ? <LoadingIcon /> : `Continue as ${user.email}`}
+            </span>
+          </Button>
+        ) : (
+          <Button className="w-full" disabled>
+            <LoadingIcon />
+          </Button>
+        )}
+        <Button
+          className="w-full"
+          variant="secondary"
+          onClick={handleChangeEmail}
+        >
           Use a different email
         </Button>
       </div>
@@ -145,19 +159,13 @@ function ConfirmationDialogBody({
   )
 }
 
-
-function EnterPhoneDialogBody({
-  onExit,
-}: {
-  onExit: () => void
-}) {
-
+function EnterPhoneDialogBody({ onExit }: { onExit: () => void }) {
   const { toast } = useToast()
   const { mutate: updateUser, isPending } = useUpdateUser()
 
   const formSchema = z.object({
     phone: z.string().regex(/^[0-9]{10}$/, {
-      message: "Please enter a valid Canadian phone number e.g. 9055555555."
+      message: "Please enter a valid Canadian phone number e.g. 9055555555.",
     }),
   })
 
@@ -169,17 +177,20 @@ function EnterPhoneDialogBody({
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    updateUser({ phone: `+1${data.phone}` }, {
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: getErrorMessage(error),
-        })
-      },
-      onSuccess: () => {
-        onExit()
+    updateUser(
+      { phone: `+1${data.phone}` },
+      {
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: getErrorMessage(error),
+          })
+        },
+        onSuccess: () => {
+          onExit()
+        },
       }
-    })
+    )
   }
 
   function handleSkip() {
@@ -214,7 +225,8 @@ function EnterPhoneDialogBody({
                   </div>
                 </FormControl>
                 <FormDescription>
-                  Enter a valid Canadian phone number. Only Canadian phone numbers are supported at this time.
+                  Enter a valid Canadian phone number. Only Canadian phone
+                  numbers are supported at this time.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

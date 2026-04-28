@@ -5,54 +5,53 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Form, FormField, FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormField,
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import type { User } from "@/types"
 import { LoadingIcon } from "@/components/shared/loading-icon"
-import { DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription, DrawerDialogFooter } from "@/components/shared/drawer-dialog"
+import {
+  DrawerDialogHeader,
+  DrawerDialogTitle,
+  DrawerDialogDescription,
+  DrawerDialogFooter,
+} from "@/components/shared/drawer-dialog"
 import { useRequestSignIn, useVerifySignIn } from "@/hooks/use-auth"
 import { getErrorMessage } from "@/lib/utils"
 import { useCountdown } from "@/hooks/use-countdown"
 
-
 type Step = "enter-email" | "enter-code"
 
-
-export function LoginDialogBody({
-  onLogin
-}: {
-  onLogin: () => void
-}) {
+export function LoginDialogBody({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState<User["email"]>("")
   const step: Step = email ? "enter-code" : "enter-email"
 
   return (
     <>
-      {
-        step === "enter-email" ? (
-          <EnterEmailStep setEmail={setEmail} />
-        ) : (
-          <EnterCodeStep email={email} setEmail={setEmail} onLogin={onLogin} />
-        )
-      }
+      {step === "enter-email" ? (
+        <EnterEmailStep setEmail={setEmail} />
+      ) : (
+        <EnterCodeStep email={email} setEmail={setEmail} onLogin={onLogin} />
+      )}
     </>
   )
 }
 
-
-function EnterEmailStep({
-  setEmail,
-}: {
-  setEmail: (email: string) => void,
-}) {
-
+function EnterEmailStep({ setEmail }: { setEmail: (email: string) => void }) {
   const { toast } = useToast()
   const { mutate: requestSignIn, isPending } = useRequestSignIn()
 
   const formSchema = z.object({
     email: z.string().email({
-      message: "Please enter a valid email address."
+      message: "Please enter a valid email address.",
     }),
   })
 
@@ -80,11 +79,10 @@ function EnterEmailStep({
   return (
     <>
       <DrawerDialogHeader>
-        <DrawerDialogTitle>
-          Enter an email for alerts
-        </DrawerDialogTitle>
+        <DrawerDialogTitle>Enter an email for alerts</DrawerDialogTitle>
         <DrawerDialogDescription>
-          We&apos;ll check if you have an account and help you create one if you don’t.
+          We&apos;ll check if you have an account and help you create one if you
+          don’t.
         </DrawerDialogDescription>
       </DrawerDialogHeader>
 
@@ -118,26 +116,25 @@ function EnterEmailStep({
   )
 }
 
-
 function EnterCodeStep({
   email,
   setEmail,
   onLogin,
 }: {
-  email: string,
-  setEmail: (email: string) => void,
+  email: string
+  setEmail: (email: string) => void
   onLogin: () => void
 }) {
-
   const { toast } = useToast()
   const { mutate: verifySignIn, isPending: isVerifyPending } = useVerifySignIn()
-  const { mutate: requestSignIn, isPending: isRequestPending } = useRequestSignIn()
+  const { mutate: requestSignIn, isPending: isRequestPending } =
+    useRequestSignIn()
   const { count, reset } = useCountdown(60)
   const pending = isVerifyPending || isRequestPending
 
   const formSchema = z.object({
     code: z.string().length(6, {
-      message: "Please enter a 6-digit code."
+      message: "Please enter a 6-digit code.",
     }),
   })
 
@@ -149,17 +146,20 @@ function EnterCodeStep({
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    verifySignIn({ email, code: data.code }, {
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: getErrorMessage(error),
-        })
-      },
-      onSuccess: () => {
-        onLogin()
+    verifySignIn(
+      { email, code: data.code },
+      {
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: getErrorMessage(error),
+          })
+        },
+        onSuccess: () => {
+          onLogin()
+        },
       }
-    })
+    )
   }
 
   function handleResendCode() {
@@ -176,7 +176,7 @@ function EnterCodeStep({
           title: "Error",
           description: getErrorMessage(error),
         })
-      }
+      },
     })
   }
 
@@ -187,11 +187,10 @@ function EnterCodeStep({
   return (
     <>
       <DrawerDialogHeader>
-        <DrawerDialogTitle>
-          You&apos;re almost signed in!
-        </DrawerDialogTitle>
+        <DrawerDialogTitle>You&apos;re almost signed in!</DrawerDialogTitle>
         <DrawerDialogDescription>
-          Enter the code we sent to <span className="font-medium">{email}</span> to finish signing in.
+          Enter the code we sent to <span className="font-medium">{email}</span>{" "}
+          to finish signing in.
         </DrawerDialogDescription>
       </DrawerDialogHeader>
 
@@ -209,7 +208,12 @@ function EnterCodeStep({
                 <FormDescription>
                   Didn&apos;t get the code? Check your Spam folder or&nbsp;
                   {count === 0 ? (
-                    <Button className="p-0 h-auto underline text-[0.8rem]" type="button" variant={"link"} onClick={handleResendCode}>
+                    <Button
+                      className="p-0 h-auto underline text-[0.8rem]"
+                      type="button"
+                      variant={"link"}
+                      onClick={handleResendCode}
+                    >
                       resend code.
                     </Button>
                   ) : (
