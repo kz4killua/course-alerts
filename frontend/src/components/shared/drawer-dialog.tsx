@@ -1,27 +1,15 @@
 "use client"
 
-import React, { JSX, createContext, useContext } from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+import type {
+  DialogCloseProps,
+  DialogContentProps,
+  DialogDescriptionProps,
+  DialogProps,
+  DialogTitleProps,
+  DialogTriggerProps,
+} from "@radix-ui/react-dialog"
+import type React from "react"
+import { createContext, type JSX, useContext } from "react"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -33,13 +21,26 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
-  DialogProps,
-  DialogTriggerProps,
-  DialogContentProps,
-  DialogDescriptionProps,
-  DialogTitleProps,
-  DialogCloseProps,
-} from "@radix-ui/react-dialog"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 
 const DrawerDialogContext = createContext({
@@ -118,7 +119,14 @@ export function DrawerDialogContent({
     return <DialogContent className={cn("max-h-[95%]", className)} {...props} />
   }
   return (
-    <AlertDialogContent className={cn("max-h-[95%]", className)} {...props} />
+    <AlertDialogContent
+      className={cn("max-h-[95%]", className)}
+      // Prevent escape key from closing the dialog
+      onEscapeKeyDown={(e) => {
+        e.preventDefault()
+      }}
+      {...props}
+    />
   )
 }
 
